@@ -1,0 +1,4 @@
+CUDA
+http://www.nvidia.com/object/cuda_get.html
+GPU Computing SDK
+http://www.geeks3d.com/20091009/nvidia-release-the-gpu-computing-sdk-with-opencl-support-and-demos/
