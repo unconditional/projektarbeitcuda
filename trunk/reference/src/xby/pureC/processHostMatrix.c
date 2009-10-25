@@ -11,11 +11,11 @@ void initHostMatrix(float **phA,float **phB,float **phC)
      
 	 printf("initHostMatrix \n");
 	 printf("size_A=%d,size_B=%d,size_C=%d \n",size_A,size_B,size_C);
-     /*
+     
      *phA=(float*)malloc(size_A*sizeof(float));
      *phB=(float*)malloc(size_B*sizeof(float));
      *phC=(float*)malloc(size_C*sizeof(float));
-     */
+     
 	 hA=*phA;
      hB=*phB;
      hC=*phC;
@@ -61,35 +61,26 @@ void freeHostMatrix(float **phA,float **phB, float **phC)
  	 printf("freeHostMatrix \n"); 
  	 //float *hA,float *hB, float *hC
  	 int i;
- 	 float *hA,*hB,*hC;
    	 unsigned int size_A = WA*HA;
      unsigned int size_B = WB*HB;
      unsigned int size_C = WC*HC;
-     hA=*phA;
-     hB=*phB;
-     hC=*phC;
+
    	 for(i=0;i<size_A;i++)
      {
-	  printf("before free *hA=%f \n",i,hA[i]);
-	  free(hA++);
-	  printf("after *hA=%f \n",i,hA[i]);
-	  
+	  free((*phA)++);	  
      }
      printf("finish init A \n");
      for(i=0;i<size_B;i++)
      {
-	  free(hB++);
+	  free((*phB)++);
 	  //printf("hB[%d]=%f \n",i,hB[i]);
      }
      printf("finish init B \n");
      for(i=0;i<size_C;i++)
      {
-	  free(hC++);
+	  free((*phC)++);
 	  //printf("hC[%d]=%f \n",i,hC[i]);
      }
- 	 free(*phA);
- 	 free(*phB);
- 	 free(*phC);
 }
 void freeMatrix(float *hA,float *hB, float *hC)
 {
