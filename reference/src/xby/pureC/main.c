@@ -35,13 +35,28 @@ int main(int argc, char *argv[])
   //freeMatrix(h_A,h_B,h_C);
   //freeMemory();
   int i;
-  //for(i=0;i<WA*HA;i++)free(h_A++);
-  //for(i=0;i<WB*HB;i++)free(h_B++);
-  //for(i=0;i<WC*HC;i++)free(h_C++);
+  /*
+  for(i=0;i<WA*HA;i++)
+  {
+   printf("h_A[%d] = %f \n",i,h_A[i]);					  
+   //free(h_A++);					  
+  }
+  for(i=0;i<WB*HB;i++)
+  {
+   printf("h_B[%d] = %f \n",i,h_B[i]);					  
+   //free(h_B++);					  
+  }
+  for(i=0;i<WC*HC;i++)
+  {
+   printf("h_C[%d] = %f \n",i,h_C[i]);					  
+   //free(h_C++);					  
+  }
+  */
+  /*
   printf("h_A[1] = %f \n",h_A[5]);
   printf("h_B[1] = %f \n",h_B[5]);
   printf("h_C[1] = %f \n",h_C[5]);
-  
+  */
   system("PAUSE");
   return 0;
 }
