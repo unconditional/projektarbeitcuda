@@ -1,0 +1,5 @@
+G:\cc\matrixMul\mul>nvcc -deviceemu  -o matrixMul matrixMul.cu -I "C:\Dokumente
+und Einstellungen\All Users\Anwendungsdaten\NVIDIA Corporation\NVIDIA GPU Comput
+ing SDK\C\common\inc" -L "C:\Dokumente und Einstellungen\All Users\Anwendungsdat
+en\NVIDIA Corporation\NVIDIA GPU Computing SDK\C\common\lib" -l cutil32 matrixMu
+l_gold.obj
