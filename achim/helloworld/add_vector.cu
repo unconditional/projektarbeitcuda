@@ -40,6 +40,7 @@ int main()
 	{
 		a[i] = (float) i;
 		b[i] = (float) i;
+        c[i] = (float) -1111;
 	}
 
 
@@ -49,9 +50,9 @@ int main()
 
 	/* Compute the execution configuration */
 
-	int block_size = 200;             // threads per block
-    int grid_x     = 100;
-    int grid_y     = 1;
+	int block_size = 512;             // threads per block
+    int grid_x     =  N / block_size + 1 ;
+    int grid_y     =  1;
 
 	dim3 dimBlock(block_size);
 	dim3 dimGrid ( grid_x, grid_y );        // threads = blocksize * gridx * grid y
