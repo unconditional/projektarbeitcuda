@@ -18,6 +18,8 @@ __global__ void add_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_vidx Ntot)
 
 int main()
 {
+
+    cudaError_t e;
 	/* pointers to host memory */
 	t_ve *a, *b, *c;
 	/* pointers to device memory */
@@ -59,6 +61,13 @@ int main()
 
 	/* Add arrays a and b, store result in c */
 	add_arrays_gpu<<<dimGrid,dimBlock>>>(a_d, b_d, c_d, N);
+
+    e = cudaGetLastError();
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on add_arrays_gpu: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
 
 	/* Copy data from deveice memory to host memory */
 	cudaMemcpy(c, c_d, sizeof(float)*N, cudaMemcpyDeviceToHost);
