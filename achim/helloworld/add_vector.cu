@@ -7,7 +7,7 @@
 typedef float        t_ve   ; // vector element, change this to double if required
 typedef unsigned int t_vidx ; // index of vector elements
 
-#define N 4000
+#define N 400000
 
 __global__ void add_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_vidx Ntot)
 {
@@ -20,12 +20,29 @@ int main()
 {
 
     cudaError_t e;
+
+    cudaEvent_t start, stop;
+    float time;
+
 	/* pointers to host memory */
 	t_ve *a, *b, *c;
 	/* pointers to device memory */
 	t_ve *a_d, *b_d, *c_d;
 //	t_vidx N=18;
 	t_vidx i;
+
+    e = cudaEventCreate(&start);
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaEventCreate: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
+    e = cudaEventCreate(&stop);
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaEventCreate: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
 
 	/* Allocate arrays a, b and c on host*/
 	a = (t_ve*) malloc(N*sizeof(t_ve));
@@ -85,12 +102,40 @@ int main()
 	dim3 dimGrid ( grid_x, grid_y );        // threads = blocksize * gridx * grid y
 
 	/* Add arrays a and b, store result in c */
-	add_arrays_gpu<<<dimGrid,dimBlock>>>(a_d, b_d, c_d, N);
 
+    e = cudaEventRecord( start, 0 );
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaEventRecord: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
+
+	add_arrays_gpu<<<dimGrid,dimBlock>>>(a_d, b_d, c_d, N);
     e = cudaGetLastError();
     if( e != cudaSuccess )
     {
         fprintf(stderr, "CUDA Error on add_arrays_gpu: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
+
+    e = cudaEventRecord( stop, 0 );
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaEventRecord: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
+
+    e = cudaEventSynchronize( stop );
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaEventRecord: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
+
+    e = cudaEventElapsedTime( &time, start, stop );
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaEventElapsedTime: '%s' \n", cudaGetErrorString(e));
         exit(-3);
     }
 
@@ -103,8 +148,8 @@ int main()
     }
 
 	/* Print c */
-	for (i=0; i<N; i++)
-		printf(" c[%d]=%f\n",i,c[i]);
+//	for (i=0; i<N; i++)
+//		printf(" c[%d]=%f\n",i,c[i]);
 
 	/* Free the memory */
 
@@ -128,6 +173,6 @@ int main()
     }
 	free(a); free(b); free(c);
 
-
+    printf( "kernel runtime (size %d): %f milliseconds\n", N , time );
 }
 
