@@ -5,6 +5,12 @@
 
 Add your content here.  Format your content with:
 
+4.Nov-10.Nov
+1.Gauss-Löser Algorithmus in CUDA(Achim)
+2.Gauss-Löser Algorithmus without CUDA(buyu)
+3.norm in CUDA(bai)
+
+-----------------------------------------------------------------------------------------------------------
 
 28.oct-4.Nov
 1.Erros handing(achim)
