@@ -33,9 +33,24 @@ int main()
 	c = (t_ve*) malloc(N*sizeof(t_ve));
 
 	/* Allocate arrays a_d, b_d and c_d on device*/
-	cudaMalloc ((void **) &a_d, sizeof(t_ve)*N);
-	cudaMalloc ((void **) &b_d, sizeof(t_ve)*N);
-	cudaMalloc ((void **) &c_d, sizeof(t_ve)*N);
+	e = cudaMalloc ((void **) &a_d, sizeof(t_ve)*N);
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaMalloc: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
+	e = cudaMalloc ((void **) &b_d, sizeof(t_ve)*N);
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaMalloc: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
+	e = cudaMalloc ((void **) &c_d, sizeof(t_ve)*N);
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaMalloc: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
 
 	/* Initialize arrays a and b */
 	for (i=0; i<N; i++)
@@ -47,8 +62,18 @@ int main()
 
 
 	/* Copy data from host memory to device memory */
-	cudaMemcpy(a_d, a, sizeof(t_ve)*N, cudaMemcpyHostToDevice);
-	cudaMemcpy(b_d, b, sizeof(t_ve)*N, cudaMemcpyHostToDevice);
+	e = cudaMemcpy(a_d, a, sizeof(t_ve)*N, cudaMemcpyHostToDevice);
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
+	e = cudaMemcpy(b_d, b, sizeof(t_ve)*N, cudaMemcpyHostToDevice);
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
 
 	/* Compute the execution configuration */
 
@@ -70,7 +95,12 @@ int main()
     }
 
 	/* Copy data from deveice memory to host memory */
-	cudaMemcpy(c, c_d, sizeof(float)*N, cudaMemcpyDeviceToHost);
+	e = cudaMemcpy(c, c_d, sizeof(float)*N, cudaMemcpyDeviceToHost);
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
 
 	/* Print c */
 	for (i=0; i<N; i++)
@@ -78,7 +108,24 @@ int main()
 
 	/* Free the memory */
 
-    cudaFree(a_d); cudaFree(b_d);cudaFree(c_d);
+    e = cudaFree(a_d);
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
+    e = cudaFree(b_d);
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
+    e = cudaFree(c_d);
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
 	free(a); free(b); free(c);
 
 
