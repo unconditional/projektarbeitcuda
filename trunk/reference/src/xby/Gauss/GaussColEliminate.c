@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include "mex.h"
 
 /*
   pA: the pointer of the Matrix A|b
@@ -118,27 +119,80 @@ void outputMatrix(double *pA, int rowMax,int colMax)
   pA: the pointer of the Matrix A|b
   rowMax,colMax:size of matirx
   pX: solution vector
+  return value: -1 solving equation failed
+  		 		1 resolve result successfully
 */
 int gaussLesung(double *pA, int rowMax,int colMax, double *pX)
 {
  	 double *pMatrix = pA;
  	 int i;
+ 	 double product;
+ 	 product = 1;
  	 if((1+rowMax)!=colMax) return -1;
  	 
  	 for(i = 0; i < rowMax; i++)
  	 {
   	   int l;
  	   printf("%d,\n",i);
+ 	   
  	   l = findMax(pMatrix, rowMax, colMax, i,i);
  	   exchangeRow(pMatrix, rowMax, colMax, l, i);
  	   eliminate(pMatrix, rowMax, colMax, i, i);
        outputMatrix(pMatrix, rowMax, colMax);
      }
      
-     double product = 1;
+     
      for(i = 0; i < rowMax; i++)product = product * pMatrix[i*colMax+i];
      if(product==0)return -1;
  	 
 	  solveX(pMatrix, rowMax,colMax, pX);
 	  return 0;
+}
+
+/*
+  matlabe function 
+  example:  
+  A = [1,2,3;1,1,1;2,1,1]
+  b=[14;6;7]
+  M=[A,b]
+  
+  x=GaussColEliminate(M)
+*/
+void mexFunction(int outArraySize, mxArray *pOutArray[], int inArraySize, const mxArray *pInArray[])
+{
+ 	 int i, j, m, n;
+ 	 double *data1, *data2;
+ 	 int rowMax, colMax;
+ 	 double *pMatrix, *pX;
+ 	 pMatrix=malloc(rowMax*colMax*sizeof(double));
+ 	 pX=malloc(rowMax*sizeof(double));
+ 	 //if (intArraySize != outArraySize) mexErrMsgTxt("the number of input and output arguments must be same!");
+ 	 m = mxGetM(pInArray[0]);
+ 	 n = mxGetN(pInArray[0]);
+ 	 rowMax = m;
+ 	 colMax = n;
+
+ 	 
+ 	 pOutArray[0] = mxCreateDoubleMatrix(rowMax, 1, mxREAL);
+ 	 
+ 	 data1 = mxGetPr(pInArray[0]);
+ 	 data2 = mxGetPr(pOutArray[0]);
+ 	 for(i = 0; i < rowMax; i++)
+ 	 {
+	  	   for(j = 0; j < colMax; j++)
+	  	   {
+		   		 pMatrix[i*colMax+j] = data1[j*rowMax+i];
+		   		// printf("%lf,",data1[j*rowMax+i]);
+		   		//printf("%lf,",pMatrix[i*colMax+j]);
+		   }
+		   //printf("\n");
+   	 }
+ 	 
+     gaussLesung(pMatrix, rowMax, colMax, pX);
+   	 
+   	 for(i = 0; i < rowMax; i++)data2[i] = pX[i];
+		//outputMatrix(pX, rowMax, 1);
+   	 
+   	 free(pX);
+   	 free(pMatrix);
 }
