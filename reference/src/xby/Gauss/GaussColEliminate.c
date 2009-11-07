@@ -119,10 +119,12 @@ void outputMatrix(double *pA, int rowMax,int colMax)
   rowMax,colMax:size of matirx
   pX: solution vector
 */
-void gaussLesung(double *pA, int rowMax,int colMax, double *pX)
+int gaussLesung(double *pA, int rowMax,int colMax, double *pX)
 {
  	 double *pMatrix = pA;
  	 int i;
+ 	 if((1+rowMax)!=colMax) return -1;
+ 	 
  	 for(i = 0; i < rowMax; i++)
  	 {
   	   int l;
@@ -132,5 +134,11 @@ void gaussLesung(double *pA, int rowMax,int colMax, double *pX)
  	   eliminate(pMatrix, rowMax, colMax, i, i);
        outputMatrix(pMatrix, rowMax, colMax);
      }
- 	 solveX(pMatrix, rowMax,colMax, pX);
+     
+     double product = 1;
+     for(i = 0; i < rowMax; i++)product = product * pMatrix[i*colMax+i];
+     if(product==0)return -1;
+ 	 
+	  solveX(pMatrix, rowMax,colMax, pX);
+	  return 0;
 }
