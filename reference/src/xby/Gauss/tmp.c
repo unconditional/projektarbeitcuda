@@ -27,7 +27,7 @@ void mexFunction(int outArraySize, mxArray *pOutArray[], int inArraySize, const 
  	 {
 	  	   for(j = 0; j < colMax; j++)
 	  	   {
-		   		 pMatrix[i*colMax+j] = data1[i*colMax+j];
+		   		 pMatrix[i*colMax+j] = data1[j*rowMax+i];
 		   }
    	 }
  	 
