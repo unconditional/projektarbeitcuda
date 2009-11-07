@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include <math.h>
 
 /*
   pA: the pointer of the Matrix A|b
@@ -12,12 +12,13 @@ int findMax(double *pA, int rowMax,int colMax, int row, int col)
     double * pMatrix = pA;
     // element pMatrix[i*colMax+j]
     // col pMatrix[i*colMatrix]~~pMatrix[(i+1)*colMatrix-1]
-    double MAX = pMatrix[row*colMatrix+col];
+    double MAX = pMatrix[row*colMax+col];
+    int i;
     int l = row;
     for (i=row;i<rowMax;i++){
-        if(MAX<pMatrix[i*colMatrix+col])
+        if(MAX<pMatrix[i*colMax+col])
         {
-         MAX=pMatrix[i*colMatrix+col];
+         MAX=fabs(pMatrix[i*colMax+col]);
          l=i;
         }
     }
@@ -34,9 +35,10 @@ void exchangeRow(double *pA, int rowMax,int colMax,int row1, int row2)
 {   
     double * pMatrix = pA;
     double swap;
+    int i;
     if(row1!=row2)
     {
-     for(int i = 0; i < colMax; i++)
+     for(i = 0; i < colMax; i++)
      {
       swap=pMatrix[row1*colMax+i];
       pMatrix[row1*colMax+i]=pMatrix[row2*colMax+i];
@@ -48,13 +50,13 @@ void exchangeRow(double *pA, int rowMax,int colMax,int row1, int row2)
   pA: the pointer of the Matrix A|b
   rowMax,colMax:size of matirx
   row: begin row
-  //col: working col
+  col: working col
 */
 int eliminate(double *pA, int rowMax,int colMax,int row, int col)
 {
      double * pMatrix = pA;
      int i,j;
-     double aii = pMatrix[row*colMax];
+     double aii = pMatrix[row*colMax+col];
      if(0 == aii)return 0;
 	 for(i = row+1; i < rowMax; i++)
      {
@@ -62,8 +64,11 @@ int eliminate(double *pA, int rowMax,int colMax,int row, int col)
 	  	   for(j = row; j < colMax; j++)
 	  	   {
 	   	   		 pMatrix[i*colMax+j]-=pMatrix[row*colMax+j]*aji/aii;
-	       }      
+	       }   
+		   //printf("aii = %lf, aji = %lf, \n",aii,aji);   
      }
+     
+     
      return 1;  
 }
 /*
@@ -82,8 +87,50 @@ int solveX(double *pA, int rowMax,int colMax, double *pX)
   	 	  for(j = i+1; j < rowMax; j++)
   	 	  {
   	  	   		Sum+=pX[j]*pMatrix[i*colMax+j];
+  	  	   		
   	 	  }
+  	 	  
   	 	  pX[i]=(pMatrix[(i+1)*colMax-1]-Sum)/pMatrix[i*colMax+i];
+  	 	  //printf("sum = %lf,b= %lf,aii= %lf, \n",Sum,pMatrix[(i+1)*colMax-1],pMatrix[i*colMax+i]);
+  	 	  //printf("x=%lf,i=%d \n",pX[i],i);
   	}
  	return 1;
+}
+/*
+  pA: the pointer of the Matrix A|b
+  rowMax,colMax:size of matirx
+*/
+void outputMatrix(double *pA, int rowMax,int colMax)
+{
+ 	double *pMatrix = pA;
+	int i,j;
+	for (i = 0; i < rowMax; i++)
+	{
+	 	for (j = 0; j < colMax; j++)
+ 		{
+		 	printf("%lf, ,",pMatrix[i*colMax+j]);
+   		}
+		printf("\n");  	
+	}
+	
+}
+/*
+  pA: the pointer of the Matrix A|b
+  rowMax,colMax:size of matirx
+  pX: solution vector
+*/
+void gaussLesung(double *pA, int rowMax,int colMax, double *pX)
+{
+ 	 double *pMatrix = pA;
+ 	 int i;
+ 	 for(i = 0; i < rowMax; i++)
+ 	 {
+  	   int l;
+ 	   printf("%d,\n",i);
+ 	   l = findMax(pMatrix, rowMax, colMax, i,i);
+ 	   exchangeRow(pMatrix, rowMax, colMax, l, i);
+ 	   eliminate(pMatrix, rowMax, colMax, i, i);
+       outputMatrix(pMatrix, rowMax, colMax);
+     }
+ 	 solveX(pMatrix, rowMax,colMax, pX);
 }
