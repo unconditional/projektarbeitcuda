@@ -11,6 +11,7 @@ typedef struct {
 
     unsigned int n;
     t_ve*    elements;
+    t_ve*    x;
 } t_matrix;
 
 typedef t_matrix* t_pmatrix;
@@ -26,10 +27,33 @@ void malloc_matrix( unsigned int size_n, t_pmatrix matrix ) {
        fprintf(stderr, "sorry, can not allocate memory for you");
        exit( -1 );
    }
+   matrix->x = malloc( sizeof(t_ve)  * size_n ); /* the output vector */
+
+   if ( matrix->elements == NULL) {
+       fprintf(stderr, "sorry, can not allocate memory for you");
+       exit( -1 );
+   }
 }
-// -----------------------------------------------------------------------
+
 
 #define ME( A, j , i ) A->elements[ (j -1 ) * ( A->n + 1 ) + i -1 ]
+
+// -----------------------------------------------------------------------
+void substitute( t_pmatrix matrix ) {
+   unsigned int j, k, N;
+   t_ve t;
+
+   N = matrix->n;
+
+   for (j = N; j >= 1; j-- ) {
+       t = 0.0;
+       for ( k = j + 1; k <= N; k++ ) {
+           t +=  ME( matrix, j , k ) * matrix->x[ k - 1 ];
+       }
+       matrix->x[ j - 1 ] = ( ME( matrix, j , N + 1 ) - t ) / ME( matrix, j , j );
+   }
+}
+// -----------------------------------------------------------------------
 
 void eleminate ( t_pmatrix matrix ) {
     unsigned int i, j, ij, ji, k, max, N;
@@ -68,6 +92,9 @@ void dump_matrix( t_pmatrix matrix ) {
         }
         printf( " \t b %f", matrix->elements[ m * ( matrix->n + 1 ) + n ] );
    }
+   for ( m = 0; m < matrix->n; m++ ) {
+      printf( "\n  x%u  = %f",m + 1, matrix->x[ m ] );
+   }
 }
 // -----------------------------------------------------------------------
 void gen_textinput_01( t_pmatrix matrix ) {
@@ -105,6 +132,7 @@ int main()
 
     dump_matrix( &M1 );
     eleminate( &M1 );
+    substitute( &M1 );
 
     printf( "\n" );
     dump_matrix( &M1 );
