@@ -31,40 +31,50 @@ t_matrix M1;
 
 // -----------------------------------------------------------------------
 
-__global__ void device_eleminate( t_pmatrix matrix  )
+__global__ void device_eleminate( t_ve* Ab, unsigned int N  )
 {
-    unsigned int i, j, k, max, N;
+    unsigned int i, j, k, max;
     t_ve t;
 
     unsigned int tidx = threadIdx.y * blockDim.x + threadIdx.x;
 
-    N = matrix->n;
-
     if ( tidx == 0 ) {
+
     for ( i = 1; i <= N ; i++ ) {
        max = i;
        for( j = i + 1; j <= N; j++ ) {
-           if ( abs( MED( matrix, j , i ) ) > abs( MED( matrix, max , i ) ) ) {
+           if ( abs( Ab[ Ae( j , i , N ) ] ) > abs( Ab[ Ae( max , i, N ) ] )  ) {
               max = j;
            }
        }
        for ( k = i; k <= N; k++ ) {
-          t                     = MED( matrix, i , k );
-          ME( matrix, i , k )   = MED( matrix, max , k );
-          ME( matrix, max , k ) = t;
+          t                   = Ab[ Ae(   i , k, N ) ];
+          Ab[ Ae( i , k ,  N )   ] = Ab[ Ae( max , k, N ) ];
+          Ab[ Ae( max , k, N ) ] = t;
        }
 
        for ( j = i +1; j <= N ; j++ ) {
           for ( k = N + 1; k >= i ; k-- ) {
-             MED( matrix, j , k ) -= MED( matrix, i , k ) * MED( matrix, j , i ) /  MED( matrix, i , i );
+             Ab[ Ae( j , k , N ) ] -= Ab[ Ae( i , k, N ) ] * Ab[ Ae( j , i, N ) ] /  Ab[ Ae( i , i, N ) ];
           }
        }
     }
+
     }
 }
 
 
 
+// -----------------------------------------------------------------------
+void pull_problem_from_device( t_pmatrix matrix ) {
+   cudaError_t e;
+    e = cudaMemcpy(  matrix->elements, matrix->device_elements, sizeof(t_ve) * (matrix->n + 1 ) * matrix->n, cudaMemcpyDeviceToHost);
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
+}
 // -----------------------------------------------------------------------
 void push_problem_to_device( t_pmatrix matrix ) {
 
@@ -210,8 +220,8 @@ int main()
 
 
     dump_matrix( &M1 );
-    eleminate( M1.elements, M1.n );
-    substitute( &M1 );
+//    eleminate( M1.elements, M1.n );
+//    substitute( &M1 );
 
     push_problem_to_device( &M1 );
 
@@ -220,9 +230,9 @@ int main()
 
     dim3 dimGrid ( 1 );
 
-//    device_eleminate<<<dimGrid,dimBlock>>>( &M1 );
+    device_eleminate<<<dimGrid,dimBlock>>>( M1.device_elements, M1.n );
 
-
+    pull_problem_from_device( &M1 );
 
     printf( "\n" );
     dump_matrix( &M1 );
