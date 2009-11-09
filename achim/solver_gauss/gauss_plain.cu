@@ -5,7 +5,7 @@
 #define Ae( j , i, N ) (j -1 ) * ( N + 1 ) + i -1
 
 #define ME( A, j , i ) A->elements[ Ae( j , i, A->n ) ]
-#define MED( A, j , i ) A->device_elements[ (j -1 ) * ( A->n + 1 ) + i -1 ]
+
 
 
 
@@ -28,6 +28,27 @@ typedef struct {
 typedef t_matrix* t_pmatrix;
 
 t_matrix M1;
+
+// -----------------------------------------------------------------------
+
+__global__ void device_substitute( t_ve* x, t_ve* Ab, unsigned int N ) {
+
+   unsigned int j, k;
+   t_ve t;
+
+   unsigned int tidx = threadIdx.y * blockDim.x + threadIdx.x;
+
+   if ( tidx == 0 ) {
+
+   for (j = N; j >= 1; j-- ) {
+       t = 0.0;
+       for ( k = j + 1; k <= N; k++ ) {
+           t +=  Ab[ Ae( j , k, N ) ] * x[ k - 1 ];
+       }
+       x[ j - 1 ] = ( Ab[ Ae( j , N + 1, N ) ] - t ) / Ab[ Ae( j , j, N) ] ;
+   }
+   }
+}
 
 // -----------------------------------------------------------------------
 
@@ -69,6 +90,12 @@ __global__ void device_eleminate( t_ve* Ab, unsigned int N  )
 void pull_problem_from_device( t_pmatrix matrix ) {
    cudaError_t e;
     e = cudaMemcpy(  matrix->elements, matrix->device_elements, sizeof(t_ve) * (matrix->n + 1 ) * matrix->n, cudaMemcpyDeviceToHost);
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
+    e = cudaMemcpy(  matrix->x, matrix->device_x, sizeof(t_ve) * matrix->n, cudaMemcpyDeviceToHost);
     if( e != cudaSuccess )
     {
         fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
@@ -129,18 +156,16 @@ void malloc_matrix( unsigned int size_n, t_pmatrix matrix ) {
 
 
 // -----------------------------------------------------------------------
-void substitute( t_pmatrix matrix ) {
-   unsigned int j, k, N;
+void substitute( t_ve* x, t_ve* Ab, unsigned int N ) {
+   unsigned int j, k;
    t_ve t;
-
-   N = matrix->n;
 
    for (j = N; j >= 1; j-- ) {
        t = 0.0;
        for ( k = j + 1; k <= N; k++ ) {
-           t +=  ME( matrix, j , k ) * matrix->x[ k - 1 ];
+           t +=  Ab[ Ae( j , k, N ) ] * x[ k - 1 ];
        }
-       matrix->x[ j - 1 ] = ( ME( matrix, j , N + 1 ) - t ) / ME( matrix, j , j );
+       x[ j - 1 ] = ( Ab[ Ae( j , N + 1, N ) ] - t ) / Ab[ Ae( j , j, N) ] ;
    }
 }
 // -----------------------------------------------------------------------
@@ -221,7 +246,7 @@ int main()
 
     dump_matrix( &M1 );
 //    eleminate( M1.elements, M1.n );
-//    substitute( &M1 );
+
 
     push_problem_to_device( &M1 );
 
@@ -231,6 +256,7 @@ int main()
     dim3 dimGrid ( 1 );
 
     device_eleminate<<<dimGrid,dimBlock>>>( M1.device_elements, M1.n );
+    device_substitute<<<dimGrid,dimBlock>>>( M1.device_x, M1.device_elements, M1.n );
 
     pull_problem_from_device( &M1 );
 
