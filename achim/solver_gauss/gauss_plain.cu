@@ -2,6 +2,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define Ae( j , i, N ) (j -1 ) * ( N + 1 ) + i -1
+
+#define ME( A, j , i ) A->elements[ Ae( j , i, A->n ) ]
+#define MED( A, j , i ) A->device_elements[ (j -1 ) * ( A->n + 1 ) + i -1 ]
+
+
+
 typedef float        t_ve   ;
 //#typedef unsigned int t_vidx ; // index of vector elements
 
@@ -21,6 +28,42 @@ typedef struct {
 typedef t_matrix* t_pmatrix;
 
 t_matrix M1;
+
+// -----------------------------------------------------------------------
+
+__global__ void device_eleminate( t_pmatrix matrix  )
+{
+    unsigned int i, j, k, max, N;
+    t_ve t;
+
+    unsigned int tidx = threadIdx.y * blockDim.x + threadIdx.x;
+
+    N = matrix->n;
+
+    if ( tidx == 0 ) {
+    for ( i = 1; i <= N ; i++ ) {
+       max = i;
+       for( j = i + 1; j <= N; j++ ) {
+           if ( abs( MED( matrix, j , i ) ) > abs( MED( matrix, max , i ) ) ) {
+              max = j;
+           }
+       }
+       for ( k = i; k <= N; k++ ) {
+          t                     = MED( matrix, i , k );
+          ME( matrix, i , k )   = MED( matrix, max , k );
+          ME( matrix, max , k ) = t;
+       }
+
+       for ( j = i +1; j <= N ; j++ ) {
+          for ( k = N + 1; k >= i ; k-- ) {
+             MED( matrix, j , k ) -= MED( matrix, i , k ) * MED( matrix, j , i ) /  MED( matrix, i , i );
+          }
+       }
+    }
+    }
+}
+
+
 
 // -----------------------------------------------------------------------
 void push_problem_to_device( t_pmatrix matrix ) {
@@ -73,7 +116,7 @@ void malloc_matrix( unsigned int size_n, t_pmatrix matrix ) {
 }
 
 
-#define ME( A, j , i ) A->elements[ (j -1 ) * ( A->n + 1 ) + i -1 ]
+
 
 // -----------------------------------------------------------------------
 void substitute( t_pmatrix matrix ) {
@@ -92,28 +135,27 @@ void substitute( t_pmatrix matrix ) {
 }
 // -----------------------------------------------------------------------
 
-void eleminate ( t_pmatrix matrix ) {
-    unsigned int i, j, k, max, N;
+void eleminate ( t_ve* Ab, unsigned int N ) {
+    unsigned int i, j, k, max;
     t_ve t;
 
-    N = matrix->n;
 
     for ( i = 1; i <= N ; i++ ) {
        max = i;
        for( j = i + 1; j <= N; j++ ) {
-           if ( abs( ME( matrix, j , i ) ) > abs( ME( matrix, max , i ) ) ) {
+           if ( abs( Ab[ Ae( j , i , N ) ] ) > abs( Ab[ Ae( max , i, N ) ] )  ) {
               max = j;
            }
        }
        for ( k = i; k <= N; k++ ) {
-          t                     = ME( matrix, i , k );
-          ME( matrix, i , k )   = ME( matrix, max , k );
-          ME( matrix, max , k ) = t;
+          t                   = Ab[ Ae(   i , k, N ) ];
+          Ab[ Ae( i , k ,  N )   ] = Ab[ Ae( max , k, N ) ];
+          Ab[ Ae( max , k, N ) ] = t;
        }
 
        for ( j = i +1; j <= N ; j++ ) {
           for ( k = N + 1; k >= i ; k-- ) {
-             ME( matrix, j , k ) -= ME( matrix, i , k ) * ME( matrix, j , i ) /  ME( matrix, i , i );
+             Ab[ Ae( j , k , N ) ] -= Ab[ Ae( i , k, N ) ] * Ab[ Ae( j , i, N ) ] /  Ab[ Ae( i , i, N ) ];
           }
        }
     }
@@ -168,10 +210,19 @@ int main()
 
 
     dump_matrix( &M1 );
-//    eleminate( &M1 );
-//    substitute( &M1 );
+    eleminate( M1.elements, M1.n );
+    substitute( &M1 );
 
     push_problem_to_device( &M1 );
+
+    int block_size = 64;
+    dim3 dimBlock(block_size);
+
+    dim3 dimGrid ( 1 );
+
+//    device_eleminate<<<dimGrid,dimBlock>>>( &M1 );
+
+
 
     printf( "\n" );
     dump_matrix( &M1 );
