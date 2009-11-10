@@ -34,7 +34,7 @@ t_matrix M1;
 __global__ void device_substitute( t_ve* x, t_ve* Ab, unsigned int N ) {
 
    unsigned int j,k;
-   t_ve t;
+
 
    unsigned int tidx = threadIdx.y * blockDim.x + threadIdx.x;
 
@@ -43,7 +43,7 @@ __global__ void device_substitute( t_ve* x, t_ve* Ab, unsigned int N ) {
    if ( tidx == 0 ) {
 
    for (j = N; j >= 1; j-- ) {
-       t = 0.0;
+       t_ve t = 0.0;
        for ( k = j + 1; k <= N; k++ ) {
            t +=  Ab[ Ae( j , k, N ) ] * x[ k - 1 ];
        }
@@ -60,7 +60,6 @@ __global__ void device_eleminate( t_ve* Ab, unsigned int N  )
 
     __shared__ unsigned int i;
     __shared__ unsigned int max;
-    t_ve t;
 
     unsigned int tidx = threadIdx.y * blockDim.x + threadIdx.x;
 //    unsigned int tidx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -83,8 +82,8 @@ __global__ void device_eleminate( t_ve* Ab, unsigned int N  )
        if ( threadIdx.y == 0 )          /*   for ( k = i; k <= N; k++ ) */
        {
            unsigned int k = threadIdx.x + 1;
-           if ( ( k >= i ) && ( k <= N )  ) {
-               t                          = Ab[ Ae(   i , k, N ) ];
+           if ( ( k >= i ) && ( k <= N ) ) {
+               t_ve t                     = Ab[ Ae(   i , k, N ) ];
                Ab[ Ae( i   , k ,  N )   ] = Ab[ Ae( max , k, N ) ];
                Ab[ Ae( max , k, N ) ]     = t;
            }
@@ -94,7 +93,7 @@ __global__ void device_eleminate( t_ve* Ab, unsigned int N  )
       {
           unsigned int j = threadIdx.x + 1;
           if (  ( j >= i +1 ) && ( j <= N ) && threadIdx.y == 0 ) {       /*   for ( j = i +1; j <= N ; j++ ) */
-              unsigned int  k;
+              unsigned int  k ;
               for ( k = N + 1; k >= i ; k-- ) {
                  Ab[ Ae( j , k , N ) ] -= Ab[ Ae( i , k, N ) ] * Ab[ Ae( j , i, N ) ] /  Ab[ Ae( i , i, N ) ];
               }
