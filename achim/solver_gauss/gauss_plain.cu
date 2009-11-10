@@ -66,14 +66,9 @@ __global__ void device_eleminate( t_ve* Ab, unsigned int N  )
 //    unsigned int tidx = blockIdx.x * blockDim.x + threadIdx.x;
 
     if ( tidx == 0 ) { i = 1; }
-
     __syncthreads();
 
-//
-
-
-//       for ( i = 1; i <= N ; i++ ) {
-    while ( i <= N ) {
+    while ( i <= N ) {                  /* for ( i = 1; i <= N ; i++ ) */
         if ( tidx == 0 ) {
             unsigned int j;
             max = i;
@@ -85,39 +80,31 @@ __global__ void device_eleminate( t_ve* Ab, unsigned int N  )
        }
        __syncthreads();
 
-
-//       for ( k = i; k <= N; k++ ) {
-         if ( threadIdx.y == 0 )
-         {
-             unsigned int k = threadIdx.x + 1;
-             if ( ( k >= i ) && ( k <= N )  ) {
-                 t                          = Ab[ Ae(   i , k, N ) ];
-                 Ab[ Ae( i   , k ,  N )   ] = Ab[ Ae( max , k, N ) ];
-                 Ab[ Ae( max , k, N ) ]     = t;
-
-             }
-         }
-         __syncthreads();
-
-//       if ( tidx == 1 )
-      {
-           unsigned int j = threadIdx.x + 1;
-//           printf("\n **** hallo hallo i %u ", i );
-//       for ( j = i +1; j <= N ; j++ ) {
-         if (  ( j >= i +1 ) && ( j <= N ) ) {
-          unsigned int  k;
-          for ( k = N + 1; k >= i ; k-- ) {
-             Ab[ Ae( j , k , N ) ] -= Ab[ Ae( i , k, N ) ] * Ab[ Ae( j , i, N ) ] /  Ab[ Ae( i , i, N ) ];
-          }
+       if ( threadIdx.y == 0 )          /*   for ( k = i; k <= N; k++ ) */
+       {
+           unsigned int k = threadIdx.x + 1;
+           if ( ( k >= i ) && ( k <= N )  ) {
+               t                          = Ab[ Ae(   i , k, N ) ];
+               Ab[ Ae( i   , k ,  N )   ] = Ab[ Ae( max , k, N ) ];
+               Ab[ Ae( max , k, N ) ]     = t;
+           }
        }
+       __syncthreads();
+
+      {
+          unsigned int j = threadIdx.x + 1;
+          if (  ( j >= i +1 ) && ( j <= N ) && threadIdx.y == 0 ) {       /*   for ( j = i +1; j <= N ; j++ ) */
+              unsigned int  k;
+              for ( k = N + 1; k >= i ; k-- ) {
+                 Ab[ Ae( j , k , N ) ] -= Ab[ Ae( i , k, N ) ] * Ab[ Ae( j , i, N ) ] /  Ab[ Ae( i , i, N ) ];
+              }
+           }
        }
        __syncthreads();
        if ( tidx == 0 ) { i++; }
 
     }
-
-    }
-//}
+}
 
 
 
@@ -287,8 +274,8 @@ int main()
 
     push_problem_to_device( &M1 );
 
-    int block_size = 64;
-    dim3 dimBlock(block_size );
+    int block_size = 22;
+    dim3 dimBlock(block_size, block_size );
 
     dim3 dimGrid ( 1 );
 
