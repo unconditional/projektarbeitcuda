@@ -7,6 +7,7 @@
   rowMax,colMax:size of matirx
   row: begin row
   col: working col
+  l: the row with the max value in the working col
 */
 int findMax(double *pA, int rowMax,int colMax, int row, int col)
 {
@@ -16,8 +17,8 @@ int findMax(double *pA, int rowMax,int colMax, int row, int col)
     double MAX = pMatrix[row*colMax+col];
     int i;
     int l = row;
-    for (i=row;i<rowMax;i++){
-        if(MAX<pMatrix[i*colMax+col])
+    for (i = row;i < rowMax;i++){
+        if(MAX < pMatrix[i*colMax+col])
         {
          MAX=fabs(pMatrix[i*colMax+col]);
          l=i;
@@ -37,13 +38,13 @@ void exchangeRow(double *pA, int rowMax,int colMax,int row1, int row2)
     double * pMatrix = pA;
     double swap;
     int i;
-    if(row1!=row2)
+    if(row1 != row2)
     {
      for(i = 0; i < colMax; i++)
      {
       swap=pMatrix[row1*colMax+i];
-      pMatrix[row1*colMax+i]=pMatrix[row2*colMax+i];
-      pMatrix[row2*colMax+i]=swap;
+      pMatrix[row1*colMax+i] = pMatrix[row2*colMax+i];
+      pMatrix[row2*colMax+i] = swap;
      }
     }
 }
@@ -64,18 +65,17 @@ int eliminate(double *pA, int rowMax,int colMax,int row, int col)
  	  	   double aji = pMatrix[i*colMax+col];  
 	  	   for(j = row; j < colMax; j++)
 	  	   {
-	   	   		 pMatrix[i*colMax+j]-=pMatrix[row*colMax+j]*aji/aii;
+	   	   		 pMatrix[i*colMax+j] -= pMatrix[row*colMax+j]*aji/aii;
 	       }   
 		   //printf("aii = %lf, aji = %lf, \n",aii,aji);   
      }
-     
-     
+        
      return 1;  
 }
 /*
   pA: the pointer of the Matrix A|b
   rowMax,colMax:size of matirx
-  pX: X vector
+  pX: result X vector
 */
 int solveX(double *pA, int rowMax,int colMax, double *pX)
 {
@@ -84,10 +84,10 @@ int solveX(double *pA, int rowMax,int colMax, double *pX)
  	
  	for(i = rowMax-1; i >= 0; i--)
  	{
-	 	  double Sum=0;
+	 	  double Sum = 0;
   	 	  for(j = i+1; j < rowMax; j++)
   	 	  {
-  	  	   		Sum+=pX[j]*pMatrix[i*colMax+j];
+  	  	   		Sum += pX[j]*pMatrix[i*colMax+j];
   	  	   		
   	 	  }
   	 	  
@@ -146,11 +146,11 @@ int gaussLesung(double *pA, int rowMax,int colMax, double *pX)
      if(product==0)return -1;
  	 
 	  solveX(pMatrix, rowMax,colMax, pX);
-	  return 0;
+	  return 1;
 }
 
 /*
-  matlabe function 
+  matlabe interface 
   example:  
   A = [1,2,3;1,1,1;2,1,1]
   b=[14;6;7]
@@ -171,9 +171,11 @@ void mexFunction(int outArraySize, mxArray *pOutArray[], int inArraySize, const 
  	 rowMax = m;
  	 colMax = n;
  	 
-     pMatrix=malloc(rowMax*colMax*sizeof(double));
- 	 pX=malloc(rowMax*sizeof(double));
- 	 
+     //pMatrix=malloc(rowMax*colMax*sizeof(double));
+ 	 //pX=malloc(rowMax*sizeof(double));
+ 	 pMatrix=mxMalloc(rowMax*colMax*sizeof(double));
+ 	 pX=mxMalloc(rowMax*sizeof(double));
+ 
  	 pOutArray[0] = mxCreateDoubleMatrix(rowMax, 1, mxREAL);
  	 
  	 data1 = mxGetPr(pInArray[0]);
@@ -193,7 +195,8 @@ void mexFunction(int outArraySize, mxArray *pOutArray[], int inArraySize, const 
    	 
    	 for(i = 0; i < rowMax; i++)data2[i] = pX[i];
 		//outputMatrix(pX, rowMax, 1);
-   	 
-   	 free(pX);
-   	 free(pMatrix);
+	 mxFree(pX);
+   	 mxFree(pMatrix); 
+   	 //free(pX);
+   	 //free(pMatrix);
 }
