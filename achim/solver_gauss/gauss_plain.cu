@@ -2,17 +2,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define Ae( j , i, N ) (j -1 ) * ( N + 1 ) + i -1
-
-#define ME( A, j , i ) A->elements[ Ae( j , i, A->n ) ]
-
-
 #define a( r, s ) (r -1 ) * ( N + 1 ) + s -1
 
 typedef float        t_ve   ;
-//#typedef unsigned int t_vidx ; // index of vector elements
-
-t_ve *a;
 
 typedef struct {
 
@@ -33,22 +25,17 @@ t_matrix M1;
 
 __global__ void device_substitute( t_ve* x, t_ve* Ab, unsigned int N ) {
 
-   unsigned int j,k;
 
 
-   unsigned int tidx = threadIdx.y * blockDim.x + threadIdx.x;
-
-
-
-   if ( tidx == 0 ) {
-
-   for (j = N; j >= 1; j-- ) {
-       t_ve t = 0.0;
-       for ( k = j + 1; k <= N; k++ ) {
-           t +=  Ab[ Ae( j , k, N ) ] * x[ k - 1 ];
-       }
-       x[ j - 1 ] = ( Ab[ Ae( j , N + 1, N ) ] - t ) / Ab[ Ae( j , j, N) ] ;
-   }
+    if ( 0 == threadIdx.y * blockDim.x + threadIdx.x ) {
+        unsigned int j,k;
+        for (j = N; j >= 1; j-- ) {
+            t_ve t = 0.0;
+            for ( k = j + 1; k <= N; k++ ) {
+                    t +=  Ab[ a(j,k) ] * x[ k - 1 ];
+            }
+            x[ j - 1 ] = ( Ab[ a(j,N+1) ] - t ) / Ab[ a(j,j) ] ;
+        }
    }
 }
 
@@ -62,7 +49,6 @@ __global__ void device_eleminate( t_ve* Ab, unsigned int N  )
     __shared__ unsigned int max;
 
     unsigned int tidx = threadIdx.y * blockDim.x + threadIdx.x;
-//    unsigned int tidx = blockIdx.x * blockDim.x + threadIdx.x;
 
     if ( tidx == 0 ) { i = 1; }
     __syncthreads();
@@ -72,8 +58,8 @@ __global__ void device_eleminate( t_ve* Ab, unsigned int N  )
             unsigned int j;
             max = i;
             for( j = i + 1; j <= N; j++ ) {
-                if ( abs( Ab[ Ae( j , i , N ) ] ) > abs( Ab[ Ae( max , i, N ) ] )  ) {
-                        max = j;
+                if ( abs( Ab[ a(j,i) ] ) > abs( Ab[ a(max,i) ] )  ) {
+                    max = j;
                 }
             }
        }
@@ -83,9 +69,9 @@ __global__ void device_eleminate( t_ve* Ab, unsigned int N  )
        {
            unsigned int k = threadIdx.x + 1;
            if ( ( k >= i ) && ( k <= N + 1 ) ) {
-               t_ve t                     = Ab[ Ae(   i , k, N ) ];
-               Ab[ Ae( i   , k ,  N )   ] = Ab[ Ae( max , k, N ) ];
-               Ab[ Ae( max , k, N ) ]     = t;
+               t_ve t         = Ab[ a(i  ,k) ];
+               Ab[ a(i,k)   ] = Ab[ a(max,k) ];
+               Ab[ a(max,k) ] = t;
            }
        }
        __syncthreads();
@@ -95,7 +81,7 @@ __global__ void device_eleminate( t_ve* Ab, unsigned int N  )
           if (  ( j >= i +1 ) && ( j <= N ) && threadIdx.y == 0 ) {       /*   for ( j = i +1; j <= N ; j++ ) */
               unsigned int  k ;
               for ( k = N + 1; k >= i ; k-- ) {
-                 Ab[ Ae( j , k , N ) ] -= Ab[ Ae( i , k, N ) ] * Ab[ Ae( j , i, N ) ] /  Ab[ Ae( i , i, N ) ];
+                 Ab[ a(j,k) ] -= Ab[ a(i,k) ] * Ab[ a(j,i) ] /  Ab[ a(i, i) ];
               }
            }
        }
