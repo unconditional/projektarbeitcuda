@@ -4,6 +4,8 @@
 
 #define a( r, s ) (r -1 ) * ( N + 1 ) + s -1
 
+#define NMAX 22
+
 typedef float        t_ve   ;
 
 typedef struct {
@@ -48,9 +50,13 @@ __global__ void device_eleminate( t_ve* Ab, unsigned int N  )
     __shared__ unsigned int i;
     __shared__ unsigned int max;
 
+//    __shared__ t_ve Ab[ NMAX * ( NMAX + 1) ];
+
     unsigned int tidx = threadIdx.y * blockDim.x + threadIdx.x;
 
-    if ( tidx == 0 ) { i = 1; }
+    if ( tidx == 0 ) {
+        i = 1;
+    }
     __syncthreads();
 
     while ( i <= N ) {                  /* for ( i = 1; i <= N ; i++ ) */
@@ -65,8 +71,8 @@ __global__ void device_eleminate( t_ve* Ab, unsigned int N  )
        }
        __syncthreads();
 
-       if ( threadIdx.y == 0 )          /*   for ( k = i; k <= N + 1; k++ ) */
-       {
+
+       if ( threadIdx.y == 0 ) {
            unsigned int k = threadIdx.x + 1;
            if ( ( k >= i ) && ( k <= N + 1 ) ) {
                t_ve t         = Ab[ a(i  ,k) ];
@@ -297,7 +303,7 @@ int main()
 
     push_problem_to_device( &M1 );
 
-    int block_size = 22;
+    int block_size = NMAX;
     dim3 dimBlock(block_size, block_size );
 
     dim3 dimGrid ( 1 );
