@@ -79,10 +79,10 @@ __global__ void device_eleminate( t_ve* Ab, unsigned int N  )
        }
        __syncthreads();
 
-       if ( threadIdx.y == 0 )          /*   for ( k = i; k <= N; k++ ) */
+       if ( threadIdx.y == 0 )          /*   for ( k = i; k <= N + 1; k++ ) */
        {
            unsigned int k = threadIdx.x + 1;
-           if ( ( k >= i ) && ( k <= N ) ) {
+           if ( ( k >= i ) && ( k <= N + 1 ) ) {
                t_ve t                     = Ab[ Ae(   i , k, N ) ];
                Ab[ Ae( i   , k ,  N )   ] = Ab[ Ae( max , k, N ) ];
                Ab[ Ae( max , k, N ) ]     = t;
@@ -305,10 +305,10 @@ int main()
 
     dump_matrix( &M1 );
 
-    eleminate( M1.elements, M1.n );
-    substitute( M1.x, M1.elements, M1.n );
+//    eleminate( M1.elements, M1.n );
+//    substitute( M1.x, M1.elements, M1.n );
 
-/*
+
     push_problem_to_device( &M1 );
 
     int block_size = 22;
@@ -331,7 +331,7 @@ int main()
         exit(-3);
     }
     pull_problem_from_device( &M1 );
-*/
+
     printf( "\n solution: \n" );
     dump_matrix( &M1 );
 }
