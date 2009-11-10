@@ -7,7 +7,7 @@
 #define ME( A, j , i ) A->elements[ Ae( j , i, A->n ) ]
 
 
-
+#define a( r, s ) (r -1 ) * ( N + 1 ) + s -1
 
 typedef float        t_ve   ;
 //#typedef unsigned int t_vidx ; // index of vector elements
@@ -184,52 +184,66 @@ void substitute( t_ve* x, t_ve* Ab, unsigned int N ) {
    for (j = N; j >= 1; j-- ) {
        t = 0.0;
        for ( k = j + 1; k <= N; k++ ) {
-           t +=  Ab[ Ae( j , k, N ) ] * x[ k - 1 ];
+           t +=  Ab[ a( j , k ) ] * x[ k - 1 ];
        }
-       x[ j - 1 ] = ( Ab[ Ae( j , N + 1, N ) ] - t ) / Ab[ Ae( j , j, N) ] ;
+       x[ j - 1 ] = ( Ab[ a(j,N+1) ] - t ) / Ab[ a(j,j) ] ;
    }
 }
 // -----------------------------------------------------------------------
 
 void eleminate ( t_ve* Ab, unsigned int N ) {
-    unsigned int i, j, k, max;
+    unsigned int i;   // columns
+    unsigned int j;   // rows, equitations
+    unsigned int k, max;
     t_ve t;
 
 
+
     for ( i = 1; i <= N ; i++ ) {
+
+
        max = i;
        for( j = i + 1; j <= N; j++ ) {
-           if ( abs( Ab[ Ae( j , i , N ) ] ) > abs( Ab[ Ae( max , i, N ) ] )  ) {
+           if ( abs( Ab[ a(j,i) ] ) > abs( Ab[ a(max,i) ] )  ) {
               max = j;
            }
        }
-       for ( k = i; k <= N; k++ ) {
-          t                   = Ab[ Ae(   i , k, N ) ];
-          Ab[ Ae( i , k ,  N )   ] = Ab[ Ae( max , k, N ) ];
-          Ab[ Ae( max , k, N ) ] = t;
+
+       for ( k = i; k <= N + 1; k++ ) {
+          t              = Ab[ a(i,k) ];
+          Ab[ a(i,k)   ] = Ab[ a(max,k) ];
+          Ab[ a(max,k) ] = t;
        }
 
        for ( j = i +1; j <= N ; j++ ) {
           for ( k = N + 1; k >= i ; k-- ) {
-             Ab[ Ae( j , k , N ) ] -= Ab[ Ae( i , k, N ) ] * Ab[ Ae( j , i, N ) ] /  Ab[ Ae( i , i, N ) ];
+             Ab[ a(j,k) ] -= Ab[ a(i,k) ] * Ab[ a(j,i) ] /  Ab[ a(i,i) ];
           }
        }
     }
 }
 // -----------------------------------------------------------------------
 void dump_matrix( t_pmatrix matrix ) {
-    int n;
-    int m;
-    for ( m = 0; m < matrix->n; m++ ) {
-        printf( "\n  %u. ", m + 1 );
-        for ( n = 0; n < matrix->n; n++ ) {
-            printf( " %f", matrix->elements[ m * ( matrix->n + 1 ) + n ] );
+    unsigned int j;
+    unsigned int i;
+    unsigned int N;
+
+    N = matrix->n;
+
+    for ( j = 1; j <= N; j++ ) {
+        printf( "\n  %u. ", j );
+        for ( i = 1; i <= N; i++ ) {
+            printf( " %f", matrix->elements[ a(j,i) ] );
         }
-        printf( " \t b %f", matrix->elements[ m * ( matrix->n + 1 ) + n ] );
+        printf( " \t b %f", matrix->elements[ a(j,i) ] );
    }
-   for ( m = 0; m < matrix->n; m++ ) {
-      printf( "\n  x%u  = %f",m + 1, matrix->x[ m ] );
+   {
+       unsigned int m;
+       for ( m = 0; m < matrix->n; m++ ) {
+           printf( "\n  x%u  = %f",m + 1, matrix->x[ m ] );
+       }
    }
+
 }
 // -----------------------------------------------------------------------
 void gen_textinput_01( t_pmatrix matrix ) {
@@ -255,6 +269,28 @@ void gen_textinput_01( t_pmatrix matrix ) {
    matrix->elements[ 11 ]  = -1;
 }
 // -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
+void gen_textinput_02( t_pmatrix matrix ) {
+
+// Example from buyu
+
+malloc_matrix( 3, matrix );
+
+matrix->elements[0]=1;
+matrix->elements[1]=2;
+matrix->elements[2]=3;
+matrix->elements[3]=14;
+matrix->elements[4]=1;
+matrix->elements[5]=1;
+matrix->elements[6]=1;
+matrix->elements[7]=6;
+matrix->elements[8]=2;
+matrix->elements[9]=1;
+matrix->elements[10]=1;
+matrix->elements[11]=7;
+
+}
+// -----------------------------------------------------------------------
 
 int main()
 {
@@ -262,15 +298,17 @@ int main()
 
     cudaError_t e;
 
-    gen_textinput_01( &M1 );
+    gen_textinput_02( &M1 );
 
     printf( "hello world , size ist set to %u\n", M1.n );
 
 
     dump_matrix( &M1 );
-//    eleminate( M1.elements, M1.n );
 
+    eleminate( M1.elements, M1.n );
+    substitute( M1.x, M1.elements, M1.n );
 
+/*
     push_problem_to_device( &M1 );
 
     int block_size = 22;
@@ -292,10 +330,9 @@ int main()
         fprintf(stderr, "CUDA Error on add_arrays_gpu: '%s' \n", cudaGetErrorString(e));
         exit(-3);
     }
-
     pull_problem_from_device( &M1 );
-
-    printf( "\n" );
+*/
+    printf( "\n solution: \n" );
     dump_matrix( &M1 );
 }
 
