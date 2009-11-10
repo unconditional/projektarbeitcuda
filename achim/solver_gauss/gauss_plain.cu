@@ -43,19 +43,23 @@ __global__ void device_substitute( t_ve* x, t_ve* Ab, unsigned int N ) {
 
 // -----------------------------------------------------------------------
 
-__global__ void device_eleminate( t_ve* Ab, unsigned int N  )
+__global__ void device_gauss_solve( t_ve* p_Ab, unsigned int N, t_ve* p_x )
 {
 
 
     __shared__ unsigned int i;
     __shared__ unsigned int max;
 
-//    __shared__ t_ve Ab[ NMAX * ( NMAX + 1) ];
+    __shared__ t_ve Ab[ NMAX * ( NMAX + 1) ];
+     t_ve x[ NMAX ];
 
     unsigned int tidx = threadIdx.y * blockDim.x + threadIdx.x;
-
+    unsigned int n;
     if ( tidx == 0 ) {
         i = 1;
+        for  ( n = 0; n <  N * (N+1); n++ ) {
+            Ab[n] = p_Ab[n];
+        }
     }
     __syncthreads();
 
@@ -93,8 +97,30 @@ __global__ void device_eleminate( t_ve* Ab, unsigned int N  )
        }
        __syncthreads();
        if ( tidx == 0 ) { i++; }
-
     }
+    __syncthreads();
+
+    if ( tidx == 0 ) {
+
+        /* the substitute part */
+        unsigned int j,k;
+        for (j = N; j >= 1; j-- ) {
+            t_ve t = 0.0;
+            for ( k = j + 1; k <= N; k++ ) {
+                    t +=  Ab[ a(j,k) ] * x[ k - 1 ];
+            }
+            x[ j - 1 ] = ( Ab[ a(j,N+1) ] - t ) / Ab[ a(j,j) ] ;
+        }
+        /* copy result back to global memory */
+
+        for  ( n = 0; n <  N * (N+1); n++ ) {
+            p_Ab[n] = Ab[n];
+        }
+        for  ( n = 0; n < N; n++ ) {
+            p_x[n] = x[n];
+        }
+    }
+   __syncthreads();
 }
 
 
@@ -290,7 +316,7 @@ int main()
 
     cudaError_t e;
 
-    gen_textinput_02( &M1 );
+    gen_textinput_01( &M1 );
 
     printf( "hello world , size ist set to %u\n", M1.n );
 
@@ -308,24 +334,31 @@ int main()
 
     dim3 dimGrid ( 1 );
 
-    device_eleminate<<<dimGrid,dimBlock>>>( M1.device_elements, M1.n );
+    device_gauss_solve<<<dimGrid,dimBlock>>>( M1.device_elements, M1.n, M1.device_x );
     e = cudaGetLastError();
     if( e != cudaSuccess )
     {
         fprintf(stderr, "CUDA Error on add_arrays_gpu: '%s' \n", cudaGetErrorString(e));
         exit(-3);
     }
-    device_substitute<<<dimGrid,dimBlock>>>( M1.device_x, M1.device_elements, M1.n );
-    e = cudaGetLastError();
-    if( e != cudaSuccess )
-    {
-        fprintf(stderr, "CUDA Error on add_arrays_gpu: '%s' \n", cudaGetErrorString(e));
-        exit(-3);
-    }
+//    device_substitute<<<dimGrid,dimBlock>>>( M1.device_x, M1.device_elements, M1.n );
+
     pull_problem_from_device( &M1 );
 
     printf( "\n solution: \n" );
     dump_matrix( &M1 );
+    e = cudaFree(M1.device_elements);
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
+    e = cudaFree(M1.device_x);
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
 }
 
 
