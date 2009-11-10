@@ -164,14 +164,15 @@ void mexFunction(int outArraySize, mxArray *pOutArray[], int inArraySize, const 
  	 double *data1, *data2;
  	 int rowMax, colMax;
  	 double *pMatrix, *pX;
- 	 pMatrix=malloc(rowMax*colMax*sizeof(double));
- 	 pX=malloc(rowMax*sizeof(double));
+
  	 //if (intArraySize != outArraySize) mexErrMsgTxt("the number of input and output arguments must be same!");
  	 m = mxGetM(pInArray[0]);
  	 n = mxGetN(pInArray[0]);
  	 rowMax = m;
  	 colMax = n;
-
+ 	 
+     pMatrix=malloc(rowMax*colMax*sizeof(double));
+ 	 pX=malloc(rowMax*sizeof(double));
  	 
  	 pOutArray[0] = mxCreateDoubleMatrix(rowMax, 1, mxREAL);
  	 
