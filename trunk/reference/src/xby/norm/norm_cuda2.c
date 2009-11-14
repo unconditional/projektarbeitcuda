@@ -3,22 +3,25 @@
 /* Kernel to square elements of the array on the GPU */
 __global__ void square_elements(float* in, float* out, int N)
 {
-int idx = blockIdx.x*blockDim.x+threadIdx.x;
-//if ( idx < N) out[idx]=in[idx]*in[idx];
-if ( idx < N)out[0]=out[0]+in[idx]*in[idx];
-__syncthreads();
+           
+      int idx = blockIdx.x*blockDim.x+threadIdx.x;
+      //if ( idx < N) out[idx] = in[idx]*in[idx];
+      //if ( idx < N) out[0] = out[0]+in[idx]*in[idx];
+      if ( idx < N) *out = *out + in[idx]*in[idx];
+      __syncthreads();
 }
 /* Gateway function */
 void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
      int i, j, m, n;
+     //pointers of input and output matrix
      double *data1, *data2;
      float *data1f, *data2f;
+     
+     //pointers of the date for gpu. data1f_gpu: input data, data2f_gpu out put data
      float *data1f_gpu, *data2f_gpu;
      mxClassID category;
-     if (nrhs != nlhs)
-     mexErrMsgTxt("The number of input and output arguments must be the same.");
-
+     //if (nrhs != nlhs)mexErrMsgTxt("The number of input and output arguments must be the same.");
 
 
      for (i = 0; i < nrhs; i++)
