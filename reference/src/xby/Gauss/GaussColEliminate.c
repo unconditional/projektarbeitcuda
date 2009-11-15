@@ -170,7 +170,11 @@ void mexFunction(int outArraySize, mxArray *pOutArray[], int inArraySize, const 
  	 n = mxGetN(pInArray[0]);
  	 rowMax = m;
  	 colMax = n;
+<<<<<<< .mine
+     
+=======
  	 
+>>>>>>> .r51
      //pMatrix=malloc(rowMax*colMax*sizeof(double));
  	 //pX=malloc(rowMax*sizeof(double));
  	 pMatrix=mxMalloc(rowMax*colMax*sizeof(double));
@@ -180,20 +184,21 @@ void mexFunction(int outArraySize, mxArray *pOutArray[], int inArraySize, const 
  	 
  	 data1 = mxGetPr(pInArray[0]);
  	 data2 = mxGetPr(pOutArray[0]);
+     
  	 for(i = 0; i < rowMax; i++)
  	 {
 	  	   for(j = 0; j < colMax; j++)
 	  	   {
-		   		 pMatrix[i*colMax+j] = data1[j*rowMax+i];
-		   		// printf("%lf,",data1[j*rowMax+i]);
-		   		//printf("%lf,",pMatrix[i*colMax+j]);
+		   		pMatrix[i*colMax+j] = data1[j*rowMax+i];
+		   	    printf("%lf,",data1[j*rowMax+i]);
+		   		printf("%lf,",pMatrix[i*colMax+j]);
 		   }
-		   //printf("\n");
+		   printf("\n");
    	 }
  	 
      gaussLesung(pMatrix, rowMax, colMax, pX);
    	 
-   	 for(i = 0; i < rowMax; i++)data2[i] = pX[i];
+   	// for(i = 0; i < rowMax; i++)data2[i] = pX[i];
 		//outputMatrix(pX, rowMax, 1);
 	 mxFree(pX);
    	 mxFree(pMatrix); 
