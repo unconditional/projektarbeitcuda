@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define a( r, s ) (r -1 ) * ( N + 1 ) + s -1
+#include "projektcuda.h"
+
+#include "gausskernel.h"
 
 #define NMAX 22
 
-typedef float        t_ve   ;
 
 typedef struct {
 
@@ -25,6 +26,8 @@ t_matrix M1;
 
 // -----------------------------------------------------------------------
 
+
+
 __global__ void device_substitute( t_ve* x, t_ve* Ab, unsigned int N ) {
 
 
@@ -42,86 +45,6 @@ __global__ void device_substitute( t_ve* x, t_ve* Ab, unsigned int N ) {
 }
 
 // -----------------------------------------------------------------------
-
-__global__ void device_gauss_solve( t_ve* p_Ab, unsigned int N, t_ve* p_x )
-{
-
-
-    __shared__ unsigned int i;
-    __shared__ unsigned int max;
-
-    __shared__ t_ve Ab[ NMAX * ( NMAX + 1) ];
-     t_ve x[ NMAX ];
-
-    unsigned int tidx = threadIdx.y * blockDim.x + threadIdx.x;
-    unsigned int n;
-    if ( tidx == 0 ) {
-        i = 1;
-        for  ( n = 0; n <  N * (N+1); n++ ) {
-            Ab[n] = p_Ab[n];
-        }
-    }
-    __syncthreads();
-
-    while ( i <= N ) {                  /* for ( i = 1; i <= N ; i++ ) */
-        if ( tidx == 0 ) {
-            unsigned int j;
-            max = i;
-            for( j = i + 1; j <= N; j++ ) {
-                if ( abs( Ab[ a(j,i) ] ) > abs( Ab[ a(max,i) ] )  ) {
-                    max = j;
-                }
-            }
-       }
-       __syncthreads();
-
-
-       if ( threadIdx.y == 0 ) {
-           unsigned int k = threadIdx.x + 1;
-           if ( ( k >= i ) && ( k <= N + 1 ) ) {
-               t_ve t         = Ab[ a(i  ,k) ];
-               Ab[ a(i,k)   ] = Ab[ a(max,k) ];
-               Ab[ a(max,k) ] = t;
-           }
-       }
-       __syncthreads();
-
-      {
-          unsigned int j = threadIdx.x + 1;
-          if (  ( j >= i +1 ) && ( j <= N ) && threadIdx.y == 0 ) {       /*   for ( j = i +1; j <= N ; j++ ) */
-              unsigned int  k ;
-              for ( k = N + 1; k >= i ; k-- ) {
-                 Ab[ a(j,k) ] -= Ab[ a(i,k) ] * Ab[ a(j,i) ] /  Ab[ a(i, i) ];
-              }
-           }
-       }
-       __syncthreads();
-       if ( tidx == 0 ) { i++; }
-    }
-    __syncthreads();
-
-    if ( tidx == 0 ) {
-
-        /* the substitute part */
-        unsigned int j,k;
-        for (j = N; j >= 1; j-- ) {
-            t_ve t = 0.0;
-            for ( k = j + 1; k <= N; k++ ) {
-                    t +=  Ab[ a(j,k) ] * x[ k - 1 ];
-            }
-            x[ j - 1 ] = ( Ab[ a(j,N+1) ] - t ) / Ab[ a(j,j) ] ;
-        }
-        /* copy result back to global memory */
-
-        for  ( n = 0; n <  N * (N+1); n++ ) {
-            p_Ab[n] = Ab[n];
-        }
-        for  ( n = 0; n < N; n++ ) {
-            p_x[n] = x[n];
-        }
-    }
-   __syncthreads();
-}
 
 
 
@@ -334,7 +257,7 @@ int main()
 
     dim3 dimGrid ( 1 );
 
-    device_gauss_solve<<<dimGrid,dimBlock>>>( M1.device_elements, M1.n, M1.device_x );
+    device_gauss_solver<<<dimGrid,dimBlock>>>( M1.device_elements, M1.n, M1.device_x );
     e = cudaGetLastError();
     if( e != cudaSuccess )
     {
