@@ -4,11 +4,24 @@
 /* Kernel to square elements of the array on the GPU */
 __global__ void square_elements(float* in, float* out, int N)
 {
+ 
+__shared__ float vOut[16];
 int idx = blockIdx.x*blockDim.x+threadIdx.x;
-//if ( idx < N) out[idx]=in[idx]*in[idx];
-if ( idx < N)out[0]=out[0]+in[idx]*in[idx];
-//if ( idx < N) *out=*out+in[idx]*in[idx];
+
+if ( idx < N)vOut[idx] = in[idx]*in[idx];
+
 __syncthreads();
+
+if(idx == 0) {
+    out[0] = 0;
+	int i;
+	for ( i = 0; i < N; i++ ) {
+	   out[0] += vOut[i];
+	}
+}
+
+__syncthreads();
+
 }
 void square_host(double* pIn, double *pOut, int sizeIn, int sizeOut)
 {
@@ -58,6 +71,14 @@ if ( (sizeIn) % sizeBlock !=0 ) dimGrid.x+=1;
     
 /* Call function on GPU */
 square_elements<<<dimGrid,dimBlock>>>(data1f_gpu, data2f_gpu, sizeIn);
+cudaError_t e;
+e = cudaGetLastError();
+if ( e != cudaSuccess)
+{
+    fprintf(stderr, "CUDA Error on square_elements: '%s' \n", cudaGetErrorString(e));
+    exit(-1);
+}
+
 /* Copy result back to host */
 cudaMemcpy( data2f, data2f_gpu, sizeof(float)*sizeOut, cudaMemcpyDeviceToHost);
     for (i = 0; i < sizeOut; i++)
@@ -88,23 +109,31 @@ int main()
     int sizeIn, sizeOut;
     int i;
     sizeIn = 3;
-    sizeOut = 3;
+    sizeOut = 1;
     pIn = (double*)malloc(sizeof(double)*sizeIn);
     pOut = (double*)malloc(sizeof(double)*sizeOut);
     pIn[0] = 1;
     pIn[1] = 2;
     pIn[2] = 3;
     square_host(pIn, pOut, sizeIn, sizeOut);
+	
+	printf("output square result");
+    for (i = 0; i < sizeOut; i++)
+    {	
+        printf(" pOut[%d] = %lf, ", i, pOut[i]);
+    }
+        printf("\n");
+	printf("output norm result");
     for (i = 0; i < sizeOut; i++)
     {
-        printf("pOut[%d] = %lf, ", i, pOut[i]);
+		pOut[i] = sqrt(pOut[i]);
+        printf("squre of pOut[%d] = %lf, ", i, pOut[i]);
     }
         printf("\n");
     
-
+   
     free(pIn);
     free(pOut);
-
     return 0;
 }
 
