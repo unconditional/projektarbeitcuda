@@ -54,7 +54,17 @@ dim3 dimGrid((sizeIn)/dimBlock.x);
 if ( (sizeIn) % sizeBlock !=0 ) dimGrid.x+=1;
     
 /* Call function on GPU */
+cudaError_t e;
 square_elements<<<dimGrid,dimBlock>>>(data1f_gpu, data2f_gpu, sizeIn);
+e = cudaGetLastError();
+if ( e != cudaSuccess)
+{
+    fprintf(stderr, "CUDA Error on square_elements: '%s' \n", cudaGestErrorString(e));
+    exit(-1);
+}
+
+
+
 /* Copy result back to host */
 cudaMemcpy( data2f, data2f_gpu, sizeof(float)*sizeOut, cudaMemcpyDeviceToHost);
     for (i = 0; i < sizeOut; i++)
