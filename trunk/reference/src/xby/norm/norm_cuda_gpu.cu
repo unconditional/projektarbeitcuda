@@ -21,6 +21,9 @@ if(idx == 0) {
 }
 
 __syncthreads();
+if(idx == 0) {
+	   out[0] = sqrt(out[0]);
+}
 
 }
 void square_host(double* pIn, double *pOut, int sizeIn, int sizeOut)
@@ -33,7 +36,7 @@ float *data1f_gpu, *data2f_gpu;
 int sizeBlock;
 sizeBlock = 16;
 data1 = pIn;
-
+data2 = pOut;
 
 /* Find the dimensions of the data */
 
@@ -89,7 +92,7 @@ cudaMemcpy( data2f, data2f_gpu, sizeof(float)*sizeOut, cudaMemcpyDeviceToHost);
 
 
 /* Create a pointer to the output data */
-data2 = pOut;
+
 /* Convert from single to double before returning */
 for (j = 0; j < sizeOut; j++)
 {
@@ -108,13 +111,13 @@ int main()
     double *pIn, *pOut;
     int sizeIn, sizeOut;
     int i;
-    sizeIn = 3;
+    sizeIn = 2;
     sizeOut = 1;
     pIn = (double*)malloc(sizeof(double)*sizeIn);
     pOut = (double*)malloc(sizeof(double)*sizeOut);
-    pIn[0] = 1;
-    pIn[1] = 2;
-    pIn[2] = 3;
+    pIn[0] = 3;
+    pIn[1] = 4;
+    //pIn[2] = 3;
     square_host(pIn, pOut, sizeIn, sizeOut);
 	
 	printf("output square result");
@@ -126,7 +129,7 @@ int main()
 	printf("output norm result");
     for (i = 0; i < sizeOut; i++)
     {
-		pOut[i] = sqrt(pOut[i]);
+		//pOut[i] = sqrt(pOut[i]);
         printf("squre of pOut[%d] = %lf, ", i, pOut[i]);
     }
         printf("\n");
