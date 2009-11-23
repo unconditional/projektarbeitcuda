@@ -5,44 +5,17 @@
 #include "projektcuda.h"
 
 #include "gausskernel.h"
+#include "util.h"
+#include "problemsamples.h"
 
 #define NMAX 22
 
 
-typedef struct {
 
-    unsigned int n;
-    t_ve*    elements;
-    t_ve*    x;
-
-    t_ve*    device_elements;
-    t_ve*    device_x;
-
-} t_matrix;
-
-typedef t_matrix* t_pmatrix;
 
 t_matrix M1;
 
-// -----------------------------------------------------------------------
 
-
-
-__global__ void device_substitute( t_ve* x, t_ve* Ab, unsigned int N ) {
-
-
-
-    if ( 0 == threadIdx.y * blockDim.x + threadIdx.x ) {
-        unsigned int j,k;
-        for (j = N; j >= 1; j-- ) {
-            t_ve t = 0.0;
-            for ( k = j + 1; k <= N; k++ ) {
-                    t +=  Ab[ a(j,k) ] * x[ k - 1 ];
-            }
-            x[ j - 1 ] = ( Ab[ a(j,N+1) ] - t ) / Ab[ a(j,j) ] ;
-        }
-   }
-}
 
 // -----------------------------------------------------------------------
 
@@ -97,39 +70,11 @@ void push_problem_to_device( t_pmatrix matrix ) {
     }
 
 }
-// -----------------------------------------------------------------------
-void malloc_matrix( unsigned int size_n, t_pmatrix matrix ) {
-
-   matrix->n        = size_n;
-   matrix->elements =  (t_ve*) malloc( sizeof(t_ve) * (size_n + 1 ) * size_n ); /* store b in array, too */
-   if ( matrix->elements == NULL) {
-       fprintf(stderr, "sorry, can not allocate memory for you");
-       exit( -1 );
-   }
-   matrix->x = (t_ve*) malloc( sizeof(t_ve)  * size_n ); /* the output vector */
-
-   if ( matrix->elements == NULL) {
-       fprintf(stderr, "sorry, can not allocate memory for you");
-       exit( -1 );
-   }
-}
 
 
 
 
 // -----------------------------------------------------------------------
-void substitute( t_ve* x, t_ve* Ab, unsigned int N ) {
-   unsigned int j, k;
-   t_ve t;
-
-   for (j = N; j >= 1; j-- ) {
-       t = 0.0;
-       for ( k = j + 1; k <= N; k++ ) {
-           t +=  Ab[ a( j , k ) ] * x[ k - 1 ];
-       }
-       x[ j - 1 ] = ( Ab[ a(j,N+1) ] - t ) / Ab[ a(j,j) ] ;
-   }
-}
 // -----------------------------------------------------------------------
 
 void eleminate ( t_ve* Ab, unsigned int N ) {
@@ -164,28 +109,9 @@ void eleminate ( t_ve* Ab, unsigned int N ) {
     }
 }
 // -----------------------------------------------------------------------
-void dump_matrix( t_pmatrix matrix ) {
-    unsigned int j;
-    unsigned int i;
-    unsigned int N;
 
-    N = matrix->n;
 
-    for ( j = 1; j <= N; j++ ) {
-        printf( "\n  %u. ", j );
-        for ( i = 1; i <= N; i++ ) {
-            printf( " %f", matrix->elements[ a(j,i) ] );
-        }
-        printf( " \t b %f", matrix->elements[ a(j,i) ] );
-   }
-   {
-       unsigned int m;
-       for ( m = 0; m < matrix->n; m++ ) {
-           printf( "\n  x%u  = %f",m + 1, matrix->x[ m ] );
-       }
-   }
 
-}
 // -----------------------------------------------------------------------
 void gen_textinput_01( t_pmatrix matrix ) {
 
@@ -235,52 +161,49 @@ matrix->elements[11]=7;
 
 int main()
 {
-//    malloc_matrix( 3, &M1 );
-
+    unsigned int problem;
     cudaError_t e;
-
-    gen_textinput_01( &M1 );
-
-    printf( "hello world , size ist set to %u\n", M1.n );
-
-
-    dump_matrix( &M1 );
-
-//    eleminate( M1.elements, M1.n );
-//    substitute( M1.x, M1.elements, M1.n );
-
-
-    push_problem_to_device( &M1 );
 
     int block_size = NMAX;
     dim3 dimBlock(block_size, block_size );
-
     dim3 dimGrid ( 1 );
 
-    device_gauss_solver<<<dimGrid,dimBlock>>>( M1.device_elements, M1.n, M1.device_x );
-    e = cudaGetLastError();
-    if( e != cudaSuccess )
-    {
-        fprintf(stderr, "CUDA Error on add_arrays_gpu: '%s' \n", cudaGetErrorString(e));
-        exit(-3);
-    }
-//    device_substitute<<<dimGrid,dimBlock>>>( M1.device_x, M1.device_elements, M1.n );
+    for ( problem = 1; problem < 3; problem++ ) {
+        gen_problemsample( &M1, 2 );
+        printf( "\n \nRunning problem No. %u\n", problem );
+        backup_problem( &M1 );
+        dump_problem( M1.elements, M1.n );
+        push_problem_to_device( &M1 );
 
-    pull_problem_from_device( &M1 );
+        device_gauss_solver<<<dimGrid,dimBlock>>>( M1.device_elements, M1.n, M1.device_x );
 
-    printf( "\n solution: \n" );
-    dump_matrix( &M1 );
-    e = cudaFree(M1.device_elements);
-    if( e != cudaSuccess )
-    {
-        fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
-        exit(-3);
-    }
-    e = cudaFree(M1.device_x);
-    if( e != cudaSuccess )
-    {
-        fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
-        exit(-3);
+        e = cudaGetLastError();
+        if( e != cudaSuccess )
+        {
+            fprintf(stderr, "CUDA Error on add_arrays_gpu: '%s' \n", cudaGetErrorString(e));
+            exit(-3);
+        }
+
+
+        pull_problem_from_device( &M1 );
+        printf( "\n solution: \n" );
+
+        dump_problem( M1.elements, M1.n );
+        dump_x( M1.x, M1.n );
+        check_correctness( M1.orgelements, M1.n, M1.x );
+        e = cudaFree(M1.device_elements);
+        if( e != cudaSuccess )
+        {
+            fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
+            exit(-3);
+        }
+        e = cudaFree(M1.device_x);
+        if( e != cudaSuccess )
+        {
+            fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
+            exit(-3);
+        }
+        free_matrix( &M1 );
     }
 }
 
