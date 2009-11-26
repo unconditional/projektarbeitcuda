@@ -2,7 +2,7 @@
 #include <stdio.h>
 //#include "mex.h"
 /* Kernel to square elements of the array on the GPU */
-__global__ void square_elements(float* in, float* out, int N)
+__global__ void norm_elements(float* in, float* out, unsigned int N)
 {
  
 __shared__ float vOut[16];
@@ -73,7 +73,7 @@ dim3 dimGrid((sizeIn)/dimBlock.x);
 if ( (sizeIn) % sizeBlock !=0 ) dimGrid.x+=1;
     
 /* Call function on GPU */
-square_elements<<<dimGrid,dimBlock>>>(data1f_gpu, data2f_gpu, sizeIn);
+norm_elements<<<dimGrid,dimBlock>>>(data1f_gpu, data2f_gpu, sizeIn);
 cudaError_t e;
 e = cudaGetLastError();
 if ( e != cudaSuccess)
