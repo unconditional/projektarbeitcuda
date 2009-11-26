@@ -1,31 +1,5 @@
-#include "cuda.h"
-#include <stdio.h>
-#include "projektcuda.h"
-//#include "mex.h"
-/* Kernel to square elements of the array on the GPU */
-__global__ void device_dotMul(t_ve* in1, t_ve* in2,t_ve* out, unsigned int N)
-{
- 
-__shared__ float vOut[16];
-int idx = blockIdx.x*blockDim.x+threadIdx.x;
+#include "project_comm.h"
 
-if ( idx < N)vOut[idx] = in1[idx]*in2[idx];
-
-__syncthreads();
-
-if(idx == 0) {
-    out[0] = 0;
-	int i;
-	for ( i = 0; i < N; i++ ) {
-	   out[0] += vOut[i];
-	}
-}
-
-__syncthreads();
-
-}
-
-/*
 void host_dotMul(double* pIn1, double* pIn2,double *pOut, int sizeIn, int sizeOut)
 {
 
@@ -116,13 +90,10 @@ free(data_out_f);
 cudaFree(data_in1_f_gpu);
 cudaFree(data_in2_f_gpu);
 cudaFree(data_out_f_gpu);
-}
-*/
-
-/*
-int main()
+}     
+     
+int test_dotMul()
 {
-
     double *pIn1, *pIn2,*pOut;
     int sizeIn, sizeOut;
     int i;
@@ -158,5 +129,5 @@ int main()
     free(pIn2);
     free(pOut);
     return 0;
+
 }
-*/

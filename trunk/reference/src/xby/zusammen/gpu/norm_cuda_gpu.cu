@@ -24,9 +24,10 @@ __syncthreads();
 if(idx == 0) {
 	   out[0] = sqrt(out[0]);
 }
-
 }
-void square_host(double* pIn, double *pOut, int sizeIn, int sizeOut)
+
+/*
+void host_norm(double* pIn, double *pOut, int sizeIn, int sizeOut)
 {
 
 int i, j;
@@ -38,19 +39,18 @@ sizeBlock = 16;
 data1 = pIn;
 data2 = pOut;
 
-/* Find the dimensions of the data */
+// Find the dimensions of the data 
 
-/* Create an mxArray for the output data */
+// Create an mxArray for the output data 
 
-/* Create an input and output data array on the GPU*/
+// Create an input and output data array on the GPU
 cudaMalloc( (void **) &data1f_gpu,sizeof(float)*sizeIn);
 cudaMalloc( (void **) &data2f_gpu,sizeof(float)*sizeOut);
-/* Retrieve the input data */
+// Retrieve the input data 
 
-/* Check if the input array is single or double precision */
+// Check if the input array is single or double precision 
 
-/* The input array is in double precision, it needs to be converted t
-floats before being sent to the card */
+// The input array is in double precision, it needs to be converted t floats before being sent to the card 
 data1f = (float *) malloc(sizeof(float)*sizeIn);
 for (j = 0; j < sizeIn; j++)
 {
@@ -67,12 +67,12 @@ cudaMemcpy( data1f_gpu, data1f, sizeof(float)*sizeIn, cudaMemcpyHostToDevice);
 data2f = (float *) malloc(sizeof(float)*sizeOut);
 //cudaMemcpy( data2f_gpu, data2f, sizeof(float)*sizeOut, cudaMemcpyHostToDevice);
 
-/* Compute execution configuration using 128 threads per block */
+// Compute execution configuration using 128 threads per block 
 dim3 dimBlock(sizeBlock);
 dim3 dimGrid((sizeIn)/dimBlock.x);
 if ( (sizeIn) % sizeBlock !=0 ) dimGrid.x+=1;
     
-/* Call function on GPU */
+// Call function on GPU 
 norm_elements<<<dimGrid,dimBlock>>>(data1f_gpu, data2f_gpu, sizeIn);
 cudaError_t e;
 e = cudaGetLastError();
@@ -82,7 +82,7 @@ if ( e != cudaSuccess)
     exit(-1);
 }
 
-/* Copy result back to host */
+// Copy result back to host 
 cudaMemcpy( data2f, data2f_gpu, sizeof(float)*sizeOut, cudaMemcpyDeviceToHost);
     for (i = 0; i < sizeOut; i++)
     {
@@ -91,20 +91,21 @@ cudaMemcpy( data2f, data2f_gpu, sizeof(float)*sizeOut, cudaMemcpyDeviceToHost);
         printf("\n");
 
 
-/* Create a pointer to the output data */
+// Create a pointer to the output data 
 
-/* Convert from single to double before returning */
+// Convert from single to double before returning 
 for (j = 0; j < sizeOut; j++)
 {
 data2[j] = (double) data2f[j];
 }
-/* Clean-up memory on device and host */
+// Clean-up memory on device and host 
 free(data1f);
 free(data2f);
 cudaFree(data1f_gpu);
 cudaFree(data2f_gpu);
 }
-
+*/
+/*
 int main()
 {
 
@@ -118,9 +119,9 @@ int main()
     pIn[0] = 3;
     pIn[1] = 4;
     //pIn[2] = 3;
-    square_host(pIn, pOut, sizeIn, sizeOut);
+    host_norm(pIn, pOut, sizeIn, sizeOut);
 	
-	printf("output square result");
+    printf("output square result");
     for (i = 0; i < sizeOut; i++)
     {	
         printf(" pOut[%d] = %lf, ", i, pOut[i]);
@@ -132,15 +133,13 @@ int main()
 		//pOut[i] = sqrt(pOut[i]);
         printf("squre of pOut[%d] = %lf, ", i, pOut[i]);
     }
-        printf("\n");
-    
-   
+        printf("\n");   
     free(pIn);
     free(pOut);
     return 0;
 }
 
-
+*/
 
 
 /* Gateway function */
