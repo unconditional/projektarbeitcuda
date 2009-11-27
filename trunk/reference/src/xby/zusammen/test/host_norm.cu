@@ -1,4 +1,4 @@
-#include "project_comm.h"
+#include "test_comm.h"
 
 void host_norm(double* pIn, double *pOut, int sizeIn, int sizeOut)
 {
