@@ -1,5 +1,5 @@
-#ifndef __PROJECT_COMM_H__
-#define __PROJECT_COMM_H__
+#ifndef __TEST_COMM_H__
+#define __TEST_COMM_H__
 
 #include "cuda.h"
 #include <stdio.h>
