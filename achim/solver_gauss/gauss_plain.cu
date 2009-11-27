@@ -42,7 +42,7 @@ void push_problem_to_device( t_pmatrix matrix ) {
 
 
     cudaError_t e;
-    e = cudaMalloc ((void **) &matrix->device_x, sizeof(t_ve) * (matrix->n + 1 ) * matrix->n );
+    e = cudaMalloc ((void **) &matrix->device_x, sizeof(t_ve) * matrix->n );
     if( e != cudaSuccess )
     {
         fprintf(stderr, "CUDA Error on cudaMalloc: '%s' \n", cudaGetErrorString(e));
@@ -54,14 +54,14 @@ void push_problem_to_device( t_pmatrix matrix ) {
         fprintf(stderr, "CUDA Error on cudaMalloc: '%s' \n", cudaGetErrorString(e));
         exit(-3);
     }
-
+/*
     e = cudaMemcpy( matrix->device_x, matrix->x , sizeof(t_ve)*matrix->n, cudaMemcpyHostToDevice);
     if( e != cudaSuccess )
     {
         fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
         exit(-3);
     }
-
+*/
     e = cudaMemcpy( matrix->device_elements, matrix->elements , sizeof(t_ve) * (matrix->n + 1 ) * matrix->n, cudaMemcpyHostToDevice);
     if( e != cudaSuccess )
     {
@@ -120,16 +120,19 @@ int main()
     cudaError_t e;
 
     int block_size = NMAX;
-    dim3 dimBlock(block_size, block_size );
+    dim3 dimBlock( block_size, block_size );
     dim3 dimGrid ( 1 );
 
-    for ( problem = 1; problem < 4; problem++ ) {
+    for ( problem = 1; problem < 5; problem++ ) {
         gen_problemsample( &M1, problem );
-        printf( "\n \nRunning problem No. %u\n", problem );
+        printf( "\n \nRunning problem No. %u , size %u\n", problem, M1.n );
         backup_problem( &M1 );
-        dump_problem( M1.elements, M1.n );
+        if ( M1.n < 20 ) {
+            dump_problem( M1.elements, M1.n );
+        }
         push_problem_to_device( &M1 );
 
+        if ( M1.n <= block_size ) {
         device_gauss_solver<<<dimGrid,dimBlock>>>( M1.device_elements, M1.n, M1.device_x );
 
         e = cudaGetLastError();
@@ -139,12 +142,16 @@ int main()
             exit(-3);
         }
 
+        }
 
         pull_problem_from_device( &M1 );
-        printf( "\n solution: \n" );
 
-        dump_problem( M1.elements, M1.n );
-        dump_x( M1.x, M1.n );
+
+        if ( M1.n < 20 ) {
+            printf( "\n solution: \n" );
+            dump_problem( M1.elements, M1.n );
+            dump_x( M1.x, M1.n );
+        }
         check_correctness( M1.orgelements, M1.n, M1.x );
         e = cudaFree(M1.device_elements);
         if( e != cudaSuccess )

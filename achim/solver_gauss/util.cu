@@ -75,7 +75,7 @@ __host__  int check_correctness(  t_ve* p_Ab, unsigned int N, t_ve* p_x ) {
         for ( i = 1; i <= N; i++ ) {
             sum += p_Ab[ a(j,i) ] * p_x[ (i-1) ] ;
         }
-        printf("\n %u %f   b %f", j, sum, p_Ab[ a(j,N+1) ] );
+//        printf("\n %u %f   b %f", j, sum, p_Ab[ a(j,N+1) ] );
         if ( sum != p_Ab[ a(j,N+1) ] ) {
             printf("check not ok");
             exit(-1); /*  needs to be changed to retunr instead of die!!! */

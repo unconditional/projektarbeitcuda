@@ -61,7 +61,28 @@ __host__ void gen_problemsample( t_pmatrix matrix, int id ) {
                        matrix->elements[ a(j,i) ] = 1;
                    }
                    if ( i == j + 1 ) {
-                       matrix->elements[ a(j,i) ] = 10;
+                       matrix->elements[ a(j,i) ] = 2;
+                   }
+               }
+               matrix->elements[ a(j,N+1) ] = j;
+           }
+
+           break;
+        }
+
+        case 4 : {
+           int N = 100;
+           unsigned int j, i;
+           malloc_matrix( N, matrix );
+
+           for ( j = 1; j <= N ; j++ ) {
+               for ( i = 1; i <= N; i++ ) {
+                   matrix->elements[ a(j,i) ] = 0;
+                   if ( i == j ) {
+                       matrix->elements[ a(j,i) ] = 1;
+                   }
+                   if ( i == j + 1 ) {
+                       matrix->elements[ a(j,i) ] = 2;
                    }
                }
                matrix->elements[ a(j,N+1) ] = j;

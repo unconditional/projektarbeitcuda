@@ -15,12 +15,15 @@ __global__ void device_gauss_solver( t_ve* p_Ab, unsigned int N, t_ve* p_x )
 
     unsigned int tidx = threadIdx.y * blockDim.x + threadIdx.x;
     unsigned int n;
-    if ( tidx == 0 ) {
-        i = 1;
-        for  ( n = 0; n <  N * (N+1); n++ ) {
-            Ab[n] = p_Ab[n];
-        }
+
+    t_ve t ;
+
+    if ( tidx  <  N * (N+1) ) {
+         Ab[tidx] = p_Ab[tidx];
     }
+
+    if ( tidx == 0 ) { i = 1; }
+
     __syncthreads();
 
     while ( i <= N ) {                  /* for ( i = 1; i <= N ; i++ ) */
@@ -36,15 +39,18 @@ __global__ void device_gauss_solver( t_ve* p_Ab, unsigned int N, t_ve* p_x )
        __syncthreads();
 
 
-       if ( threadIdx.y == 0 ) {
-           unsigned int k = threadIdx.x + 1;
-           if ( ( k >= i ) && ( k <= N + 1 ) ) {
-               t_ve t         = Ab[ a(i  ,k) ];
+//       if ( threadIdx.y == 0 ) {
+           unsigned int k = tidx + 1;
+         if ( tidx == 0 ) { /* does not work in parallel on device (don't not know why :-/ ) */
+//           if ( ( k >= i ) && ( k <= N + 1 ) ) {
+            for ( k = i; k <= N + 1; k++ ) {
+               t              = Ab[ a(i  ,k) ];
                Ab[ a(i,k)   ] = Ab[ a(max,k) ];
                Ab[ a(max,k) ] = t;
            }
-       }
-       __syncthreads();
+        }
+
+      __syncthreads();
 
       {
           unsigned int j = threadIdx.x + 1;
