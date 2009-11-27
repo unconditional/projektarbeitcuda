@@ -113,51 +113,6 @@ void eleminate ( t_ve* Ab, unsigned int N ) {
 
 
 // -----------------------------------------------------------------------
-void gen_textinput_01( t_pmatrix matrix ) {
-
-// Example from R.Sedgewick, Page 608
-
-   malloc_matrix( 3, matrix );
-
-   matrix->elements[ 0 ]  = 1;
-   matrix->elements[ 1 ]  = 3;
-   matrix->elements[ 2 ]  = -4;
-
-   matrix->elements[ 4 ]  = 1;
-   matrix->elements[ 5 ]  = 1;
-   matrix->elements[ 6 ]  = -2;
-
-   matrix->elements[  8 ]  = -1;
-   matrix->elements[  9 ]  = -2;
-   matrix->elements[ 10 ]  = 5;
-
-   matrix->elements[  3 ]  = 8;
-   matrix->elements[  7 ]  = 2;
-   matrix->elements[ 11 ]  = -1;
-}
-// -----------------------------------------------------------------------
-// -----------------------------------------------------------------------
-void gen_textinput_02( t_pmatrix matrix ) {
-
-// Example from buyu
-
-malloc_matrix( 3, matrix );
-
-matrix->elements[0]=1;
-matrix->elements[1]=2;
-matrix->elements[2]=3;
-matrix->elements[3]=14;
-matrix->elements[4]=1;
-matrix->elements[5]=1;
-matrix->elements[6]=1;
-matrix->elements[7]=6;
-matrix->elements[8]=2;
-matrix->elements[9]=1;
-matrix->elements[10]=1;
-matrix->elements[11]=7;
-
-}
-// -----------------------------------------------------------------------
 
 int main()
 {
@@ -168,8 +123,8 @@ int main()
     dim3 dimBlock(block_size, block_size );
     dim3 dimGrid ( 1 );
 
-    for ( problem = 1; problem < 3; problem++ ) {
-        gen_problemsample( &M1, 2 );
+    for ( problem = 1; problem < 4; problem++ ) {
+        gen_problemsample( &M1, problem );
         printf( "\n \nRunning problem No. %u\n", problem );
         backup_problem( &M1 );
         dump_problem( M1.elements, M1.n );

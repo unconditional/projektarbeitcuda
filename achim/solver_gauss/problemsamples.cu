@@ -47,9 +47,29 @@ __host__ void gen_problemsample( t_pmatrix matrix, int id ) {
            matrix->elements[9]=1;
            matrix->elements[10]=1;
            matrix->elements[11]=7;
+           break;
+        }
+        case 3 : {
+           int N = 9;
+           unsigned int j, i;
+           malloc_matrix( N, matrix );
+
+           for ( j = 1; j <= N ; j++ ) {
+               for ( i = 1; i <= N; i++ ) {
+                   matrix->elements[ a(j,i) ] = 0;
+                   if ( i == j ) {
+                       matrix->elements[ a(j,i) ] = 1;
+                   }
+                   if ( i == j + 1 ) {
+                       matrix->elements[ a(j,i) ] = 10;
+                   }
+               }
+               matrix->elements[ a(j,N+1) ] = j;
+           }
 
            break;
         }
+
        default: {
           printf( "type %u not found", id );
           exit( -1 );
