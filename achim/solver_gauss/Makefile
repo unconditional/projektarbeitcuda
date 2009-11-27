@@ -1,8 +1,8 @@
 CFLAGS = -deviceemu
 CC = nvcc $(CFLAGS)
 
-solver: gauss_plain.o gausskernel.o util.o problemsamples.o
-	$(CC)  -o gauss_plain gauss_plain.o gausskernel.o util.o problemsamples.o  > nul
+solver: gauss_plain.o gausskernel.o util.o problemsamples.o idrs.o
+	$(CC)  -o gauss_plain gauss_plain.o gausskernel.o util.o problemsamples.o idrs.o > nul
 
 gauss_plain.o: gauss_plain.cu util.h
 	$(CC)  -c gauss_plain.cu -o gauss_plain.o  > nul
@@ -18,3 +18,6 @@ util.o: util.cu util.h
 
 problemsamples.o: problemsamples.cu
 	$(CC) -c problemsamples.cu -o problemsamples.o  > nul
+
+idrs.o: idrs.cu idrs.h
+	$(CC) -c idrs.cu -o idrs.o

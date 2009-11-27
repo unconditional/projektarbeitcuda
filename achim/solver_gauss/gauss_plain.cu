@@ -7,7 +7,7 @@
 #include "gausskernel.h"
 #include "util.h"
 #include "problemsamples.h"
-
+#include "idrs.h"
 #define NMAX 22
 
 
