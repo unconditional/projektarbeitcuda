@@ -14,9 +14,9 @@ __host__  void dump_problem( t_ve* p_Ab, unsigned int N  ) {
     for ( j = 1; j <= N; j++ ) {
         printf( "\n  %u. ", j );
         for ( i = 1; i <= N; i++ ) {
-            printf( " %f", p_Ab[ a(j,i) ] );
+            printf( " %f", p_Ab[ ab(j,i) ] );
         }
-        printf( " \t b %f", p_Ab[ a(j,i) ] );
+        printf( " \t b %f", p_Ab[ ab(j,i) ] );
    }
 }
 /* ---------------------------------------------------- */
@@ -73,12 +73,12 @@ __host__  int check_correctness(  t_ve* p_Ab, unsigned int N, t_ve* p_x ) {
     for ( j = 1; j <= N; j++ ) {
         t_ve sum = 0;
         for ( i = 1; i <= N; i++ ) {
-            sum += p_Ab[ a(j,i) ] * p_x[ (i-1) ] ;
+            sum += p_Ab[ ab(j,i) ] * p_x[ (i-1) ] ;
         }
-//        printf("\n %u %f   b %f", j, sum, p_Ab[ a(j,N+1) ] );
-        if ( sum != p_Ab[ a(j,N+1) ] ) {
-            printf("check not ok");
-            exit(-1); /*  needs to be changed to retunr instead of die!!! */
+        printf("\n %u %f   b %f", j, sum, p_Ab[ ab(j,N+1) ] );
+        if ( sum != p_Ab[ ab(j,N+1) ] ) {
+            printf("check not ok, sum %f   b %f", p_x[ (i-1) ], sum  );
+            //exit(-1); /*  needs to be changed to retunr instead of die!!! */
         }
     }
    return GAUSS_SOLVE_OK;

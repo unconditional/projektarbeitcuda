@@ -8,7 +8,7 @@
 #include "util.h"
 #include "problemsamples.h"
 #include "idrs.h"
-#define NMAX 22
+
 
 
 
@@ -90,20 +90,20 @@ void eleminate ( t_ve* Ab, unsigned int N ) {
 
        max = i;
        for( j = i + 1; j <= N; j++ ) {
-           if ( abs( Ab[ a(j,i) ] ) > abs( Ab[ a(max,i) ] )  ) {
+           if ( abs( Ab[ ab(j,i) ] ) > abs( Ab[ ab(max,i) ] )  ) {
               max = j;
            }
        }
 
        for ( k = i; k <= N + 1; k++ ) {
-          t              = Ab[ a(i,k) ];
-          Ab[ a(i,k)   ] = Ab[ a(max,k) ];
-          Ab[ a(max,k) ] = t;
+          t              = Ab[ ab(i,k) ];
+          Ab[ ab(i,k)   ] = Ab[ ab(max,k) ];
+          Ab[ ab(max,k) ] = t;
        }
 
        for ( j = i +1; j <= N ; j++ ) {
           for ( k = N + 1; k >= i ; k-- ) {
-             Ab[ a(j,k) ] -= Ab[ a(i,k) ] * Ab[ a(j,i) ] /  Ab[ a(i,i) ];
+             Ab[ ab(j,k) ] -= Ab[ ab(i,k) ] * Ab[ ab(j,i) ] /  Ab[ ab(i,i) ];
           }
        }
     }
@@ -119,8 +119,8 @@ int main()
     unsigned int problem;
     cudaError_t e;
 
-    int block_size = NMAX;
-    dim3 dimBlock( block_size, block_size );
+//    int block_size = NMAX;
+    dim3 dimBlock( GAUSS_NMAX * ( GAUSS_NMAX + 1 ));
     dim3 dimGrid ( 1 );
 
     for ( problem = 1; problem < 5; problem++ ) {
@@ -132,7 +132,7 @@ int main()
         }
         push_problem_to_device( &M1 );
 
-        if ( M1.n <= block_size ) {
+        if ( M1.n  <= GAUSS_NMAX ) {
         device_gauss_solver<<<dimGrid,dimBlock>>>( M1.device_elements, M1.n, M1.device_x );
 
         e = cudaGetLastError();
@@ -142,7 +142,7 @@ int main()
             exit(-3);
         }
 
-        }
+
 
         pull_problem_from_device( &M1 );
 
@@ -153,6 +153,7 @@ int main()
             dump_x( M1.x, M1.n );
         }
         check_correctness( M1.orgelements, M1.n, M1.x );
+        }
         e = cudaFree(M1.device_elements);
         if( e != cudaSuccess )
         {

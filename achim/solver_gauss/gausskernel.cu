@@ -10,10 +10,10 @@ __global__ void device_gauss_solver( t_ve* p_Ab, unsigned int N, t_ve* p_x )
     __shared__ unsigned int i;
     __shared__ unsigned int max;
 
-    __shared__ t_ve Ab[ GAUSSNMAX * ( GAUSSNMAX + 1) ];
-     t_ve x[ GAUSSNMAX ];
+    __shared__ t_ve Ab[ GAUSS_NMAX * ( GAUSS_NMAX + 1) ];
+    __shared__ t_ve x[ GAUSS_NMAX ];
 
-    unsigned int tidx = threadIdx.y * blockDim.x + threadIdx.x;
+    unsigned int tidx =  threadIdx.x;
     unsigned int n;
 
     t_ve t ;
@@ -31,7 +31,7 @@ __global__ void device_gauss_solver( t_ve* p_Ab, unsigned int N, t_ve* p_x )
             unsigned int j;
             max = i;
             for( j = i + 1; j <= N; j++ ) {
-                if ( abs( Ab[ a(j,i) ] ) > abs( Ab[ a(max,i) ] )  ) {
+                if ( abs( Ab[ ab(j,i) ] ) > abs( Ab[ ab(max,i) ] )  ) {
                     max = j;
                 }
             }
@@ -44,9 +44,9 @@ __global__ void device_gauss_solver( t_ve* p_Ab, unsigned int N, t_ve* p_x )
          if ( tidx == 0 ) { /* does not work in parallel on device (don't not know why :-/ ) */
 //           if ( ( k >= i ) && ( k <= N + 1 ) ) {
             for ( k = i; k <= N + 1; k++ ) {
-               t              = Ab[ a(i  ,k) ];
-               Ab[ a(i,k)   ] = Ab[ a(max,k) ];
-               Ab[ a(max,k) ] = t;
+               t              = Ab[ ab(i  ,k) ];
+               Ab[ ab(i,k)   ] = Ab[ ab(max,k) ];
+               Ab[ ab(max,k) ] = t;
            }
         }
 
@@ -57,7 +57,7 @@ __global__ void device_gauss_solver( t_ve* p_Ab, unsigned int N, t_ve* p_x )
           if (  ( j >= i +1 ) && ( j <= N ) && threadIdx.y == 0 ) {       /*   for ( j = i +1; j <= N ; j++ ) */
               unsigned int  k ;
               for ( k = N + 1; k >= i ; k-- ) {
-                 Ab[ a(j,k) ] -= Ab[ a(i,k) ] * Ab[ a(j,i) ] /  Ab[ a(i, i) ];
+                 Ab[ ab(j,k) ] -= Ab[ ab(i,k) ] * Ab[ ab(j,i) ] /  Ab[ ab(i, i) ];
               }
            }
        }
@@ -73,18 +73,23 @@ __global__ void device_gauss_solver( t_ve* p_Ab, unsigned int N, t_ve* p_x )
         for (j = N; j >= 1; j-- ) {
             t_ve t = 0.0;
             for ( k = j + 1; k <= N; k++ ) {
-                    t +=  Ab[ a(j,k) ] * x[ k - 1 ];
+                    t +=  Ab[ ab(j,k) ] * x[ k - 1 ];
             }
-            x[ j - 1 ] = ( Ab[ a(j,N+1) ] - t ) / Ab[ a(j,j) ] ;
+            x[ j - 1 ] = ( Ab[ ab(j,N+1) ] - t ) / Ab[ ab(j,j) ] ;
         }
         /* copy result back to global memory */
 
         for  ( n = 0; n <  N * (N+1); n++ ) {
             p_Ab[n] = Ab[n];
         }
-        for  ( n = 0; n < N; n++ ) {
-            p_x[n] = x[n];
-        }
+//        for  ( n = 0; n < N; n++ ) {
+//            p_x[n] = x[n];
+//        }
     }
+    __syncthreads();
+    if ( threadIdx.x < N ) {
+       p_x[threadIdx.x] = x[threadIdx.x];
+    }
+
    __syncthreads();
 }
