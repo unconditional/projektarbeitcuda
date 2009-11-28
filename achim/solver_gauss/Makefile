@@ -20,4 +20,4 @@ problemsamples.o: problemsamples.cu
 	$(CC) -c problemsamples.cu -o problemsamples.o  > nul
 
 idrs.o: idrs.cu idrs.h
-	$(CC) -c idrs.cu -o idrs.o
+	$(CC) -c idrs.cu -o idrs.o > nul
