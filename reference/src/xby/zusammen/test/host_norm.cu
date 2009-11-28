@@ -8,7 +8,7 @@ double *data1, *data2;
 float *data1f, *data2f;
 float *data1f_gpu, *data2f_gpu;
 int sizeBlock;
-sizeBlock = 16;
+sizeBlock = VECTOR_BLOCK_SIZE;
 data1 = pIn;
 data2 = pOut;
 
@@ -84,13 +84,18 @@ int test_norm()
     double *pIn, *pOut;
     int sizeIn, sizeOut;
     int i;
-    sizeIn = 2;
-    sizeOut = 1;
+    sizeIn = 10000;
+    sizeOut = sizeIn/VECTOR_BLOCK_SIZE;
     pIn = (double*)malloc(sizeof(double)*sizeIn);
     pOut = (double*)malloc(sizeof(double)*sizeOut);
-    pIn[0] = 3;
+    /*
+	pIn[0] = 3;
     pIn[1] = 4;
     //pIn[2] = 3;
+	*/
+	for (i = 0; i < sizeIn; i++){
+		pIn[i] = 1;
+	}
     host_norm(pIn, pOut, sizeIn, sizeOut);
 	
     printf("output square result");

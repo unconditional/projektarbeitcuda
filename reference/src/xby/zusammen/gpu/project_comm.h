@@ -6,8 +6,8 @@
 #define CHECK_BANK_CONFLICTS 0
 #if CHECK_BANK_CONFLICTS
 //?????????????????????????
-#define AS(i,j) cutilBankChecker(((float*)&As[0]), (VECTOR_BLOCK_SIZE * i + j))
-#define BS(i,j) cutilBankChecker(((float*)&Bs[0]), (VECTOR_BLOCK_SIZE * i + j))
+#define AS(i) cutilBankChecker(((float*)&As[0]), (VECTOR_BLOCK_SIZE * i + j))
+#define BS(i) cutilBankChecker(((float*)&Bs[0]), (VECTOR_BLOCK_SIZE * i + j))
 
 
 
@@ -16,6 +16,6 @@
 #define BS(i) Bs[i]
 #endif
 
-typedef VECTOR_BLOCK_SIZE 20
+#define VECTOR_BLOCK_SIZE 512
 
 #endif //?PROJECT_COMM_H__
