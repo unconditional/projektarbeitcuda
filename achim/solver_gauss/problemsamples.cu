@@ -50,7 +50,7 @@ __host__ void gen_problemsample( t_pmatrix matrix, int id ) {
            break;
         }
         case 3 : {
-           int N = 9;
+           int N = 19;
            unsigned int j, i;
            malloc_matrix( N, matrix );
 

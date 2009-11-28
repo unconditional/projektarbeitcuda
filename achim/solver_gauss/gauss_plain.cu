@@ -127,7 +127,7 @@ int main()
         gen_problemsample( &M1, problem );
         printf( "\n \nRunning problem No. %u , size %u\n", problem, M1.n );
         backup_problem( &M1 );
-        if ( M1.n < 20 ) {
+        if ( M1.n < 9 ) {
             dump_problem( M1.elements, M1.n );
         }
         push_problem_to_device( &M1 );
@@ -147,7 +147,7 @@ int main()
         pull_problem_from_device( &M1 );
 
 
-        if ( M1.n < 20 ) {
+        if ( M1.n < 9 ) {
             printf( "\n solution: \n" );
             dump_problem( M1.elements, M1.n );
             dump_x( M1.x, M1.n );
