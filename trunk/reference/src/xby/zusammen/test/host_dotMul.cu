@@ -33,7 +33,7 @@ double *data_in1_d, *data_in2_d, *data_out_d;
 float *data_in1_f, *data_in2_f, *data_out_f;
 float *data_in1_f_gpu, *data_in2_f_gpu , *data_out_f_gpu;
 int sizeBlock;
-sizeBlock = 16;
+sizeBlock = VECTOR_BLOCK_SIZE;
 
 // get Input data pointer
 data_in1_d = pIn1;
@@ -79,7 +79,8 @@ cudaMemcpy( data_in2_f_gpu, data_in2_f, sizeof(t_ve)*sizeIn, cudaMemcpyHostToDev
 
 // Compute execution configuration using 128 threads per block 
 dim3 dimBlock(sizeBlock);
-dim3 dimGrid((sizeIn)/dimBlock.x);
+//dim3 dimGrid((sizeIn)/dimBlock.x);
+dim3 dimGrid(3);
 if ( (sizeIn) % sizeBlock !=0 ) dimGrid.x+=1;
     
 //Call function on GPU 
@@ -122,17 +123,23 @@ int test_dotMul()
     double *pIn1, *pIn2,*pOut;
     int sizeIn, sizeOut;
     int i;
-    sizeIn = 3;
-    sizeOut = 1;
+    sizeIn = 1000;
+    sizeOut =3;
     pIn1 = (double*)malloc(sizeof(double)*sizeIn);
     pIn2 = (double*)malloc(sizeof(double)*sizeIn);
     pOut = (double*)malloc(sizeof(double)*sizeOut);
-    pIn1[0] = 1;
+    for (i = 0; i < sizeIn; i++){
+		pIn1[i] = 2;
+		pIn2[i] = 2;
+	}
+	/*
+	pIn1[0] = 1;
     pIn1[1] = 2;
     pIn1[2] = 3;
     pIn2[0] = 1;
     pIn2[1] = 2;
     pIn2[2] = 3;
+	*/
     host_dotMul(pIn1, pIn2, pOut, sizeIn, sizeOut);
 	
 	printf("output square result");
@@ -141,6 +148,8 @@ int test_dotMul()
         printf(" pOut[%d] = %lf, ", i, pOut[i]);
     }
         printf("\n");
+		
+	/*
 	printf("output norm result");
     for (i = 0; i < sizeOut; i++)
     {
@@ -149,7 +158,7 @@ int test_dotMul()
     }
         printf("\n");
     
-   
+   */
     free(pIn1);
     free(pIn2);
     free(pOut);

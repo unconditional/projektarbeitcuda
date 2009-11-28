@@ -10,7 +10,7 @@ UnitTestMain
 
 int main()
 {
-     test_dotMul();
+     //test_dotMul();
 	 test_norm();
 	 return 1;
 }

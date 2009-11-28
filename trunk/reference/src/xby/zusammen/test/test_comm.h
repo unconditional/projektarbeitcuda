@@ -6,13 +6,18 @@
 
 #define COMMPATH "..\\gpu\\projektcuda.h"
 #define COMMHEAD COMMPATH 
-#include COMMHEAD
 
-#define FUNCTIONPATH1 "..\\gpu\\dotMul_cuda_gpu.cu"
+
+#include "..\\gpu\\projektcuda.h"
+#include "..\\gpu\\project_comm.h"
+
+
+
+#define FUNCTIONPATH1 "..\\gpu\\dotMul_cuda_gpu02.cu"
 
 #include FUNCTIONPATH1
 
-#define FUNCTIONPATH2 "..\\gpu\\norm_cuda_gpu.cu"
+#define FUNCTIONPATH2 "..\\gpu\\norm_cuda_gpu02.cu"
 
 #include FUNCTIONPATH2
 
