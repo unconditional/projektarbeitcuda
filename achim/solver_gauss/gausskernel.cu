@@ -79,17 +79,19 @@ __global__ void device_gauss_solver( t_ve* p_Ab, unsigned int N, t_ve* p_x )
         }
         /* copy result back to global memory */
 
-        for  ( n = 0; n <  N * (N+1); n++ ) {
-            p_Ab[n] = Ab[n];
-        }
+//        for  ( n = 0; n <  N * (N+1); n++ ) {
+//            p_Ab[n] = Ab[n];
+//        }
 //        for  ( n = 0; n < N; n++ ) {
 //            p_x[n] = x[n];
 //        }
     }
     __syncthreads();
     if ( threadIdx.x < N ) {
-       p_x[threadIdx.x] = x[threadIdx.x];
+        p_x[threadIdx.x] = x[threadIdx.x];
     }
-
+    if ( threadIdx.x < N * (N+1) ) {
+        p_Ab[threadIdx.x] = Ab[threadIdx.x];
+    }
    __syncthreads();
 }
