@@ -6,7 +6,7 @@
 
 #include "idrs.h"
 
-#define N_PROBLEM 20000
+#define N_PROBLEM 10000
 
 
 __host__ void malloc_NN( unsigned int size_n, t_ve** M ) {
@@ -47,6 +47,8 @@ int main()
 
        malloc_NN( N_PROBLEM , &A );
        malloc_N( N_PROBLEM  , &b );
+       malloc_N( N_PROBLEM  , &x0 );
+       malloc_N( N_PROBLEM  , &x );
 
        unsigned int N  =  N_PROBLEM;
 
