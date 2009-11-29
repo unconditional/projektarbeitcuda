@@ -7,23 +7,25 @@
 #endif
 //typedef NULL 0;
 typedef float t_ve;
+typedef unsigned int mwSize;
+typedef int mwIndex;
 
 typedef struct DataTable{
        float * pBody; 
        struct DataTable * pHead;
        struct DataTable * pTail;
-}mDataTable;
+} aDataTable;
 
-void freeDataTable(struct DataTable * pTable){
+void freeDataTable( aDataTable * pTable){
      pTable->pTail = NULL;
      pTable->pHead = NULL;
      free(pTable->pBody);
      free(pTable);
 }
 
-void freeTable(struct DataTable * pTable){
-     mDataTable * pData;
-     mDataTable * pData1=0;
+void freeTable( aDataTable * pTable){
+     aDataTable * pData;
+     aDataTable * pData1=0;
      pData = NULL;
      if(pTable->pTail != NULL){
         pData = pTable->pTail;
@@ -41,12 +43,12 @@ void freeTable(struct DataTable * pTable){
      }
 }
 
-typedef struct {
-    unsigned int m = 0;
-    unsigned int n = 0;
-    t_ve* pElement = 0;
-
+typedef struct Matrix{
+    unsigned int m;
+    unsigned int n;
+    t_ve* pElement;
 } t_Matix;
+
 void initElement(t_Matix * pMatrix)
 {
     int i;
@@ -57,8 +59,9 @@ void initElement(t_Matix * pMatrix)
 }
 void setElement(t_Matix * pMatrix, unsigned int row, unsigned int col, float val)
 {
-    if((row < pMatrix->m)&&(col < pMatrix->n){
-        pMatrix->pElement[(row-1)*(pMatrix->n) + col -1] = val;
+    if((row < pMatrix->m)&&(col < pMatrix->n)){
+        //printf("row=%d,col=%d,val=%lf,\n",row,col, val);
+        pMatrix->pElement[(row)*(pMatrix->n) + col ] = val;
     }
 }
 /* Gateway function */
@@ -74,7 +77,8 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     double percent_sparse;
     
      double *pMatrix;
-     t_Matix *pFullMatrix = (t_Matix)malloc(sizeof(t_Matix));
+     t_Matix fullMatrix;
+     t_Matix *pFullMatrix = &fullMatrix;
      t_ve * pIn;       
     /* Get the size and pointers to input data */
     m  = mxGetM(prhs[0]);
@@ -86,13 +90,18 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     nzmax = mxGetNzmax(prhs[0]);
     pFullMatrix->m = m;
     pFullMatrix->n = n;
-    
+    printf("m=%d,n=%d,nzmax=%d, \n",m,n,nzmax);
     cmplx = (pi==NULL ? 0 : 1);
 
     
     /* Allocate space for sparse matrix 
      * NOTE:  Assume at most 20% of the data is sparse.  Use ceil
      * to cause it to round up. 
+     *
+     *
+     *
+     *Nonzero elements
+     *if(jc[i]!=jc[i+1]) for(int k = jc[i]; k<jc[i+1]; k++)A[ir[k][i]=pr[k]+pi[k]
      */
     /*
     percent_sparse = 0.2;
@@ -132,21 +141,26 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     
             printf("jc[%d]=%d \n",k,jc[k]);
         }
-        /*
+       
          //setElement(pFullMatrix,)
         for(i = 0; i < n; i++){
             if(jc[i]!=jc[i+1])
-            for( k = jc[i] ; k < jc[i+1] ; i++){
-                setElement(pFullMatrix,ir[k],i,pr[k]);
+            for( k = jc[i] ; k < jc[i+1] ; k++){
+                setElement(pFullMatrix,ir[k],i,(t_ve)pr[k]);
             }
         }
-        */
+        printf("printf full matrix \n");
+        for(i=0; i < m; i++){     
+            for(k=0;k<n;++k)printf("%f,k=%d ",pIn[i*n+k],k);
+            printf("%f \n");
+        }
+        /*
         for(k=0; k < m*n; k++){
-           
             pIn[k] = (t_ve)pr[k];
             printf("%f \n",pIn[k]);
         }
+         **/
         mxFree(pIn);
-        free(pFullMatrix);
+        //free(pFullMatrix);
    
 }
