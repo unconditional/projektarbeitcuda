@@ -23,26 +23,27 @@ __host__ void malloc_NN( unsigned int size_n, t_ve** M ) {
 
 __host__ void malloc_N( unsigned int size_n, t_ve** M ) {
 
-    *M =  (t_ve*) malloc( sizeof(t_ve) * size_n  );
-    if ( *M == NULL) {
+    t_ve* v =  (t_ve*) malloc( sizeof(t_ve) * size_n  );
+    if ( v == NULL) {
 	       fprintf(stderr, "sorry, can not allocate memory for you");
 	       exit( -1 );
     }
+    *M = v;
 
 }
 
 int main()
 {
 
-	   t_ve* A = NULL; /* the problem */
-	   t_ve* b = NULL; /* the problems right side */
-       t_ve* s = NULL;
+	   t_ve* A ; /* the problem */
+	   t_ve* b ; /* the problems right side */
 
 
-       t_ve* x0 = NULL;
 
-       t_ve* x = NULL;  /* output vector */
-       t_ve* resvec = NULL;
+       t_ve* x0 ;
+
+       t_ve* x ;  /* output vector */
+       t_ve* resvec ;
        unsigned int iter;
 
        malloc_NN( N_PROBLEM , &A );
@@ -70,9 +71,9 @@ int main()
    idrs(
                       A ,
                       b ,
-                      s ,
-                     0.1, /* tol */
-                     50,  /* masit  */
+                     20 ,  /* s iterations */
+                     0.1,  /* tol          */
+                     50,   /* masit        */
                      x0,
 
                      N_PROBLEM,

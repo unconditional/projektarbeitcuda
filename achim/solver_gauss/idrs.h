@@ -3,7 +3,7 @@
 __host__ void idrs(
                      t_ve* A,
                      t_ve* b,
-                     t_ve* s,
+                     unsigned int s,
                      t_ve  tol,
                      unsigned int maxit,
                      t_ve* x0,

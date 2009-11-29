@@ -23,10 +23,40 @@ __host__ void push_vector_2_device( t_ve* V,  t_ve** pV_d, unsigned int L ) {
     }
 }
 
+__host__ void malloc_vector_on_device(  t_ve** pV_d, unsigned int L ) {
+	cudaError_t e;
+
+    e = cudaMalloc ((void **) pV_d, sizeof(t_ve) * L );
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on cudaMalloc: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
+/*
+    cudaMemset ( *pV_d, 0, 1 );
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on memset 0: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
+*/
+}
+
+__host__ void set_zero_on_device(  void* V_d, unsigned int L ) {
+	cudaError_t e;
+    cudaMemset ( V_d, 0, 1 );
+    if( e != cudaSuccess )
+    {
+        fprintf(stderr, "CUDA Error on memset 0: '%s' \n", cudaGetErrorString(e));
+        exit(-3);
+    }
+}
+
+
 __host__ void idrs(
                      t_ve* A_h,
                      t_ve* b_h,
-                     t_ve* s_h,
+                     unsigned int s,
                      t_ve  tol,
                      unsigned int maxit,
                      t_ve* x0_h,
@@ -43,11 +73,23 @@ __host__ void idrs(
    t_ve* b;
    t_ve* x;
 
+   t_ve* dR;
+   t_ve* dX;
+
    printf("\n empty IDRS, malloc \n");
 
    push_vector_2_device( A_h, &A, N * N );
    push_vector_2_device( b_h, &b, N );
    push_vector_2_device( x_h, &x, N );
+
+   /* m20:  dR = zeros(N,s); dX = zeros(N,s); */
+   malloc_vector_on_device( &dR, N * s );
+   malloc_vector_on_device( &dX, N * s );
+
+ //  cudaMemset ( dR, 0, N *  );
+   //set_zero_on_device(  dR, N * s );
+
+  // malloc_vector_on_device( &dX, N * s );
 
 }
 
