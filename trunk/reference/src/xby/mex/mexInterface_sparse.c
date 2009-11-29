@@ -132,23 +132,22 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
         pIn = (t_ve*)mxMalloc(sizeof(t_ve)*m*n);
         pFullMatrix->pElement = pIn;
         initElement(pFullMatrix);
-        
+        /*
         for(k=0; k < nzmax; k++){
             printf("ir[%d]=%d \n",k,ir[k]);
-
         }
-        for(k=0; k < n+1; k++){
-    
+        for(k=0; k < n+1; k++){    
             printf("jc[%d]=%d \n",k,jc[k]);
         }
-       
-         //setElement(pFullMatrix,)
+       */
+        //convert sparse Matrix into fullmatrix in C
         for(i = 0; i < n; i++){
             if(jc[i]!=jc[i+1])
             for( k = jc[i] ; k < jc[i+1] ; k++){
                 setElement(pFullMatrix,ir[k],i,(t_ve)pr[k]);
             }
         }
+        //print out
         printf("printf full matrix \n");
         for(i=0; i < m; i++){     
             for(k=0;k<n;++k)printf("%f,k=%d ",pIn[i*n+k],k);
