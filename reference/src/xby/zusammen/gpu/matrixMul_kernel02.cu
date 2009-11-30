@@ -60,7 +60,7 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 			if(threadIdx.x==0){
 				
 				
-				//30.Nov.2009 add for Cs
+				//30.Nov.2009 fixeded for Cs summe
 				int kEnd = bEnd-b;
 				if(kEnd > VECTOR_BLOCK_SIZE)kEnd = VECTOR_BLOCK_SIZE;
 				//Because I add Cs[0...k], if blockSize and Matrix does not fit, Parts of Cs[k] are not initialized as 0.  
