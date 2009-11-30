@@ -69,6 +69,7 @@ __host__ void idrs(
 
    t_ve* dR;
    t_ve* dX;
+   t_ve* r;
 
    printf("\n empty IDRS, malloc \n");
 
@@ -79,6 +80,15 @@ __host__ void idrs(
    /* m20:  dR = zeros(N,s); dX = zeros(N,s); */
    malloc_vector_on_device( &dR, N * s );
    malloc_vector_on_device( &dX, N * s );
+   malloc_vector_on_device( &r , N  );
+
+
+
+   for ( int k = 1; k < s; k ++ )
+   {
+	    /*  v = A*r;   */
+	   printf("\n %u this loop is currently not implemented");
+   }
 
 }
 
