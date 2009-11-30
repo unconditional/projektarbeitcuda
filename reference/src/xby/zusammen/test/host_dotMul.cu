@@ -1,30 +1,5 @@
 #include "test_comm.h"
 
-/*
-__global__ void device_dotMul(t_ve* in1, t_ve* in2,t_ve* out, unsigned int N)
-{
- 
-	__shared__ float vOut[16];
-	int idx = blockIdx.x*blockDim.x+threadIdx.x;
-
-	if ( idx < N)vOut[idx] = in1[idx]*in2[idx];
-
-	__syncthreads();
-
-	if(idx == 0) {
-		out[0] = 0;
-		int i;
-		for ( i = 0; i < N; i++ ) {
-			out[0] += vOut[i];
-		}
-	}
-
-	__syncthreads();
-
-}
-*/
-
-
 void host_dotMul(double* pIn1, double* pIn2,double *pOut, int sizeIn, int sizeOut)
 {
 
@@ -123,14 +98,14 @@ int test_dotMul()
     double *pIn1, *pIn2,*pOut;
     int sizeIn, sizeOut;
     int i;
-    sizeIn = 1000;
+    sizeIn = 3;
     sizeOut =3;
     pIn1 = (double*)malloc(sizeof(double)*sizeIn);
     pIn2 = (double*)malloc(sizeof(double)*sizeIn);
     pOut = (double*)malloc(sizeof(double)*sizeOut);
     for (i = 0; i < sizeIn; i++){
-		pIn1[i] = 2;
-		pIn2[i] = 2;
+		pIn1[i] = 1;
+		pIn2[i] = 1;
 	}
 	/*
 	pIn1[0] = 1;
