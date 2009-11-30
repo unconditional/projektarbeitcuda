@@ -131,7 +131,7 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
         //pMatrix = mxGetPr(prhs[i]); 
         pIn = (t_ve*)mxMalloc(sizeof(t_ve)*m*n);
         pFullMatrix->pElement = pIn;
-        initElement(pFullMatrix);
+        initElement(pFullMatrix);      
         /*
         for(k=0; k < nzmax; k++){
             printf("ir[%d]=%d \n",k,ir[k]);
@@ -150,8 +150,8 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
         //print out
         printf("printf full matrix \n");
         for(i=0; i < m; i++){     
-            for(k=0;k<n;++k)printf("%f,k=%d ",pIn[i*n+k],k);
-            printf("%f \n");
+            for(k=0;k<n;++k)printf("%f, ",pIn[i*n+k]);
+            printf("\n");
         }
         /*
         for(k=0; k < m*n; k++){
