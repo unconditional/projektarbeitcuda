@@ -71,7 +71,9 @@ __host__ void idrs(
    t_ve* dR;
    t_ve* dX;
    t_ve* r;
+   t_ve* v;
    t_ve*  om1;
+   t_ve*  om2;
 
    int block_size = 512;
 
@@ -88,7 +90,9 @@ __host__ void idrs(
    malloc_vector_on_device( &dR, N * s );
    malloc_vector_on_device( &dX, N * s );
    malloc_vector_on_device( &r , N  );
+   malloc_vector_on_device( &v , N  );
    malloc_vector_on_device( &om1, N / block_size );
+   malloc_vector_on_device( &om2, N / block_size );
 
 
    for ( int k = 1; k < s; k ++ )
@@ -97,7 +101,8 @@ __host__ void idrs(
 	   printf("\n %u this loop is currently not implemented");
 
 
-	   device_dotMul<<<dimGrid,dimBlock>>>( r, r, om1, N );
+	   device_dotMul<<<dimGrid,dimBlock>>>( v, r, om1, N );
+	   device_dotMul<<<dimGrid,dimBlock>>>( v, v, om2, N );
 
    }
 
