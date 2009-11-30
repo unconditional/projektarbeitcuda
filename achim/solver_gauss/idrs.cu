@@ -5,6 +5,7 @@
 
 #include "projektcuda.h"
 #include "idrs.h"
+#include "dotMul_cuda_gpu.h"
 
 __host__ void push_vector_2_device( t_ve* V,  t_ve** pV_d, unsigned int L ) {
 	cudaError_t e;
@@ -70,6 +71,12 @@ __host__ void idrs(
    t_ve* dR;
    t_ve* dX;
    t_ve* r;
+   t_ve*  om1;
+
+   int block_size = 512;
+
+   dim3 dimBlock(block_size);
+   dim3 dimGrid ( N / block_size );
 
    printf("\n empty IDRS, malloc \n");
 
@@ -81,13 +88,17 @@ __host__ void idrs(
    malloc_vector_on_device( &dR, N * s );
    malloc_vector_on_device( &dX, N * s );
    malloc_vector_on_device( &r , N  );
-
+   malloc_vector_on_device( &om1, N / block_size );
 
 
    for ( int k = 1; k < s; k ++ )
    {
 	    /*  v = A*r;   */
 	   printf("\n %u this loop is currently not implemented");
+
+
+	   device_dotMul<<<dimGrid,dimBlock>>>( r, r, om1, N );
+
    }
 
 }

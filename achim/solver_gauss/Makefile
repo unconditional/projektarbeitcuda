@@ -10,8 +10,8 @@ gauss_plain.o: gauss_plain.cu util.h projektcuda.h
 # redirect to nul for tweaking nmake :-/
 # see <http://forums.nvidia.com/index.php?showtopic=56803>
 
-idrsdriver: idrsdriver.o idrs.o
-	$(CC) -o idrsdriver idrsdriver.o idrs.o > nul
+idrsdriver: idrsdriver.o idrs.o dotMul_cuda_gpu02.o
+	$(CC) -o idrsdriver idrsdriver.o idrs.o dotMul_cuda_gpu02.o > nul
 
 idrsdriver.o: idrs_driver.cu idrs.o
 	$(CC) -o idrsdriver.o  -c idrs_driver.cu > nul
@@ -27,3 +27,6 @@ problemsamples.o: problemsamples.cu projektcuda.h
 
 idrs.o: idrs.cu idrs.h projektcuda.h
 	$(CC) -c idrs.cu -o idrs.o > nul
+
+dotMul_cuda_gpu02.o: dotMul_cuda_gpu02.cu 
+	$(CC) -c dotMul_cuda_gpu02.cu -o dotMul_cuda_gpu02.o > nul
