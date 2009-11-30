@@ -28,5 +28,5 @@ problemsamples.o: problemsamples.cu projektcuda.h
 idrs.o: idrs.cu idrs.h projektcuda.h
 	$(CC) -c idrs.cu -o idrs.o > nul
 
-dotMul_cuda_gpu02.o: dotMul_cuda_gpu02.cu 
+dotMul_cuda_gpu02.o: dotMul_cuda_gpu02.cu projektcuda.h 
 	$(CC) -c dotMul_cuda_gpu02.cu -o dotMul_cuda_gpu02.o > nul
