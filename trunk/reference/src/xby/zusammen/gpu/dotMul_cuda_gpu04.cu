@@ -22,10 +22,6 @@ __global__ void device_dotMul(t_ve* in1, t_ve* in2,t_ve* out, unsigned int N)
 {
 	int idx = blockIdx.x*blockDim.x+threadIdx.x;
 	if(idx > N) return;
-	
-	if(threadIdx.x == 0)out[blockIdx.x] = 0;
-	__syncthreads();
-	
    //block index
    int blockRow = blockIdx.x;
    // thread index
@@ -37,9 +33,7 @@ __global__ void device_dotMul(t_ve* in1, t_ve* in2,t_ve* out, unsigned int N)
    int aEnd = N;
    
    int aStep = VECTOR_BLOCK_SIZE;
-   //
-   
-   
+
    // comupted by the thread
    t_ve outValue = 0;
   
@@ -59,38 +53,35 @@ __global__ void device_dotMul(t_ve* in1, t_ve* in2,t_ve* out, unsigned int N)
         // one element of each matrix
         AS(row) = in1[aBegin + row];
         BS(row) = in2[aBegin + row];
-
         // Synchronize to make sure the matrices are loaded
-        __syncthreads();    
+        __syncthreads();    	
 		
-		Cs[row] = AS(row) * BS(row);
-        
-		/*
-        // Multiply the two matrices together;
-        // each thread computes one element
-        // of the block sub-matrix
-		*/
+		Cs[row] = AS(row) * BS(row);   
+		//Cs[row] = in1[aBegin + row] *in2[aBegin + row];   
+		
         // Synchronize to make sure that the preceding
         // computation is done before loading two new
         // sub-matrices of A and B in the next iteration
-        __syncthreads();  
+        
+		__syncthreads();  
+		if(threadIdx.x == 0)out[blockIdx.x] = 0;
+		__syncthreads();
 		
 		// computing summe in one thread for one Loop 
-		if (row == 0) {		
-            //for (int k = 0; (k < VECTOR_BLOCK_SIZE)&&(idx < N); k++)
-			//out[blockIdx.x] += Cs[k];
-			
+		if (threadIdx.x == 0) {			
 			for (int k = 1; (k < VECTOR_BLOCK_SIZE)&&(idx < N); k++){
                  Cs[0]+= Cs[k];
-            }
-            //outValue += Cs[0]
+				 //out[k]= Cs[k];
+            }   
 			out[blockIdx.x] = Cs[0];
 		}
 		__syncthreads();
    //__syncthreads();   
+   
+   /*
    if(idx==0){
 		for(int k = 1; k <= gridDim.x; k++)out[0] += out[k];
    }
-   
+   */
 }
 
