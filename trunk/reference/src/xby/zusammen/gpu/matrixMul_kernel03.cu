@@ -55,8 +55,6 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 			Cs[threadIdx.x] = 0;
 			__syncthreads();
 			// compute scalar product
-			//int kEnd = bEnd-b;
-			//if(kEnd > VECTOR_BLOCK_SIZE)kEnd = VECTOR_BLOCK_SIZE;
 			if (( (gridIndex*gridDim.x+blockIdx.x)<aEnd)&&(threadIdx.x < nB)) {
 				//Cs[threadIdx.x] = A[a + blockIdx.x ][b + threadIdx.x] * B[b + threadIdx.x ];
 				Cs[threadIdx.x] = A[(a + blockIdx.x)* nB+b + threadIdx.x] * B[b + threadIdx.x ];
