@@ -21,6 +21,6 @@
 
 #include FUNCTIONPATH2
 
-#define FUNCTIONPATH3 "..\\gpu\\matrixMul_kernel02.cu"
+#define FUNCTIONPATH3 "..\\gpu\\matrixMul_kernel03.cu"
 #include FUNCTIONPATH3
 #endif

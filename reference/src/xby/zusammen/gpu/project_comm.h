@@ -16,5 +16,5 @@
 #define BS(i) Bs[i]
 #endif
 
-#define VECTOR_BLOCK_SIZE 5
+#define VECTOR_BLOCK_SIZE 128
 #endif //?PROJECT_COMM_H__
