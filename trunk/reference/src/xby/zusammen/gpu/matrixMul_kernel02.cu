@@ -77,7 +77,7 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 
 		if(threadIdx.x == 0) C[gridIndex*gridDim.x+blockIdx.x] = blocksum;
 		__syncthreads();
-		// summe all block
+		// summe all block, need test for mA bigger than one Grid
 		//idx = gridIndex*gridDim.x + blockIdx.x*blockDim.x+threadIdx.x;
 	
 	}

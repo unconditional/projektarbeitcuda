@@ -45,8 +45,8 @@ __global__ void device_dotMul(t_ve* in1, t_ve* in2,t_ve* out, unsigned int N)
         // store the sub-matrix of B
         __shared__ float Bs[VECTOR_BLOCK_SIZE];
 		
-		__shared__ float Cs[VECTOR_BLOCK_SIZE];
-		Cs[row] = 0;
+	__shared__ float Cs[VECTOR_BLOCK_SIZE];
+	Cs[row] = 0;
 
         // Load the matrices from device memory
         // to shared memory; each thread loads
@@ -70,9 +70,9 @@ __global__ void device_dotMul(t_ve* in1, t_ve* in2,t_ve* out, unsigned int N)
 		// computing summe in one thread for one Loop 
 		if (threadIdx.x == 0) {			
 			for (int k = 1; (k < VECTOR_BLOCK_SIZE)&&(idx < N); k++){
-                 Cs[0]+= Cs[k];
+				Cs[0]+= Cs[k];
 				 //out[k]= Cs[k];
-            }   
+			}   
 			out[blockIdx.x] = Cs[0];
 		}
 		__syncthreads();
