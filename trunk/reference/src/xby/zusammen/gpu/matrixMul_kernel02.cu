@@ -29,8 +29,8 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 	int aEnd = mA;
 	int bEnd = nB;
 
-		//initialise Cs 
-		Cs[threadIdx.x] = 0;
+	//initialise Cs 
+	Cs[threadIdx.x] = 0;
 	
 	// if nB > gridDim???????
 	for(int a = aBegin; (a < aEnd)&&(idx < mA*nB); a += aStep, gridIndex++){
