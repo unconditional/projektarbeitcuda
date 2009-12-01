@@ -98,8 +98,9 @@ int test_dotMul()
     double *pIn1, *pIn2,*pOut;
     int sizeIn, sizeOut;
     int i;
-    sizeIn = 3;
-    sizeOut =3;
+    sizeIn = 1000;
+    //sizeOut =3;
+	sizeOut =sizeIn/VECTOR_BLOCK_SIZE + 1;
     pIn1 = (double*)malloc(sizeof(double)*sizeIn);
     pIn2 = (double*)malloc(sizeof(double)*sizeIn);
     pOut = (double*)malloc(sizeof(double)*sizeOut);
