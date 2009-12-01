@@ -1,12 +1,14 @@
-#ifndef __MATRIXMUL_KERNEL__
-#define __MATRIXMUL_KERNEL__
+#ifndef __MATRIXMUL_KERNEL_H__
+#define __MATRIXMUL_KERNEL_H__
 
 ////////////////////////////////////////////////////////////////////////////////
-//! Matrix multiplication on the device: C = A * B
-//! wA is A's width and wB is B's width
-//! wB = 1;
+//! Matrix and Vector multiplication on the device: C = A * B
+//!	Matrix A is mA x nB  , Vector B is nB
+//!	Vector C output vector in size of mA
+//!	description:
+//!	each row of A occuppy one block. if gridDim is smaller than the row number of A  
 ////////////////////////////////////////////////////////////////////////////////
-__global__ void matrixMul( float* C, float* A, float* B, int wA, int wB);
+__global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB);
 
 #endif
 
