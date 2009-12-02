@@ -18,7 +18,21 @@ if(ArgNum ==2){
 		if(1==pnIn[0])mexTest_dotMul(ppIn[0],ppIn[1],pmIn[0]);
 	}
 }
-
+//test norm
+if(ArgNum ==1){
+	if((pmIn[0]==pmIn[1])&&(pnIn[0]==pnIn[1])){
+		if(1==pnIn[0])mexTest_norm(ppIn[0],pmIn[0]);
+	}
+}
+//test matrixMul
+//ppIn[0]:matrix A, ppIn[1]: vector B
+if(ArgNum ==2){
+	//pmIn[0]=mA pmIn[1]=nB, pnIn[0]=nB,pnIn[1]=1
+	if((pmIn[1]==pnIn[0])&&(1==pnIn[1])){
+		//mexTest_matrixMul(double *pA,double *pB,int mA, int nB);
+		mexTest_matrixMul(ppIn[0],ppIn[1],pmIn[0], pmIn[1]);
+	}
+}
 //call cpu
 
 }
