@@ -55,7 +55,7 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 			Cs[threadIdx.x] = 0;
 			__syncthreads();
 			// compute scalar product
-			if (( (gridIndex*gridDim.x+blockIdx.x)<aEnd)&&(threadIdx.x < nB)) {
+			if (( (gridIndex*gridDim.x+blockIdx.x)<aEnd)&&((b+threadIdx.x) < bEnd)) {
 				//Cs[threadIdx.x] = A[a + blockIdx.x ][b + threadIdx.x] * B[b + threadIdx.x ];
 				Cs[threadIdx.x] = A[(a + blockIdx.x)* nB+b + threadIdx.x] * B[b + threadIdx.x ];
 			}
@@ -74,7 +74,7 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 			
 			//Cs[threadIdx.x] = 0;
 			//__syncthreads();	
-		}
+		}//for b
 		__syncthreads();
 
 		if(threadIdx.x == 0) C[gridIndex*gridDim.x+blockIdx.x] = blocksum;
