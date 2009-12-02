@@ -2,17 +2,20 @@
 mexUnitTestMain.cu
 */
 #include <stdio.h>
+#include "mex.h"
 #include "host_dotMul.cu"
 #include "host_norm.cu"
 #include "host_matrixMul.cu"
 
-#define double t_In
-void callTestFunction(t_In** ppIn,int *pmIn,int *pnIn, int ArgNum){
-//call gpu
 
+
+void callTestFunction(double** ppIn,int *pmIn,int *pnIn, int ArgNum){
+//call gpu
+//testdotMul
+printf("pnIn[0]=%d,pmIn[0]=%d, \n",pnIn[0],pmIn[0]);
 if(ArgNum ==2){
-	if(pmIn[0]==pmIn[1])&&(pnIn[0]==pnIn[1]){
-		if(1==pnIn[0])mexTest_dotMul(ppIn[0],ppIn[1],pnIn[0]);
+	if((pmIn[0]==pmIn[1])&&(pnIn[0]==pnIn[1])){
+		if(1==pnIn[0])mexTest_dotMul(ppIn[0],ppIn[1],pmIn[0]);
 	}
 }
 
@@ -28,13 +31,13 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
      int outputArgNum = nlhs;
      int i,j,k,m, n;
      double *pMatrix;
-     t_In * pIn;  
-     t_In ** ppIn;
+     double * pIn;  
+     double ** ppIn;
      int *pmIn;
      int *pnIn;
      pnIn = (int*)mxMalloc(sizeof(int)*nrhs);
      pmIn = (int*)mxMalloc(sizeof(int)*nrhs);
-     ppIn = (t_In**)mxMalloc(sizeof(t_In*)*nrhs);
+     ppIn = (double**)mxMalloc(sizeof(double*)*nrhs);
      //printf("nrhs = %d \n",nrhs);
      for (i = 0; i < nrhs; i++){
         /* Find the dimensions of the data */
@@ -44,12 +47,12 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
         pmIn[i] = (int)m;
         pnIn[i] = (int)n;
         pMatrix = mxGetPr(prhs[i]); 
-        pIn = (t_In*)mxMalloc(sizeof(t_In)*m*n);       
+        pIn = (double*)mxMalloc(sizeof(double)*m*n);       
         ppIn[i]=pIn;
         
         for( k = 0; k < m; k++)
             for( j = 0; j < n; j++){
-                pIn[k*n+j] = (t_In)pMatrix[j*m+k];
+                pIn[k*n+j] = (double)pMatrix[j*m+k];
 			//	printf("%f \n",pIn[k*n+j]);
             }
        
