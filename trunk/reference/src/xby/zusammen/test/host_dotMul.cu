@@ -42,7 +42,7 @@ data_in2_f[j] = (t_ve) data_in2_d[j];
 }
     for (i = 0; i < sizeIn; i++)
     {
-        printf("data_in1_f[%d] = %f, ", i, data_in1_f[i]);
+     //    printf("data_in1_f[%d] = %f, ", i, data_in1_f[i]);
     }
         printf("\n");
 
@@ -54,8 +54,8 @@ cudaMemcpy( data_in2_f_gpu, data_in2_f, sizeof(t_ve)*sizeIn, cudaMemcpyHostToDev
 
 // Compute execution configuration using 128 threads per block 
 dim3 dimBlock(sizeBlock);
-//dim3 dimGrid((sizeIn)/dimBlock.x);
-dim3 dimGrid(3);
+dim3 dimGrid((sizeIn)/dimBlock.x);
+
 if ( (sizeIn) % sizeBlock !=0 ) dimGrid.x+=1;
     
 //Call function on GPU 
@@ -72,7 +72,7 @@ if ( e != cudaSuccess)
 cudaMemcpy( data_out_f, data_out_f_gpu, sizeof(float)*sizeOut, cudaMemcpyDeviceToHost);
     for (i = 0; i < sizeOut; i++)
     {
-        printf("data_out_f[%d] = %f, ", i, data_out_f[i]);
+     //   printf("data_out_f[%d] = %f, ", i, data_out_f[i]);
     }
         printf("\n");
 
@@ -98,7 +98,12 @@ int test_dotMul()
     double *pIn1, *pIn2,*pOut;
     int sizeIn, sizeOut;
     int i;
-    sizeIn = 1000;
+	
+	double expect;
+	int loop;
+	for (loop = 9000; loop < 10000; loop++) {
+	int expect_error = 0;
+    sizeIn = loop;
     //sizeOut =3;
 	sizeOut =sizeIn/VECTOR_BLOCK_SIZE + 1;
     pIn1 = (double*)malloc(sizeof(double)*sizeIn);
@@ -117,27 +122,33 @@ int test_dotMul()
     pIn2[2] = 3;
 	*/
     host_dotMul(pIn1, pIn2, pOut, sizeIn, sizeOut);
-	
+	expect=sizeIn;
 	printf("output square result");
-    for (i = 0; i < sizeOut; i++)
-    {	
-        printf(" pOut[%d] = %lf, ", i, pOut[i]);
-    }
-        printf("\n");
+	
+	if(pOut[0] != expect){
 		
-	/*
-	printf("output norm result");
-    for (i = 0; i < sizeOut; i++)
-    {
-		pOut[i] = sqrt(pOut[i]);
-        printf("squre of pOut[%d] = %lf, ", i, pOut[i]);
-    }
+		for (i = 0; i < sizeOut; i++)
+		{	
+        printf(" pOut[%d] = %lf, ", i, pOut[i]);
+		}
+		
+		expect_error = loop;
+		printf(" pOut[0] = %lf,  ", pOut[0]);
         printf("\n");
-    
-   */
+		printf("expect error = %d,\n",expect_error);
+		
+	}
+	/*
+		expect_error = loop;
+		printf(" pOut[0] = %lf,  ", pOut[0]);
+        printf("\n");
+		printf("expect error = %d,\n",expect_error);
+*/
+
     free(pIn1);
     free(pIn2);
     free(pOut);
+	}
     return 0;
 
 }
