@@ -24,7 +24,10 @@ __global__ void device_dotMul(t_ve* in1, t_ve* in2,t_ve* out, unsigned int N)
 	__syncthreads();
 	
 	if(threadIdx.x==0){
-	    for ( int i = 1; i < blockDim.x; i++ ) {
+		int kEnd = N-(blockIdx.x*VECTOR_BLOCK_SIZE);
+				if(kEnd > VECTOR_BLOCK_SIZE)kEnd = VECTOR_BLOCK_SIZE;
+	    //for ( int i = 1; i < blockDim.x; i++ ) {
+		for ( int i = 1; i < kEnd; i++ ) {
 		     Cs[0] += Cs[i];
 		}
 		out[blockIdx.x]=Cs[0];
