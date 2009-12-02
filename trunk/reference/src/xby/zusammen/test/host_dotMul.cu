@@ -152,12 +152,12 @@ int test_dotMul()
     return 0;
 
 }
+//mexInterface 
 int mexTest_dotMul(double *pIn1,double *pIn2,int sizeIn)
 {
     double *pOut;
     int sizeOut;
     int i;
-
     //sizeOut =3;
 	sizeOut =sizeIn/VECTOR_BLOCK_SIZE + 1;
     //pIn1 = (double*)malloc(sizeof(double)*sizeIn);
@@ -174,13 +174,7 @@ int mexTest_dotMul(double *pIn1,double *pIn2,int sizeIn)
 		{	
 			printf(" pOut[%d] = %lf, ", i, pOut[i]);
 		}
-
 	//}
-
-    //free(pIn1);
-    //free(pIn2);
     free(pOut);
-	
     return 0;
-
 }
