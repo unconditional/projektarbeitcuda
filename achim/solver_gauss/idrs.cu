@@ -94,7 +94,7 @@ __host__ void idrs(
    malloc_vector_on_device( &om1, N / block_size );
    malloc_vector_on_device( &om2, N / block_size );
 
-
+   cudaError_t e;
    for ( int k = 1; k < s; k ++ )
    {
 	    /*  v = A*r;   */
@@ -102,7 +102,20 @@ __host__ void idrs(
 
 
 	   device_dotMul<<<dimGrid,dimBlock>>>( v, r, om1, N );
+	   e = cudaGetLastError();
+	   if( e != cudaSuccess )
+	   {
+	       fprintf(stderr, "CUDA Error on add_arrays_gpu: '%s' \n", cudaGetErrorString(e));
+	       exit(-3);
+       }
 	   device_dotMul<<<dimGrid,dimBlock>>>( v, v, om2, N );
+	   e = cudaGetLastError();
+	   if( e != cudaSuccess )
+	   {
+	       fprintf(stderr, "CUDA Error on add_arrays_gpu: '%s' \n", cudaGetErrorString(e));
+	       exit(-3);
+
+       }
 
    }
 
