@@ -17,7 +17,7 @@ double *data1, *data2;
 float *data1f, *data2f;
 float *data1f_gpu, *data2f_gpu;
 int sizeBlock;
-sizeBlock = 1;
+sizeBlock = 8;
 data1 = pIn;
 
 
@@ -56,6 +56,17 @@ if ( (sizeIn) % sizeBlock !=0 ) dimGrid.x+=1;
 /* Call function on GPU */
 cudaError_t e;
 square_elements<<<dimGrid,dimBlock>>>(data1f_gpu, data2f_gpu, sizeIn);
+<<<<<<< .mine
+e = cudaGetLastError();
+if ( e != cudaSuccess)
+{
+    fprintf(stderr, "CUDA Error on square_elements: '%s' \n", cudaGetErrorString(e));
+    exit(-1);
+}
+
+
+
+=======
 e = cudaGetLastError();
 if ( e != cudaSuccess)
 {
@@ -65,6 +76,7 @@ if ( e != cudaSuccess)
 
 
 
+>>>>>>> .r101
 /* Copy result back to host */
 cudaMemcpy( data2f, data2f_gpu, sizeof(float)*sizeOut, cudaMemcpyDeviceToHost);
     for (i = 0; i < sizeOut; i++)
@@ -96,13 +108,13 @@ int main()
     double *pIn, *pOut;
     int sizeIn, sizeOut;
     int i;
-    sizeIn = 1;
-    sizeOut = 1;
+    sizeIn = 3;
+    sizeOut = 3;
     pIn = (double*)malloc(sizeof(double)*sizeIn);
     pOut = (double*)malloc(sizeof(double)*sizeOut);
     pIn[0] = 1;
-  //  pIn[1] = 2;
-   // pIn[2] = 3;
+    pIn[1] = 2;
+    pIn[2] = 3;
     square_host(pIn, pOut, sizeIn, sizeOut);
     for (i = 0; i < sizeOut; i++)
     {
