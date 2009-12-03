@@ -33,11 +33,17 @@ void freeTable(struct DataTable * pTable){
 }
 
 /* Gateway function */
+// the last input argument should the type of call function 
+// type: 0 for dotMul, 1 for norm, 3 for matrixMul
+
 void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
      int inputArgNum = nrhs;
      int outputArgNum = nlhs;
+	 //define number of outputs 
+	 int retNum;
      int i,j,k,m, n;
+	 double *pOut;
      double *pMatrix;
      float * pIn;  
      float ** ppIn;
@@ -46,7 +52,9 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
      pnIn = (int*)mxMalloc(sizeof(int)*nrhs);
      pmIn = (int*)mxMalloc(sizeof(int)*nrhs);
      ppIn = (float**)mxMalloc(sizeof(float*)*nrhs);
-     printf("nrhs = %d \n",nrhs);
+     
+
+	 printf("nrhs = %d \n",nrhs);
      for (i = 0; i < nrhs; i++){
         /* Find the dimensions of the data */
         m = mxGetM(prhs[i]);
@@ -57,7 +65,7 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
         pMatrix = mxGetPr(prhs[i]); 
         pIn = (float*)mxMalloc(sizeof(float)*m*n);       
         ppIn[i]=pIn;
-        
+		//get data from input
         for( k = 0; k < m; k++)
             for( j = 0; j < n; j++){
                 pIn[k*n+j] = (float)pMatrix[j*m+k];
@@ -68,6 +76,31 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
         }
         //mxFree(pIn);
      }
+	 ///output
+	 
+	 if(nrhs > 0){
+		pMatrix = mxGetPr(prhs[nrhs-1]);
+		//m = mxGetM(prhs[nrhs-1]);
+        //n = mxGetN(prhs[nrhs-1]);
+		retNum = (int)pMatrix[0];
+		plhs[0] = mxCreateDoubleMatrix(retNum,1,mxREAL);
+		pOut = mxGetPr(plhs[0]);
+		for (i = 0; i < retNum; i++) pOut[i] = 365 + i;
+	 }
+	 
+	 	 
+	 /*
+	 //if(nlhs!=0){
+		plhs[0] = mxCreateDoubleMatrix(1,1,mxREAL);
+		pOut = mxGetPr(plhs[0]);
+		pOut[0] = 365;
+		plhs[1] = mxCreateDoubleMatrix(1,1,mxREAL);
+		pOut = mxGetPr(plhs[1]);
+		pOut[0] = 366;
+	 //}
+	 */
+	 
+	 
      for (i = 0; i < nrhs; i++){
         pIn=ppIn[i];
         printf("m = %d , n= %d \n",pmIn[i],pnIn[i]);
