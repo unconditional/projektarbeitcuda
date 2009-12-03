@@ -23,4 +23,5 @@
 
 #define FUNCTIONPATH3 "..\\gpu\\matrixMul_kernel03.cu"
 #include FUNCTIONPATH3
-#endif
+
+#endif//__TEST_COMM_H__
