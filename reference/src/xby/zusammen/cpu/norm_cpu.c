@@ -2,7 +2,7 @@
 norm_cpu
 */
 #ifndef __NORM_CPU__
-#idefine __NORM_CPU__
+#define __NORM_CPU__
 #include "test_comm_cpu.h"
 
 void norm_elements(t_ve* in, t_ve* out, unsigned int N)
