@@ -2,7 +2,7 @@
 matrixMul_cpu.c
 */
 #ifndef __MATRIXMUL_CPU__
-#idefine __MATRIXMUL_CPU__
+#define __MATRIXMUL_CPU__
 #include "test_comm_cpu.h"
 void matrixMul_cpu( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 {

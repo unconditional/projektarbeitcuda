@@ -2,7 +2,7 @@
 dotMul_cpu.c
 */
 #ifndef __DOTMUL_CPU__
-#idefine __DOTMUL_CPU__
+#define __DOTMUL_CPU__
 //#include "..\\gpu\\projektcuda.h"
 //#include "..\\gpu\\project_comm.h"
 
