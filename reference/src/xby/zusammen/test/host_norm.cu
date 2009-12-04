@@ -115,14 +115,15 @@ int test_norm()
     free(pOut);
     return 0;
 }
-int mexTest_norm(double *pIn,int sizeIn)
+int mexTest_norm(double *pIn,double *pOut,int sizeIn)
 {
-    double *pOut;
+    //double *pOut;
     int sizeOut;
     int i;
 
-	sizeOut =sizeIn/VECTOR_BLOCK_SIZE + 1;
-    pOut = (double*)malloc(sizeof(double)*sizeOut);
+	//sizeOut =sizeIn/VECTOR_BLOCK_SIZE + 1;
+	sizeOut=1;
+    //pOut = (double*)malloc(sizeof(double)*sizeOut);
 
     host_norm(pIn, pOut, sizeIn, sizeOut);
 	double expect=sizeIn;
@@ -137,7 +138,7 @@ int mexTest_norm(double *pIn,int sizeIn)
 
 	//}
 
-    free(pOut);
+    //free(pOut);
 	
     return 0;
 

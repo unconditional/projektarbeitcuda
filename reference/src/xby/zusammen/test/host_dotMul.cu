@@ -153,17 +153,18 @@ int test_dotMul()
 
 }
 //mexInterface 
-int mexTest_dotMul(double *pIn1,double *pIn2,int sizeIn)
+//int mexTest_dotMul(double *pIn1,double *pIn2,int sizeIn)
+int mexTest_dotMul(double *pIn1,double *pIn2,double* pOut,int sizeIn)
 {
-    double *pOut;
+    //double *pOut;
     int sizeOut;
     int i;
-    //sizeOut =3;
-	sizeOut =sizeIn/VECTOR_BLOCK_SIZE + 1;
+    sizeOut =1;
+	//sizeOut =sizeIn/VECTOR_BLOCK_SIZE + 1;
     //pIn1 = (double*)malloc(sizeof(double)*sizeIn);
     //pIn2 = (double*)malloc(sizeof(double)*sizeIn);
-    pOut = (double*)malloc(sizeof(double)*sizeOut);
-
+    //pOut = (double*)malloc(sizeof(double)*sizeOut);
+	
     host_dotMul(pIn1, pIn2, pOut, sizeIn, sizeOut);
 	double expect=sizeIn;
 	printf("output square result");
@@ -172,9 +173,9 @@ int mexTest_dotMul(double *pIn1,double *pIn2,int sizeIn)
 		
 		for (i = 0; i < sizeOut; i++)
 		{	
-			printf(" pOut[%d] = %lf, ", i, pOut[i]);
+			//printf(" pOut[%d] = %lf, ", i, pOut[i]);
 		}
 	//}
-    free(pOut);
+    //free(pOut);
     return 0;
 }

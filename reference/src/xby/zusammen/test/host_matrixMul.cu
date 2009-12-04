@@ -141,12 +141,12 @@ int test_matrixMul()
  
 }
 
-int mexTest_matrixMul(double *pA,double *pB,int mA, int nB)
+int mexTest_matrixMul(double *pC,double *pA,double *pB,int mA, int nB)
 {
-    double *pC;
-    int sizeOut;
+    //double *pC;
+    //int sizeOut;
     int i;
-    pC = (double*)malloc(sizeof(double)*mA);
+    //pC = (double*)malloc(sizeof(double)*mA);
     host_matrixMul(pC,pA, pB, mA, nB);
 	
 	printf("output square result");
@@ -158,6 +158,6 @@ int mexTest_matrixMul(double *pA,double *pB,int mA, int nB)
     }
      printf("\n");
 	//	printf("expect error = %d,\n",expect_error);	
-    free(pC);	
+    //free(pC);	
     return 0;
 }
