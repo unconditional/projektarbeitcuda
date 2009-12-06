@@ -1,0 +1,20 @@
+/*
+UnitTestMain
+*/
+
+#include <stdio.h>
+#include "host_dotMul.cu"
+#include "host_norm.cu"
+#include "host_matrixMul.cu"
+
+#include "..\cpu\dotMul_cpu.c"
+#include "..\cpu\norm_cpu.c"
+#include "..\cpu\matrixMul_cpu.c"
+
+int main()
+{
+	 //test_matrixMul();
+     test_dotMul();
+	 //test_norm();
+	 return 1;
+}
