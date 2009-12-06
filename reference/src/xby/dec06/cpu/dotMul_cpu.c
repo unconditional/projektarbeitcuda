@@ -9,7 +9,7 @@ dotMul_cpu.c
 //#include "..\\gpu\\project_comm.h"
 
 #include "test_comm_cpu.h"
-#include <time.h>
+
 void dotMul_cpu(t_ve* in1, t_ve* in2,t_ve* out, unsigned int N)
 {
 	int i;
@@ -24,12 +24,11 @@ void dotMul_cpu(t_ve* in1, t_ve* in2,t_ve* out, unsigned int N)
 void test_dotMul_cpu(double * pIn1,double * pIn2, double* pOut, unsigned int N)
 {
 
-
-
 	t_ve *pV1, *pV2, *pV3;
-	int i,j,it;
+	int i;
 	
-	float t_avg;
+	unsigned int it;
+	double t_avg;
 	it = ITERATE;
 	t_avg = 0;
 	
@@ -41,18 +40,17 @@ void test_dotMul_cpu(double * pIn1,double * pIn2, double* pOut, unsigned int N)
 		pV2[i] = (t_ve)pIn2[i];
 	}	
 	//printf("before dotMul_cpu \n");
-	for (j=0;j<it; j++){
-	
+	for (i=0;i<it; i++){	
 		clock_t startTime;
 		clock_t endTime;
 		startTime=clock();
-		dotMul_cpu(pV1,pV2,pV3,N);	
+		//call computing function
+		dotMul_cpu(pV1,pV2,pV3,N);
+		
 		endTime=clock();
 		t_avg += endTime-startTime;
-	
 	}
-
-	printf("laufTime  in CPU = %lf \n", ((double) t_avg) /(it* CLOCKS_PER_SEC));
+	printf("laufTime  in CPU = %lf (ms)\n", ((double) t_avg)*1000 /(it* CLOCKS_PER_SEC));
 	
 	//printf("after dotMul_cpu \n");
 	pOut[0] = (double)pV3[0];

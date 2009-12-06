@@ -1,10 +1,10 @@
 clear all
 
-a1 = ones(1000,1);
+a1 = ones(500,1);
 a2 = a1;
-%tic
-%b1 = mexUnitTestMain_cpu(a1,1);
-%toc
+tic
+b1 = mexUnitTestMain_cpu(a1,1)
+toc
 %tic
 %b12 = mexUnitTestMain(a1,1);
 %toc

@@ -4,25 +4,29 @@
 void host_dotMul(double* pIn1, double* pIn2,double *pOut, int sizeIn, int sizeOut)
 {
 
-int i, j,  it;
-float t_avg;
-double *data_in1_d, *data_in2_d, *data_out_d;
-float *data_in1_f, *data_in2_f, *data_out_f;
-float *data_in1_f_gpu, *data_in2_f_gpu , *data_out_f_gpu;
-int sizeBlock;
-sizeBlock = VECTOR_BLOCK_SIZE;
-t_avg = 0;
-it = 10000;
-// get Input data pointer
-data_in1_d = pIn1;
-data_in2_d = pIn2;
-// get Ouput data pointer
-data_out_d = pOut;
-	
-    cudaError_t e;
-  
+	int i, j;
+
+	double *data_in1_d, *data_in2_d, *data_out_d;
+	float *data_in1_f, *data_in2_f, *data_out_f;
+	float *data_in1_f_gpu, *data_in2_f_gpu , *data_out_f_gpu;
+	int sizeBlock;
+	//VECTOR_BLOCK_SIZE defined in project_comm.h
+	sizeBlock = VECTOR_BLOCK_SIZE;
+	// variable for time measure
+	int it;
+	float t_avg;
+	t_avg = 0;
+	//ITERATE defined in project_comm.h
+	it = ITERATE;
+	// get Input data pointer
+	data_in1_d = pIn1;
+	data_in2_d = pIn2;
+	// get Ouput data pointer
+	data_out_d = pOut;
+	//CUDA event
+    cudaError_t e; 
     //cudaEvent_t start, stop;
-    float time;
+    //float time;
 	/*
 	e = cudaEventCreate(&start);
     if( e != cudaSuccess )
@@ -47,34 +51,27 @@ data_out_d = pOut;
 	*/
 	
 
-// Create an mxArray for the output data 
+	// Create an mxArray for the output data 
 	
-// Create an input and output data array on the GPU
-cudaMalloc( (void **) &data_in1_f_gpu,sizeof(t_ve)*sizeIn);
-cudaMalloc( (void **) &data_in2_f_gpu,sizeof(t_ve)*sizeIn);
-cudaMalloc( (void **) &data_out_f_gpu,sizeof(t_ve)*sizeOut);
-// Retrieve the input data 
+	// Create an input and output data array on the GPU
+	cudaMalloc( (void **) &data_in1_f_gpu,sizeof(t_ve)*sizeIn);
+	cudaMalloc( (void **) &data_in2_f_gpu,sizeof(t_ve)*sizeIn);
+	cudaMalloc( (void **) &data_out_f_gpu,sizeof(t_ve)*sizeOut);
 
-// Check if the input array is single or double precision 
+	// The input array is in double precision, it needs to be converted t floats before being sent to the card 
+	data_in1_f = (t_ve *) malloc(sizeof(t_ve)*sizeIn);
+	data_in2_f = (t_ve *) malloc(sizeof(t_ve)*sizeIn);
+	data_out_f = (t_ve *) malloc(sizeof(t_ve)*sizeOut);
 
-// The input array is in double precision, it needs to be converted t floats before being sent to the card 
-data_in1_f = (t_ve *) malloc(sizeof(t_ve)*sizeIn);
-data_in2_f = (t_ve *) malloc(sizeof(t_ve)*sizeIn);
+	//startTime=clock();
+	// Retrieve the input data 
+	for (j = 0; j < sizeIn; j++)
+	{
+		data_in1_f[j] = (t_ve) data_in1_d[j];
+		data_in2_f[j] = (t_ve) data_in2_d[j];
+	}
 
-data_out_f = (t_ve *) malloc(sizeof(t_ve)*sizeOut);
-
-//startTime=clock();
-for (j = 0; j < sizeIn; j++)
-{
-data_in1_f[j] = (t_ve) data_in1_d[j];
-data_in2_f[j] = (t_ve) data_in2_d[j];
-}
-   // for (i = 0; i < sizeIn; i++)
-    //{
-     //    printf("data_in1_f[%d] = %f, ", i, data_in1_f[i]);
-   // }
-    //    printf("\n");
- //startTime=clock();
+	//startTime=clock();
  	////zeit
   /*
    e = cudaEventRecord( start, 0 );
@@ -84,46 +81,39 @@ data_in2_f[j] = (t_ve) data_in2_d[j];
         exit(-3);
     }
    */
- 
+		// copy data from host to device
+	cudaMemcpy( data_in1_f_gpu, data_in1_f, sizeof(t_ve)*sizeIn, cudaMemcpyHostToDevice);
+	cudaMemcpy( data_in2_f_gpu, data_in2_f, sizeof(t_ve)*sizeIn, cudaMemcpyHostToDevice);
+	// Compute execution configuration using sizeBlock threads per block 
+	dim3 dimBlock(sizeBlock);
+	//define enough grid Size
+	dim3 dimGrid((sizeIn)/dimBlock.x);
+	if ( (sizeIn) % sizeBlock !=0 ) dimGrid.x+=1;  
+	
 
-
-
-//cudaMemcpy( data2f_gpu, data2f, sizeof(float)*sizeOut, cudaMemcpyHostToDevice);
-
-// Compute execution configuration using 128 threads per block 
-
-		
-		cudaMemcpy( data_in1_f_gpu, data_in1_f, sizeof(t_ve)*sizeIn, cudaMemcpyHostToDevice);
-		cudaMemcpy( data_in2_f_gpu, data_in2_f, sizeof(t_ve)*sizeIn, cudaMemcpyHostToDevice);
-		dim3 dimBlock(sizeBlock);
-		dim3 dimGrid((sizeIn)/dimBlock.x);
-		if ( (sizeIn) % sizeBlock !=0 ) dimGrid.x+=1;  
+	for (i = 0; i < it ; i++){
 		clock_t startTime;
 		clock_t endTime;
-	for (i = 0; i < it ; i++){
-		
 		startTime=clock();		
-		
 
 		//Call function on GPU 
 		device_dotMul<<<dimGrid,dimBlock>>>(data_in1_f_gpu, data_in2_f_gpu, data_out_f_gpu, sizeIn);
 		//cudaError_t e;
-		/*
+		
 		e = cudaGetLastError();
 		if ( e != cudaSuccess)
 		{
 			fprintf(stderr, "CUDA Error on square_elements: '%s' \n", cudaGetErrorString(e));
 			exit(-1);
 		}
-		*/
+		
 		endTime=clock();
-		t_avg += (endTime-startTime);
+		t_avg += endTime-startTime;
+	}//for it
+	printf("laufTime  in CPU = %lf (ms)\n", ((double) t_avg)*1000 /(it* CLOCKS_PER_SEC));
 	
-		// Copy result back to host 
-		cudaMemcpy( data_out_f, data_out_f_gpu, sizeof(float)*sizeOut, cudaMemcpyDeviceToHost);
-	
-	}//it
-	printf("laufTime in GPU = %lf \n", ((double) t_avg) / (CLOCKS_PER_SEC));
+	// Copy result back to host 
+	cudaMemcpy( data_out_f, data_out_f_gpu, sizeof(float)*sizeOut, cudaMemcpyDeviceToHost);
 	
 	/*
 	e = cudaEventRecord( stop, 0 );
@@ -164,18 +154,18 @@ data_in2_f[j] = (t_ve) data_in2_d[j];
 
 // Create a pointer to the output data 
 
-// Convert from single to double before returning 
-for (j = 0; j < sizeOut; j++)
-{
-data_out_d[j] = (double) data_out_f[j];
-}
-// Clean-up memory on device and host 
-free(data_in1_f);
-free(data_in2_f);
-free(data_out_f);
-cudaFree(data_in1_f_gpu);
-cudaFree(data_in2_f_gpu);
-cudaFree(data_out_f_gpu);
+	// Convert from single to double before returning 
+	for (j = 0; j < sizeOut; j++)
+	{
+		data_out_d[j] = (double) data_out_f[j];
+	}
+	// Clean-up memory on device and host 
+	free(data_in1_f);
+	free(data_in2_f);
+	free(data_out_f);
+	cudaFree(data_in1_f_gpu);
+	cudaFree(data_in2_f_gpu);
+	cudaFree(data_out_f_gpu);
 }     
      
 int test_dotMul()

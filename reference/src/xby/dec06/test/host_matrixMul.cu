@@ -3,45 +3,48 @@
 void host_matrixMul(double* pC, double* pA,double *pB, int mA, int nB)
 {
 
-int i, j, it;
-float t_avg;
-double *data_in1_d, *data_in2_d, *data_out_d;
-float *data_in1_f, *data_in2_f, *data_out_f;
-float *data_in1_f_gpu, *data_in2_f_gpu , *data_out_f_gpu;
-int sizeBlock;
-sizeBlock = VECTOR_BLOCK_SIZE;
-int sizeA = mA*nB;
-int sizeB = nB;
-int sizeC = mA;
+	int i, j;
+
+	double *data_in1_d, *data_in2_d, *data_out_d;
+	float *data_in1_f, *data_in2_f, *data_out_f;
+	float *data_in1_f_gpu, *data_in2_f_gpu , *data_out_f_gpu;
+	int sizeBlock;
+	sizeBlock = VECTOR_BLOCK_SIZE;
+	int sizeA = mA*nB;
+	int sizeB = nB;
+	int sizeC = mA;
+
+	// variable for time measure
+	int it;
+	float t_avg;
+	t_avg = 0;
+	//ITERATE defined in project_comm.h
+	it = ITERATE;
+
+	// get Input data pointer
+	data_in1_d = pA;
+	data_in2_d = pB;
+	// get Ouput data pointer
+	data_out_d = pC;
 
 
-t_avg = 0;
-it = 1000;
+	// Find the dimensions of the data 
 
-// get Input data pointer
-data_in1_d = pA;
-data_in2_d = pB;
-// get Ouput data pointer
-data_out_d = pC;
+	// Create an mxArray for the output data 
 
+	// Create an input and output data array on the GPU
+	cudaMalloc( (void **) &data_in1_f_gpu,sizeof(t_ve)*sizeA);
+	cudaMalloc( (void **) &data_in2_f_gpu,sizeof(t_ve)*sizeB);
+	cudaMalloc( (void **) &data_out_f_gpu,sizeof(t_ve)*sizeC);
+	// Retrieve the input data 
 
-// Find the dimensions of the data 
+	// Check if the input array is single or double precision 
 
-// Create an mxArray for the output data 
+	// The input array is in double precision, it needs to be converted t floats before being sent to the card 
+	data_in1_f = (t_ve *) malloc(sizeof(t_ve)*sizeA);
+	data_in2_f = (t_ve *) malloc(sizeof(t_ve)*sizeB);
 
-// Create an input and output data array on the GPU
-cudaMalloc( (void **) &data_in1_f_gpu,sizeof(t_ve)*sizeA);
-cudaMalloc( (void **) &data_in2_f_gpu,sizeof(t_ve)*sizeB);
-cudaMalloc( (void **) &data_out_f_gpu,sizeof(t_ve)*sizeC);
-// Retrieve the input data 
-
-// Check if the input array is single or double precision 
-
-// The input array is in double precision, it needs to be converted t floats before being sent to the card 
-data_in1_f = (t_ve *) malloc(sizeof(t_ve)*sizeA);
-data_in2_f = (t_ve *) malloc(sizeof(t_ve)*sizeB);
-
-data_out_f = (t_ve *) malloc(sizeof(t_ve)*sizeC);
+	data_out_f = (t_ve *) malloc(sizeof(t_ve)*sizeC);
 
 	for (j = 0; j < sizeA; j++)
 	{
@@ -63,57 +66,49 @@ data_out_f = (t_ve *) malloc(sizeof(t_ve)*sizeC);
 
 
 
-// Compute execution configuration using 128 threads per block 
-dim3 dimBlock(sizeBlock);
-//dim3 dimGrid((sizeIn)/dimBlock.x);
-dim3 dimGrid(mA);
-//if ( (sizeA) % sizeBlock !=0 ) dimGrid.x+=1;
+	// Compute execution configuration using 128 threads per block 
+	dim3 dimBlock(sizeBlock);
+	//dim3 dimGrid((sizeIn)/dimBlock.x);
+	dim3 dimGrid(mA);
+	//if ( (sizeA) % sizeBlock !=0 ) dimGrid.x+=1;
  		
+
+	cudaError_t e;	
+	for (i = 0; i < it ; i++){
 		clock_t startTime;
 		clock_t endTime;
-		
-	for (i = 0; i < it ; i++){
 		startTime=clock();	
 			//Call function on GPU 
 		matrixMul<<<dimGrid,dimBlock>>>(data_out_f_gpu,data_in1_f_gpu, data_in2_f_gpu, mA,nB);
-
-
-		endTime=clock();
-		t_avg += (endTime-startTime);
 		
+		e = cudaGetLastError();
+		if ( e != cudaSuccess)
+		{
+			fprintf(stderr, "CUDA Error on square_elements: '%s' \n", cudaGetErrorString(e));
+			exit(-1);
+		}
+		endTime=clock();
+		t_avg += (endTime-startTime);		
 	}//it
-		printf("laufTime in GPU = %lf \n", ((double) t_avg) / (CLOCKS_PER_SEC));
-cudaError_t e;
-e = cudaGetLastError();
-if ( e != cudaSuccess)
-{
-    fprintf(stderr, "CUDA Error on square_elements: '%s' \n", cudaGetErrorString(e));
-    exit(-1);
-}
-
-// Copy result back to host 
-cudaMemcpy( data_out_f, data_out_f_gpu, sizeof(float)*sizeC, cudaMemcpyDeviceToHost);
-    for (i = 0; i < sizeC; i++)
-    {
-    //    printf("data_out_f[%d] = %f, ", i, data_out_f[i]);
-    }
-     //   printf("\n");
+	printf("laufTime in GPU = %lf \n", ((double) t_avg) / (CLOCKS_PER_SEC));
+	// Copy result back to host 
+	cudaMemcpy( data_out_f, data_out_f_gpu, sizeof(float)*sizeC, cudaMemcpyDeviceToHost);
 
 
-// Create a pointer to the output data 
+	// Create a pointer to the output data 
 
-// Convert from single to double before returning 
-for (j = 0; j < sizeC; j++)
-{
-data_out_d[j] = (double) data_out_f[j];
-}
-// Clean-up memory on device and host 
-free(data_in1_f);
-free(data_in2_f);
-free(data_out_f);
-cudaFree(data_in1_f_gpu);
-cudaFree(data_in2_f_gpu);
-cudaFree(data_out_f_gpu);
+	// Convert from single to double before returning 
+	for (j = 0; j < sizeC; j++)
+	{
+		data_out_d[j] = (double) data_out_f[j];
+	}
+	// Clean-up memory on device and host 
+	free(data_in1_f);
+	free(data_in2_f);
+	free(data_out_f);
+	cudaFree(data_in1_f_gpu);
+	cudaFree(data_in2_f_gpu);
+	cudaFree(data_out_f_gpu);
 }     
      
 int test_matrixMul()

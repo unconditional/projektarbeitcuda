@@ -19,7 +19,12 @@ void matrixMul_cpu( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 void test_matrixMul_cpu(double * pC,double * pA, double* pB, unsigned int mA ,unsigned int nB)
 {
 	t_ve *pAin, *pBin, *pCout;
-	int i;
+	int i,j;
+	//variable for Time measure
+	unsigned int it;
+	double t_avg;
+	it = ITERATE;
+	t_avg = 0;
 	
 	pAin = (t_ve*)malloc(sizeof(t_ve)*mA*nB);
 	pBin = (t_ve*)malloc(sizeof(t_ve)*nB);
@@ -32,8 +37,18 @@ void test_matrixMul_cpu(double * pC,double * pA, double* pB, unsigned int mA ,un
 		pBin[i] = (t_ve)pB[i];
 	}		
 	
-	matrixMul_cpu(pCout, pAin, pBin, mA, nB);
-	
+	for (i=0;i<it; i++){	
+		clock_t startTime;
+		clock_t endTime;
+		startTime=clock();
+		//call computing function
+		matrixMul_cpu(pCout, pAin, pBin, mA, nB);
+		
+		endTime=clock();
+		t_avg += endTime-startTime;
+	}
+	printf("laufTime  in CPU = %lf (ms)\n", ((double) t_avg)*1000 /(it* CLOCKS_PER_SEC));
+
 	for (i = 0; i < mA; i++){
 		pC[i] = (double)pCout[i];
 	}		
