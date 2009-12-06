@@ -31,8 +31,16 @@ int main()
     clock_t startclocks, endclock, payoffstart, payoffend, startclockscpu, endclockscpu;
     cudaError_t e;
 
+    cudaEvent_t start_host,stop_host;
+    float et;
+    float et_gpu;
     int deviceCount;
     cudaGetDeviceCount(&deviceCount);
+
+     e = cudaEventCreate( &start_host );
+     CUDA_UTIL_ERRORCHECK("cudaEventCreate");
+     e = cudaEventCreate( &stop_host );
+     CUDA_UTIL_ERRORCHECK("cudaEventCreate");
 
     if (deviceCount == 0)
         printf("There is no device supporting CUDA\n");
@@ -47,7 +55,11 @@ int main()
         printf("  CUDA Capability Minor revision number:         %d\n", deviceProp.minor);
         printf("  Maximum number of threads per block:           %d\n", deviceProp.maxThreadsPerBlock);
     }
-    int block_size = 512;
+
+    int block_size = DEF_BLOCKSIZE ;
+
+    printf("working with blocksize %u \n", block_size );
+
     dim3 dimBlock(block_size);
 
     printf("\n measureing operation DOTMUL with N = %u, ITERSTEPS %u", N_PROBLEM, ITERSTEPS );
@@ -65,17 +77,35 @@ int main()
         e = cudaMemcpy(  v1_d, v1, sizeof(t_ve) * N * 2 , cudaMemcpyHostToDevice);
         CUDA_UTIL_ERRORCHECK("cudaMemcpy v1_d");
 
+        e = cudaMemset ( out_d, 0, sizeof(t_ve) * N );
+        CUDA_UTIL_ERRORCHECK("cudaMemset ( out_d, 0)");
+
         payoffend = clock();
         startclocks = clock( );
 
         dim3 dimGrid ( N / block_size + 1 );
 
-        for ( unsigned int i = 0; i < ITERSTEPS; i++ ) {
+        //for ( unsigned int i = 0; i < ITERSTEPS; i++ ) {
+        {
+            cudaEvent_t start,stop;
+            e = cudaEventCreate( &start );
+            CUDA_UTIL_ERRORCHECK("cudaEventCreate");
+            e = cudaEventCreate( &stop );
+            CUDA_UTIL_ERRORCHECK("cudaEventCreate");
+            e= cudaEventRecord(start,0);
+            CUDA_UTIL_ERRORCHECK("cudaEventRecord");
 
             device_dotMul<<<dimGrid,dimBlock>>>(v1_d, v2_d, out_d, N );
         	e = cudaGetLastError();
             CUDA_UTIL_ERRORCHECK("Kernel device_dotMul")
+
+            e= cudaEventRecord(stop,0 );
+            CUDA_UTIL_ERRORCHECK("cudaEventRecord");
+            e = cudaEventSynchronize(stop);
+            CUDA_UTIL_ERRORCHECK("cudaEventSynchronize");
+            e = cudaEventElapsedTime( &et_gpu, start, stop );
         }
+        //}
         endclock = clock( );
 
         e = cudaFree(v1_d);
@@ -87,16 +117,26 @@ int main()
         v2  = &v1[N];
         out = &v1[N*2];
 
-		for ( unsigned int i = 0; i < ITERSTEPS; i++ ) {
+		//for ( unsigned int i = 0; i < ITERSTEPS; i++ ) {
 		    v1[1]++; /* ensure opearation is not answered from cache */
+            e= cudaEventRecord(start_host,0);
+            CUDA_UTIL_ERRORCHECK("cudaEventRecord");
 		    dotMul_cpu(v1, v2, out, N );
-		}
+            e= cudaEventRecord(stop_host,0 );
+            CUDA_UTIL_ERRORCHECK("cudaEventRecord");
+            e = cudaEventSynchronize(stop_host);
+            CUDA_UTIL_ERRORCHECK("cudaEventSynchronize");
+            e = cudaEventElapsedTime( &et, start_host, stop_host );
+		//}
         endclockscpu   = clock( );
         /* ------------------------------------------------------------ */
 
         printf( "\n ----------------------------------------------------- \n N = %u, ITER = %u", N, ITERSTEPS );
 	    printf( "\n GPU: %f seconds,  clocks: %u : CLOCKS_PER_SEC %u \n", ( (float) ( endclock - startclocks)) / CLOCKS_PER_SEC / ITERSTEPS, endclock - startclocks, CLOCKS_PER_SEC );
 	    printf( "\n CPU: %f seconds,  clocks: %u : CLOCKS_PER_SEC %u \n", ( (float) ( endclockscpu - startclockscpu)) / CLOCKS_PER_SEC / ITERSTEPS, endclockscpu - startclockscpu, CLOCKS_PER_SEC );
+        printf( "\n CPU, measured by CUDA event: %f ms", et );
+        printf( "\n GPU, measured by CUDA event: %f ms", et_gpu );
 	    printf( "\n cudamemcopy payoff %f secsonds (%u clocks)", (float) (payoffend - payoffstart) / CLOCKS_PER_SEC, payoffend - payoffstart );
+
     }
 }

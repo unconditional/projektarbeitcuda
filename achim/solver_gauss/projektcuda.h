@@ -12,6 +12,9 @@
 
 #define GAUSS_NMAX 22
 
+# define BLOCK_EXP 9
+# define DEF_BLOCKSIZE 1 << BLOCK_EXP
+
 typedef float        t_ve; /* base type of Matrizes: 'float' or 'double' */
 typedef t_ve*        pt_ve;
 
