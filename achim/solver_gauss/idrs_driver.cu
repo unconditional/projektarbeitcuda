@@ -5,6 +5,7 @@
 #include "projektcuda.h"
 
 #include "idrs.h"
+#include <time.h>
 
 #define N_PROBLEM 10000
 
@@ -34,6 +35,9 @@ __host__ void malloc_N( unsigned int size_n, t_ve** M ) {
 
 int main()
 {
+    clock_t startime;
+    clock_t endtime;
+    startime = clock( );
 
 	   t_ve* A ; /* the problem */
 	   t_ve* b ; /* the problems right side */
@@ -50,6 +54,8 @@ int main()
        malloc_N( N_PROBLEM  , &b );
        malloc_N( N_PROBLEM  , &x0 );
        malloc_N( N_PROBLEM  , &x );
+
+
 
        unsigned int N  =  N_PROBLEM;
 
@@ -83,7 +89,10 @@ int main()
                      &iter
                   );
 
+       endtime = clock();
 
 	   printf("idrs solver - testdriver");
+
+	   printf( "\n %f seconds,  clocks: %u : CLOCKS_PER_SEC %u \n", ( (float) (endtime - startime)) / CLOCKS_PER_SEC, endtime - startime, CLOCKS_PER_SEC );
 	}
 
