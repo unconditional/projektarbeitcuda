@@ -75,59 +75,44 @@ int main()
     cudaError_t e;
 
     malloc_N( N_PROBLEM * 3 , &v1 );
-    //malloc_N( N_PROBLEM  , &v2 );
-    //malloc_N( N_PROBLEM  , &out );
 
+    dim3 dimBlock(block_size);
 
+    for ( unsigned int N = 1; N < N_PROBLEM; N *= 5 ) {
+        payoffstart = clock();
 
-
-
-
-    for ( unsigned long N = 1; N < N_PROBLEM; N *= 5 ) {
-
-		/* ------------------------------------------------------------ */
-
-
-
-    payoffstart = clock();
-
-        malloc_vector_on_device( &v1_d , N * 3 );
+        e = cudaMalloc ((void **) &v1_d, sizeof(t_ve) * N * 3 );
+        CUDA_UTIL_ERRORCHECK("cudaMalloc &v1_d");
 
         v2_d  = &v1_d[N    ];
         out_d = &v1_d[N * 2];
 
         e = cudaMemcpy(  v1_d, v1, sizeof(t_ve) * N * 2 , cudaMemcpyHostToDevice);
-        if( e != cudaSuccess )
-        {
-            fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
-            exit(-3);
-        }
+        CUDA_UTIL_ERRORCHECK("cudaMemcpy v1_d");
 
         payoffend = clock();
-
-
         startclocks = clock( );
-        for ( int i = 0; i < ITERSTEPS; i++ ) {
-            dim3 dimBlock(block_size);
-            dim3 dimGrid ( N / block_size + 1 );
+
+        dim3 dimGrid ( N / block_size + 1 );
+
+        for ( unsigned int i = 0; i < ITERSTEPS; i++ ) {
+
             device_dotMul<<<dimGrid,dimBlock>>>(v1_d, v2_d, out_d, N );
         	e = cudaGetLastError();
-			if( e != cudaSuccess ) {
-			       fprintf(stderr, "CUDA Error on add_arrays_gpu: '%s' \n", cudaGetErrorString(e));
-			       exit(-3);
-            }
+            CUDA_UTIL_ERRORCHECK("Kernel device_dotMul")
         }
         endclock = clock( );
 
         e = cudaFree(v1_d);
-        if( e != cudaSuccess )
-        {
-            fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
-            exit(-3);
-        }
+        CUDA_UTIL_ERRORCHECK("cudaFree")
+
         /* ------------------------------------------------------------ */
 		startclockscpu = clock( );
-		for ( int i = 0; i < ITERSTEPS; i++ ) {
+
+        v2  = &v1[N];
+        out = &v1[N*2];
+
+		for ( unsigned int i = 0; i < ITERSTEPS; i++ ) {
 		    v1[1]++; /* ensure opearation is not answerde from cache */
 		    dotMul_cpu(v1, v2, out, N );
 		}

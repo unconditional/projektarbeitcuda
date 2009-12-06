@@ -3,7 +3,11 @@
 
 #define a( r, s ) (r -1 ) * N  + s -1
 
-
+#define CUDA_UTIL_ERRORCHECK(MSG)        if( e != cudaSuccess ) \
+        {\
+            fprintf(stderr, "*** Error on CUDA operation '%s': '%s'*** \n\n", MSG, cudaGetErrorString(e));\
+            exit(-3);\
+        }\
 
 
 #define GAUSS_NMAX 22
