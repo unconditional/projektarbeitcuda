@@ -11,7 +11,6 @@ mexUnitTestMain.cu
 
 void callTestFunction(double** ppIn,int *pmIn,int *pnIn, int callFuncType,double** ppOut){
 //call cpu
-//testdotMul
 	//printf("in callTestFunction \n");
 
 	switch(callFuncType){

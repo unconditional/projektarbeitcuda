@@ -3,6 +3,8 @@
 
 #include "..\\gpu\\projektcuda.h"
 #include "..\\gpu\\project_comm.h"
+#include <time.h>
+
 #define ITERATE 10000
 
 #endif

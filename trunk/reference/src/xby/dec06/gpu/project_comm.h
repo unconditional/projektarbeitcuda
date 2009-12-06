@@ -17,4 +17,8 @@
 #endif
 
 #define VECTOR_BLOCK_SIZE 128
+
+#include <time.h>
+#define ITERATE 10000
+
 #endif //?PROJECT_COMM_H__

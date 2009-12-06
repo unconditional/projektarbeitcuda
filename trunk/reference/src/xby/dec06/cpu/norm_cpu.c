@@ -21,7 +21,11 @@ void test_norm_cpu(double * pIn,double * pOut, unsigned int N)
 {
 	t_ve *pVin, *pVout;
 	int i;
-	//printf("in test_norm_cpu \n");
+	//variable for Time measure
+	unsigned int it;
+	double t_avg;
+	it = ITERATE;
+	t_avg = 0;
 	
 	pVin = (t_ve*)malloc(sizeof(t_ve)*N);
 	pVout = (t_ve*)malloc(sizeof(t_ve)*1);
@@ -29,8 +33,21 @@ void test_norm_cpu(double * pIn,double * pOut, unsigned int N)
 	for (i = 0; i < N; i++){
 		pVin[i] = (t_ve)pIn[i];
 	}	
+	
+	for (i=0;i<it; i++){	
+		clock_t startTime;
+		clock_t endTime;
+		startTime=clock();
+		//call computing function
+		norm_elements(pVin,pVout,N);
+		
+		endTime=clock();
+		t_avg += endTime-startTime;
+	}
+	printf("lauf Tack  in CPU = %lf \n",t_avg);
+	printf("laufTime  in CPU = %lf (ms)\n", ((double) t_avg)*1000 /(it* CLOCKS_PER_SEC));
 
-	norm_elements(pVin,pVout,N);
+	
 	pOut[0] = (double)pVout[0];
 	free(pVin);
 	free(pVout);
