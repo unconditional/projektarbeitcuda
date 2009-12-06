@@ -13,5 +13,6 @@
 #define GAUSS_NMAX 22
 
 typedef float        t_ve; /* base type of Matrizes: 'float' or 'double' */
+typedef t_ve*        pt_ve;
 
 
