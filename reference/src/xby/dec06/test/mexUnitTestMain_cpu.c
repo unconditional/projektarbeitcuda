@@ -67,9 +67,10 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
 				outNum = 1;
 		}
 		//error checking
-		if((outputArgNum!=outNum)&&(outputArgNum!=0)){
-			mexErrMsgTxt("the number of output arguments does not metch the function! ");
-		}
+		//if((outputArgNum!=outNum)&&(outputArgNum!=0)){
+        //    printf("outputArgNum =%d,  outNum =%d \n",outputArgNum,outNum);
+		//	mexErrMsgTxt("the number of output arguments does not metch the function! ");
+		//}
 		if(outNum < 1) {
 			printf("please define function Type! \ n");
 			printf("0:dotMul,1:norm, 2: matrixMul \ n");

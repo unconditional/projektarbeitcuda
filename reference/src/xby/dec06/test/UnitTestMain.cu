@@ -7,9 +7,9 @@ UnitTestMain
 #include "host_norm.cu"
 #include "host_matrixMul.cu"
 
-//#include "..\cpu\dotMul_cpu.c"
-//#include "..\cpu\norm_cpu.c"
-//#include "..\cpu\matrixMul_cpu.c"
+#include "..\cpu\dotMul_cpu.c"
+#include "..\cpu\norm_cpu.c"
+#include "..\cpu\matrixMul_cpu.c"
 /*
 int main()
 {
@@ -27,20 +27,26 @@ void callTestFunction(double** ppIn,int *pmIn,int *pnIn, int callFuncType,double
 		case 0://dotMul
 			if((pmIn[0]==pmIn[1])&&(pnIn[0]==pnIn[1])){
 				//if(1==pnIn[0])test_dotMul_cpu(ppIn[0],ppIn[1],ppOut[0],pmIn[0]);
-				if(1==pnIn[0])host_dotMul(ppIn[0],ppIn[1],ppOut[0],pmIn[0],pnIn[0]);
+				if(1==pnIn[0]){
+					host_dotMul(ppIn[0],ppIn[1],ppOut[0],pmIn[0],pnIn[0]);
+					test_dotMul_cpu(ppIn[0],ppIn[1],ppOut[0],pmIn[0]);
+				}
 			}
 			break;
 		case 1://norm	
 				//if(1==pnIn[0])test_norm_cpu(ppIn[0],ppOut[0],pmIn[0]);
-				if(1==pnIn[0])host_norm(ppIn[0],ppOut[0],pmIn[0], pnIn[0]);
+				if(1==pnIn[0]){
+					host_norm(ppIn[0],ppOut[0],pmIn[0], pnIn[0]);
+					test_norm_cpu(ppIn[0],ppOut[0],pmIn[0]);
+				}
 		break;
 		case 2: //matrixMul
 			//test matrixMul A*B = C
 			//ppIn[0]:matrix A, ppIn[1]: vector B, ppOut[0]: result verctor C
 			//pmIn[0]=mA pmIn[1]=nB, pnIn[0]=nB,pnIn[1]=1
 			if((pmIn[1]==pnIn[0])&&(1==pnIn[1])){
-				//test_matrixMul_cpu(ppOut[0],ppIn[0],ppIn[1],pmIn[0], pmIn[1]);
-				host_matrixMul(ppOut[0],ppIn[0],ppIn[1],pmIn[0], pmIn[1])
+				//host_matrixMul(ppOut[0],ppIn[0],ppIn[1],pmIn[0], pmIn[1]);
+				test_matrixMul_cpu(ppOut[0],ppIn[0],ppIn[1],pmIn[0], pmIn[1]);
 			}
 			
 		default:  
@@ -70,12 +76,13 @@ int main()
 	//0 dotMul
 	//1 norm
 	//2 matrixMul
-	funcType = 0;
-	vectorSize = 500;
+	funcType = 2;
+	vectorSize = 5000;
 	switch(funcType){
 		case 0://dotMul
 			argInNum = 2;
 			argOutNum = 1;
+			
 			ppOut = (double **)malloc(sizeof(double *)*argOutNum);
 			ppIn = (double **)malloc(sizeof(double *)*argInNum);			
 			pmIn = (int *) malloc(sizeof(int)*argInNum);			
@@ -96,6 +103,7 @@ int main()
 		case 1:// norm
 			argInNum = 1;
 			argOutNum = 1;
+			
 			ppOut = (double **)malloc(sizeof(double *)*argOutNum);
 			ppIn = (double **)malloc(sizeof(double *)*argInNum);			
 			pmIn = (int *) malloc(sizeof(int)*argInNum);			
@@ -116,6 +124,7 @@ int main()
 		case 2: //matrixMul
 			argInNum = 2;
 			argOutNum = 1;
+			
 			ppOut = (double **)malloc(sizeof(double *)*argOutNum);
 			ppIn = (double **)malloc(sizeof(double *)*argInNum);			
 			pmIn = (int *) malloc(sizeof(int)*argInNum);			
@@ -131,7 +140,7 @@ int main()
 
 		break;
 		default:
-		return;
+		return 1;
 		
 	}
 
@@ -146,9 +155,8 @@ int main()
 	for ( i = 0; i < argOutNum; i++){
 		pOut = ppOut[i];
 		
-        printf("pOut[0] = %lf ,argOutNum=%d", pOut[0], argOutNum);
-		
-        printf("\n");
+        for(j = 0; j<pnIn[0];j++)printf("pOut[%d] = %lf \n", j,pOut[j]);
+        
 		free(pOut);
 	}
 	free(ppIn);
