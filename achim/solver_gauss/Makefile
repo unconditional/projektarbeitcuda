@@ -10,7 +10,16 @@ CC = nvcc $(CFLAGS)
 # redirect to nul for tweaking nmake :-/
 # see <http://forums.nvidia.com/index.php?showtopic=56803>
 
-measuredotmul: measuredotmul.o dotMul_cuda_gpu02.o dotMul_cpu.o
+
+measurevectoradd: measurevectoradd.o addvector_cpu.o 
+	$(CC) -o measurevectoradd measurevectoradd.o addvector_cpu.o > nul
+ 
+
+measurematrixmul: measurematrixmul.o  matrixMul_cpu.o matrixMul_kernel04.o
+	$(CC) -o measurematrixmul measuredotmul.o  matrixMul_cpu.o matrixMul_kernel04.o > nul
+
+
+measuredotmul: measuredotmul.o dotMul_cuda_gpu02.o dotMul_cpu.o 
 	$(CC) -o measuredotmul measuredotmul.o dotMul_cuda_gpu02.o dotMul_cpu.o > nul
 
 idrsdriver: idrsdriver.o idrs.o dotMul_cuda_gpu02.o
@@ -37,5 +46,20 @@ dotMul_cuda_gpu02.o: dotMul_cuda_gpu02.cu projektcuda.h
 measuredotmul.o: measuredotmul.cu projektcuda.h
 	$(CC) -c measuredotmul.cu -o measuredotmul.o > nul
 	
+measurematrixmul.o: measurematrixmul.cu projektcuda.h
+	$(CC) -c measurematrixmul.cu -o measuredotmul.o > nul
+	
 dotMul_cpu.o: dotMul_cpu.cu projektcuda.h
 	$(CC) -c dotMul_cpu.cu -o dotMul_cpu.o > nul
+	
+matrixMul_cpu.o: matrixMul_cpu.cu projektcuda.h
+	$(CC) -c matrixMul_cpu.cu -o matrixMul_cpu.o > nul
+	
+matrixMul_kernel04.o: matrixMul_kernel04.cu projektcuda.h
+	$(CC) -c matrixMul_kernel04.cu -o matrixMul_kernel04.o > nul
+	
+measurevectoradd.o: measurevectoradd.cu
+	$(CC) -c measurevectoradd.cu -o measurevectoradd.o > nul
+	
+addvector_cpu.o: addvector_cpu.cu
+	$(CC) -c addvector_cpu.cu -o addvector_cpu.o > nul
