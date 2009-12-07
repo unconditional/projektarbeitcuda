@@ -3,6 +3,8 @@
 
 #include "projektcuda.h"
 
+#define ITERATIONS 100
+
 __host__ void malloc_N( unsigned int size_n, t_ve** M ) {
 
     t_ve* v =  (t_ve*) malloc( sizeof(t_ve) * size_n  );
@@ -63,6 +65,9 @@ __host__ void summup_cpu( t_ve *in, t_ve *out, unsigned int N ) {
 int main()
 {
     cudaError_t e;
+
+
+
     printf("\n triangle adder \n");
 
     t_ve* in;
@@ -101,22 +106,67 @@ int main()
     dim3 dimGrid ( 1 );
     dim3 dimBlock(DEF_BLOCKSIZE);
 
-    summup_kernel_for<<<dimGrid,dimBlock>>>( in, outgpu_d, DEF_BLOCKSIZE);
-    e = cudaGetLastError();
-    CUDA_UTIL_ERRORCHECK("summup_kernel_for");
+    float kernelfor_ms, kerneltriangle_ms;
+
+    {
+
+
+        cudaEvent_t start,stop;
+        e = cudaEventCreate( &stop );
+        CUDA_UTIL_ERRORCHECK("cudaEventCreate");
+        e = cudaEventCreate( &start );
+        CUDA_UTIL_ERRORCHECK("cudaEventCreate");
+        e= cudaEventRecord(start,0);
+        CUDA_UTIL_ERRORCHECK("cudaEventRecord");
+
+        for  ( int i = 0; i < ITERATIONS; i++ ) {
+            summup_kernel_for<<<dimGrid,dimBlock>>>( devicemem, outgpu_d, DEF_BLOCKSIZE);
+            e = cudaGetLastError();
+            CUDA_UTIL_ERRORCHECK("summup_kernel_for");
+        }
+
+        e= cudaEventRecord(stop,0 );
+        CUDA_UTIL_ERRORCHECK("cudaEventRecord");
+        e = cudaEventSynchronize(stop);
+        CUDA_UTIL_ERRORCHECK("cudaEventSynchronize");
+        e = cudaEventElapsedTime( &kernelfor_ms, start, stop );
+
+    }
     e = cudaMemcpy( &outgpu_for, outgpu_d, sizeof(t_ve) , cudaMemcpyDeviceToHost);
+
     CUDA_UTIL_ERRORCHECK("&outgpu_for, outgpu_dd");
     printf("\n\n got from GPU for: %f", outgpu_for);
+    printf("\n>>> GPU 'for' runtime: %f ms", kernelfor_ms );
 
-    summup_kernel_triangle<<<dimGrid,dimBlock>>>( in, outgpu_d, DEF_BLOCKSIZE);
-    e = cudaGetLastError();
-    CUDA_UTIL_ERRORCHECK("summup_kernel_triangle");
+    {
+        cudaEvent_t start,stop;
+        e = cudaEventCreate( &stop );
+        CUDA_UTIL_ERRORCHECK("cudaEventCreate");
+        e = cudaEventCreate( &start );
+        CUDA_UTIL_ERRORCHECK("cudaEventCreate");
+        e= cudaEventRecord(start,0);
+        CUDA_UTIL_ERRORCHECK("cudaEventRecord");
+
+        for  ( int i = 0; i < ITERATIONS; i++ ) {
+            summup_kernel_triangle<<<dimGrid,dimBlock>>>( devicemem, outgpu_d, DEF_BLOCKSIZE);
+            e = cudaGetLastError();
+            CUDA_UTIL_ERRORCHECK("summup_kernel_triangle");
+        }
+
+        e= cudaEventRecord(stop,0 );
+        CUDA_UTIL_ERRORCHECK("cudaEventRecord");
+        e = cudaEventSynchronize(stop);
+        CUDA_UTIL_ERRORCHECK("cudaEventSynchronize");
+        e = cudaEventElapsedTime( &kerneltriangle_ms, start, stop );
+    }
     e = cudaMemcpy( &outgpu_triangle, outgpu_d, sizeof(t_ve) , cudaMemcpyDeviceToHost);
-    CUDA_UTIL_ERRORCHECK("&outgpu_for, outgpu_dd");
+    CUDA_UTIL_ERRORCHECK("&outgpu_triangle, outgpu_dd");
     printf("\n\n got from GPU triangle: %f", outgpu_triangle);
+    printf("\n>>> GPU 'triangle' runtime: %f ms", kerneltriangle_ms );
 
     e = cudaFree(devicemem);
     CUDA_UTIL_ERRORCHECK("cudaFree")
+
 /*  --------------------------------------------------  */
 
 
