@@ -54,18 +54,14 @@ void host_matrixMul(double* pC, double* pA,double *pB, int mA, int nB)
 	{
 		data_in2_f[j] = (t_ve) data_in2_d[j];
 	}
-    for (i = 0; i < sizeA; i++)
-    {
-       // printf("data_in1_f[%d] = %f, ", i, data_in1_f[i]);
-    }
-        printf("\n");
-
+	
+	clock_t startTime;
+	clock_t endTime;
+	startTime=clock();
+		
 	cudaMemcpy( data_in1_f_gpu, data_in1_f, sizeof(t_ve)*sizeA, cudaMemcpyHostToDevice);
 	cudaMemcpy( data_in2_f_gpu, data_in2_f, sizeof(t_ve)*sizeB, cudaMemcpyHostToDevice);
-
-
-
-
+	
 	// Compute execution configuration using 128 threads per block 
 	dim3 dimBlock(sizeBlock);
 	//dim3 dimGrid((sizeIn)/dimBlock.x);
@@ -75,9 +71,7 @@ void host_matrixMul(double* pC, double* pA,double *pB, int mA, int nB)
 
 	cudaError_t e;	
 	for (i = 0; i < it ; i++){
-		clock_t startTime;
-		clock_t endTime;
-		startTime=clock();	
+
 			//Call function on GPU 
 		matrixMul<<<dimGrid,dimBlock>>>(data_out_f_gpu,data_in1_f_gpu, data_in2_f_gpu, mA,nB);
 		
@@ -87,9 +81,11 @@ void host_matrixMul(double* pC, double* pA,double *pB, int mA, int nB)
 			fprintf(stderr, "CUDA Error on square_elements: '%s' \n", cudaGetErrorString(e));
 			exit(-1);
 		}
-		endTime=clock();
-		t_avg += (endTime-startTime);		
+	
 	}//it
+	
+	endTime=clock();
+	t_avg += (endTime-startTime);	
 	printf("laufTime in GPU = %lf \n", ((double) t_avg) / (CLOCKS_PER_SEC));
 	// Copy result back to host 
 	cudaMemcpy( data_out_f, data_out_f_gpu, sizeof(float)*sizeC, cudaMemcpyDeviceToHost);

@@ -81,6 +81,9 @@ void host_dotMul(double* pIn1, double* pIn2,double *pOut, int sizeIn, int sizeOu
         exit(-3);
     }
    */
+   		clock_t startTime;
+		clock_t endTime;
+		startTime=clock();		
 		// copy data from host to device
 	cudaMemcpy( data_in1_f_gpu, data_in1_f, sizeof(t_ve)*sizeIn, cudaMemcpyHostToDevice);
 	cudaMemcpy( data_in2_f_gpu, data_in2_f, sizeof(t_ve)*sizeIn, cudaMemcpyHostToDevice);
@@ -92,9 +95,7 @@ void host_dotMul(double* pIn1, double* pIn2,double *pOut, int sizeIn, int sizeOu
 	
 
 	for (i = 0; i < it ; i++){
-		clock_t startTime;
-		clock_t endTime;
-		startTime=clock();		
+
 
 		//Call function on GPU 
 		device_dotMul<<<dimGrid,dimBlock>>>(data_in1_f_gpu, data_in2_f_gpu, data_out_f_gpu, sizeIn);
@@ -107,10 +108,11 @@ void host_dotMul(double* pIn1, double* pIn2,double *pOut, int sizeIn, int sizeOu
 			exit(-1);
 		}
 		
+
+	}//for it
 		endTime=clock();
 		t_avg += endTime-startTime;
-	}//for it
-	printf("laufTime  in CPU = %lf (ms)\n", ((double) t_avg)*1000 /(it* CLOCKS_PER_SEC));
+	printf("laufTime  in GPU = %lf (ms)\n", ((double) t_avg)*1000 /(it* CLOCKS_PER_SEC));
 	
 	// Copy result back to host 
 	cudaMemcpy( data_out_f, data_out_f_gpu, sizeof(float)*sizeOut, cudaMemcpyDeviceToHost);

@@ -5,7 +5,7 @@ norm_cpu
 #define __NORM_CPU__
 #include "test_comm_cpu.h"
 
-void norm_elements(t_ve* in, t_ve* out, unsigned int N)
+void norm_cpu(t_ve* in, t_ve* out, unsigned int N)
 {
 	int i;
 	out[0] = 0;
@@ -39,7 +39,7 @@ void test_norm_cpu(double * pIn,double * pOut, unsigned int N)
 		clock_t endTime;
 		startTime=clock();
 		//call computing function
-		norm_elements(pVin,pVout,N);
+		norm_cpu(pVin,pVout,N);
 		
 		endTime=clock();
 		t_avg += endTime-startTime;

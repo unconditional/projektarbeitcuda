@@ -38,38 +38,41 @@ void host_norm(double* pIn, double *pOut, int sizeIn, int sizeOut)
 	{
 		data1f[j] = (float) data1[j];
 	}
-
-
-	cudaMemcpy( data1f_gpu, data1f, sizeof(float)*sizeIn, cudaMemcpyHostToDevice);
-
 	data2f = (float *) malloc(sizeof(float)*sizeOut);
-	//cudaMemcpy( data2f_gpu, data2f, sizeof(float)*sizeOut, cudaMemcpyHostToDevice);
+	
+		clock_t startTime;
+		clock_t endTime;
+		startTime=clock();	
+		
+		cudaMemcpy( data1f_gpu, data1f, sizeof(float)*sizeIn, cudaMemcpyHostToDevice);
 
+	
 	// Compute execution configuration using 128 threads per block 
 	dim3 dimBlock(sizeBlock);
 	dim3 dimGrid((sizeIn)/dimBlock.x);
 	if ( (sizeIn) % sizeBlock !=0 ) dimGrid.x+=1;
 	for (i = 0; i < it ; i++){
-		clock_t startTime;
-		clock_t endTime;
-		startTime=clock();	 
-	// Call function on GPU 
-	norm_elements<<<dimGrid,dimBlock>>>(data1f_gpu, data2f_gpu, sizeIn);
-	cudaError_t e;
-	e = cudaGetLastError();
-	if ( e != cudaSuccess)
-	{
-		fprintf(stderr, "CUDA Error on square_elements: '%s' \n", cudaGetErrorString(e));
-		exit(-1);
-	}
+
+		
+		// Call function on GPU 
+		norm_elements<<<dimGrid,dimBlock>>>(data1f_gpu, data2f_gpu, sizeIn);
+		cudaError_t e;
+		e = cudaGetLastError();
+		if ( e != cudaSuccess)
+		{
+			fprintf(stderr, "CUDA Error on square_elements: '%s' \n", cudaGetErrorString(e));
+			exit(-1);
+		}
+
+	}//for it
 	
 	endTime=clock();
 	t_avg += endTime-startTime;
-	}//for it
-	printf("laufTime  in CPU = %lf (ms)\n", ((double) t_avg)*1000 /(it* CLOCKS_PER_SEC));
+	printf("laufTime  in GPU = %lf (ms)\n", ((double) t_avg)*1000 /(it* CLOCKS_PER_SEC));
 	
-	// Copy result back to host 
-	cudaMemcpy( data2f, data2f_gpu, sizeof(float)*sizeOut, cudaMemcpyDeviceToHost);
+		// Copy result back to host 
+		cudaMemcpy( data2f, data2f_gpu, sizeof(float)*sizeOut, cudaMemcpyDeviceToHost);
+		
 
 	// Create a pointer to the output data 
 
