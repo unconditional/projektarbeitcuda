@@ -67,5 +67,5 @@ measurevectoradd.o: measurevectoradd.cu
 addvector_cpu.o: addvector_cpu.cu
 	$(CC) -c addvector_cpu.cu -o addvector_cpu.o > nul
 
-measure_triangle_adder.o: measure_triangle_adder.cu
+measure_triangle_adder.o: measure_triangle_adder.cu measurehelp.h
 	$(CC) -c measure_triangle_adder.cu -o measure_triangle_adder.o > nul
