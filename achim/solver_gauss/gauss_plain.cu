@@ -9,9 +9,9 @@
 #include "problemsamples.h"
 #include "idrs.h"
 
+#include "measurehelp.h"
 
-
-
+#define ITERATIONS 100
 
 t_matrix M1;
 
@@ -25,17 +25,11 @@ t_matrix M1;
 void pull_problem_from_device( t_pmatrix matrix ) {
    cudaError_t e;
     e = cudaMemcpy(  matrix->elements, matrix->device_elements, sizeof(t_ve) * (matrix->n + 1 ) * matrix->n, cudaMemcpyDeviceToHost);
-    if( e != cudaSuccess )
-    {
-        fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
-        exit(-3);
-    }
+    CUDA_UTIL_ERRORCHECK("cudaMemcpy");
+
     e = cudaMemcpy(  matrix->x, matrix->device_x, sizeof(t_ve) * matrix->n, cudaMemcpyDeviceToHost);
-    if( e != cudaSuccess )
-    {
-        fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
-        exit(-3);
-    }
+    CUDA_UTIL_ERRORCHECK("cudaMemcpy");
+
 }
 // -----------------------------------------------------------------------
 void push_problem_to_device( t_pmatrix matrix ) {
@@ -43,17 +37,10 @@ void push_problem_to_device( t_pmatrix matrix ) {
 
     cudaError_t e;
     e = cudaMalloc ((void **) &matrix->device_x, sizeof(t_ve) * matrix->n );
-    if( e != cudaSuccess )
-    {
-        fprintf(stderr, "CUDA Error on cudaMalloc: '%s' \n", cudaGetErrorString(e));
-        exit(-3);
-    }
+    CUDA_UTIL_ERRORCHECK("cudaMalloc");
+
     e = cudaMalloc ((void **) &matrix->device_elements, sizeof(t_ve) * (matrix->n + 1 ) * matrix->n );
-    if( e != cudaSuccess )
-    {
-        fprintf(stderr, "CUDA Error on cudaMalloc: '%s' \n", cudaGetErrorString(e));
-        exit(-3);
-    }
+    CUDA_UTIL_ERRORCHECK("cudaMalloc");
 /*
     e = cudaMemcpy( matrix->device_x, matrix->x , sizeof(t_ve)*matrix->n, cudaMemcpyHostToDevice);
     if( e != cudaSuccess )
@@ -63,11 +50,7 @@ void push_problem_to_device( t_pmatrix matrix ) {
     }
 */
     e = cudaMemcpy( matrix->device_elements, matrix->elements , sizeof(t_ve) * (matrix->n + 1 ) * matrix->n, cudaMemcpyHostToDevice);
-    if( e != cudaSuccess )
-    {
-        fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
-        exit(-3);
-    }
+    CUDA_UTIL_ERRORCHECK("cudaMemcpy");
 
 }
 
@@ -77,13 +60,11 @@ void push_problem_to_device( t_pmatrix matrix ) {
 // -----------------------------------------------------------------------
 // -----------------------------------------------------------------------
 
-void eleminate ( t_ve* Ab, unsigned int N ) {
+void eleminate ( t_ve* Ab, t_ve* x, unsigned int N ) {
     unsigned int i;   // columns
     unsigned int j;   // rows, equitations
     unsigned int k, max;
     t_ve t;
-
-
 
     for ( i = 1; i <= N ; i++ ) {
 
@@ -106,6 +87,18 @@ void eleminate ( t_ve* Ab, unsigned int N ) {
              Ab[ ab(j,k) ] -= Ab[ ab(i,k) ] * Ab[ ab(j,i) ] /  Ab[ ab(i,i) ];
           }
        }
+
+
+      // substitute ...
+
+        for (j = N; j >= 1; j-- ) {
+            t_ve t = 0.0;
+            for ( k = j + 1; k <= N; k++ ) {
+                    t +=  Ab[ ab(j,k) ] * x[ k - 1 ];
+            }
+            x[ j - 1 ] = ( Ab[ ab(j,N+1) ] - t ) / Ab[ ab(j,j) ] ;
+        }
+
     }
 }
 // -----------------------------------------------------------------------
@@ -127,23 +120,34 @@ int main()
         gen_problemsample( &M1, problem );
         printf( "\n \nRunning problem No. %u , size %u\n", problem, M1.n );
         backup_problem( &M1 );
-        if ( M1.n < 9 ) {
+        if ( M1.n < 0 ) {
             dump_problem( M1.elements, M1.n );
         }
         push_problem_to_device( &M1 );
 
-        if ( M1.n  <= GAUSS_NMAX ) {
-        device_gauss_solver<<<dimGrid,dimBlock>>>( M1.device_elements, M1.n, M1.device_x );
+        float kernel_ms;
 
-        e = cudaGetLastError();
-        if( e != cudaSuccess )
+        if ( M1.n  <= GAUSS_NMAX ) {
+
         {
-            fprintf(stderr, "CUDA Error on add_arrays_gpu: '%s' \n", cudaGetErrorString(e));
-            exit(-3);
+           for ( int i = 0; i < 10; i++ ) {
+            device_gauss_solver<<<dimGrid,dimBlock>>>( M1.device_elements, M1.n, M1.device_x );
+            e = cudaGetLastError();
+            CUDA_UTIL_ERRORCHECK("kernel");
+           }
+        }
+        {
+            START_CUDA_TIMER
+            for ( int i = 0; i < ITERATIONS; i++ ) {
+                device_gauss_solver<<<dimGrid,dimBlock>>>( M1.device_elements, M1.n, M1.device_x );
+                e = cudaGetLastError();
+                CUDA_UTIL_ERRORCHECK("kernel");
+            }
+
+            STOP_CUDA_TIMER( & kernel_ms )
         }
 
-
-
+        printf("\nelapsed time GPU: %f ms\n", kernel_ms / ITERATIONS );
         pull_problem_from_device( &M1 );
 
 
@@ -155,17 +159,20 @@ int main()
         check_correctness( M1.orgelements, M1.n, M1.x );
         }
         e = cudaFree(M1.device_elements);
-        if( e != cudaSuccess )
-        {
-            fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
-            exit(-3);
-        }
+        CUDA_UTIL_ERRORCHECK("cudaFree");
         e = cudaFree(M1.device_x);
-        if( e != cudaSuccess )
+        CUDA_UTIL_ERRORCHECK("cudaFree");
+
+        float cpu_ms;
+
         {
-            fprintf(stderr, "CUDA Error on cudaMemcpy: '%s' \n", cudaGetErrorString(e));
-            exit(-3);
+            START_CUDA_TIMER
+
+            eleminate ( M1.orgelements, M1.x, M1.n );
+
+            STOP_CUDA_TIMER( &cpu_ms )
         }
+        printf("\nelapsed time CPU: %f ms\n", cpu_ms );
         free_matrix( &M1 );
     }
 }
