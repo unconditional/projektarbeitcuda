@@ -4,7 +4,7 @@
 #include "projektcuda.h"
 #include "measurehelp.h"
 
-#define ITERATIONS 100
+#define ITERATIONS 5
 
 __host__ void malloc_N( unsigned int size_n, t_ve** M ) {
 
@@ -19,20 +19,77 @@ __host__ void malloc_N( unsigned int size_n, t_ve** M ) {
 /* ----------------------------------------------------------------- */
 __global__ void summup_kernel_triangle( t_ve *in, t_ve *out, unsigned int N ) {
     __shared__ t_ve Vs [DEF_BLOCKSIZE];
-    short offset = 1;
 
     Vs[threadIdx.x] = in[threadIdx.x];
     __syncthreads();
 
-    for ( short i = 0; i < BLOCK_EXP ; i++ ) {
-        short old = offset;
+/*
+    unsigned short t = 1;
+    for ( t = 1 << BLOCK_EXP - 1; t > 1; t >>= 1 ) {
+        __syncthreads();
+        if ( threadIdx.x < t ) {
+            Vs[threadIdx.x] += Vs[ threadIdx.x + t ];
+        }
+    }
+    __syncthreads();
+    if ( threadIdx.x == 0 ) { out[0] = Vs[0] + Vs[t]; }
+*/
+
+    short int offset = 1;
+    for ( short int i = 1; i < BLOCK_EXP ; i++ ) {
+        short int old = offset;
         offset <<= 1;
         if ( threadIdx.x % offset == 0 ) {
            Vs[threadIdx.x] += Vs[ threadIdx.x + old ];
         }
         __syncthreads();
     }
-    if ( threadIdx.x == 0 ) { out[0] = Vs[0]; }
+    if ( threadIdx.x == 0 ) { out[0] = Vs[0] + Vs[offset]; }
+
+}
+/* ----------------------------------------------------------------- */
+__global__ void summup_kernel_triangle_warpop( t_ve *in, t_ve *out, unsigned int N ) {
+    __shared__ t_ve Vs [DEF_BLOCKSIZE];
+
+
+    //Vs[threadIdx.x] = in[threadIdx.x];
+
+
+    __syncthreads();
+    if ( threadIdx.x < 256 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  + 256 ]; }
+    //if ( threadIdx.x < 256 ) { Vs[threadIdx.x] = in[threadIdx.x] + in[threadIdx.x + 256]; }
+    __syncthreads();
+
+    if ( threadIdx.x < 128 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  + 128 ];}
+    __syncthreads();
+
+    if ( threadIdx.x <  64 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  +  64 ];}
+    __syncthreads();
+
+    if ( threadIdx.x <  32 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  +  32 ];}
+    __syncthreads();
+
+    if ( threadIdx.x <  16 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  + 16 ]; }
+    __syncthreads();
+
+    if ( threadIdx.x <   8 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  + 8 ]; }
+    __syncthreads();
+
+//    if ( threadIdx.x <   4 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  + 4 ]; }
+//    __syncthreads();
+
+//    if ( threadIdx.x <   2 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  + 2 ]; }
+//    __syncthreads();
+
+
+    if ( threadIdx.x == 0 ) {
+        t_ve sum = 0;
+        for ( short int i = 0; i < 8; i++ ) {
+            sum += Vs[i];
+        }
+        out[0] =  sum;
+    }
+
 }
 /* ----------------------------------------------------------------- */
 
@@ -85,13 +142,28 @@ int main()
         printf("\n step: %u. offset %u old %u", i, offset, old );
     }
 */
+    short offset = 1;
+    for ( short t = 1 << BLOCK_EXP - 1; t > 1; t >>= 1 ) {
+        printf("\n threadlimit %u, offset %u", t, offset );
+        offset <<= 1;
+    }
+
     malloc_N( DEF_BLOCKSIZE , &in );
 
     for ( int i = 0; i < DEF_BLOCKSIZE; i++ ) {
        in[i] = 10;
     }
 
-    summup_cpu( in, &out, DEF_BLOCKSIZE );
+    float cpu_ms;
+
+    {
+       START_CUDA_TIMER
+       for  ( int i = 0; i < ITERATIONS; i++ ) {
+           summup_cpu( in, &out, DEF_BLOCKSIZE );
+       }
+       STOP_CUDA_TIMER( &cpu_ms )
+
+    }
     //printf("\n\n got from CPU calc: %f", out);
 
 /*  --------------------------------------------------  */
@@ -113,13 +185,13 @@ int main()
             e = cudaGetLastError();
             CUDA_UTIL_ERRORCHECK("summup_kernel_triangle");
 
-            summup_kernel_triangle<<<dimGrid,dimBlock>>>( devicemem, outgpu_d, DEF_BLOCKSIZE);
+            summup_kernel_triangle_warpop<<<dimGrid,dimBlock>>>( devicemem, outgpu_d, DEF_BLOCKSIZE);
             e = cudaGetLastError();
             CUDA_UTIL_ERRORCHECK("summup_kernel_triangle");
 
     }
 
-    float kernelfor_ms, kerneltriangle_ms;
+    float kernelfor_ms, kerneltriangle_ms, kerneltrianglewarpop_ms;
 
     {
         START_CUDA_TIMER
@@ -145,14 +217,32 @@ int main()
         }
         STOP_CUDA_TIMER( &kerneltriangle_ms )
     }
+
+    {
+        START_CUDA_TIMER
+        for  ( int i = 0; i < ITERATIONS; i++ ) {
+            summup_kernel_triangle_warpop<<<dimGrid,dimBlock>>>( devicemem, outgpu_d, DEF_BLOCKSIZE);
+            e = cudaGetLastError();
+            CUDA_UTIL_ERRORCHECK("summup_kernel_triangle");
+        }
+        STOP_CUDA_TIMER( &kerneltrianglewarpop_ms )
+    }
+
     e = cudaMemcpy( &outgpu_triangle, outgpu_d, sizeof(t_ve) , cudaMemcpyDeviceToHost);
     CUDA_UTIL_ERRORCHECK("&outgpu_triangle, outgpu_dd");
-    //printf("\n\n got from GPU triangle: %f", outgpu_triangle );
+    printf("\n\n got from GPU triangle: %f", outgpu_triangle );
     printf("\n>>> GPU 'triangle' runtime: %f ms", kerneltriangle_ms / ITERATIONS );
+    printf("\n>>> GPU 'triangleop' runtime: %f ms", kerneltrianglewarpop_ms  / ITERATIONS );
 
     printf("\n\n runtime of 'triangle' is %f percent of 'for(...)' runtime \n\n", 100 / kernelfor_ms * kerneltriangle_ms );
+    printf("\n\n runtime of 'trianglewarpop' is %f percent of 'for(...)' runtime \n\n", 100 / kernelfor_ms * kerneltrianglewarpop_ms );
+
     e = cudaFree(devicemem);
     CUDA_UTIL_ERRORCHECK("cudaFree")
+
+    printf("\n runtime on CPU: %f ms \n", cpu_ms / ITERATIONS  );
+
+   printf("\n\n runtime of 'triangleop' is %f percent of 'cpu' runtime \n\n", 100 / cpu_ms * kerneltrianglewarpop_ms );
 
 /*  --------------------------------------------------  */
 

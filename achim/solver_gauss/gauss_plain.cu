@@ -11,7 +11,7 @@
 
 #include "measurehelp.h"
 
-#define ITERATIONS 100
+#define ITERATIONS 5
 
 t_matrix M1;
 
@@ -113,7 +113,7 @@ int main()
     cudaError_t e;
 
 //    int block_size = NMAX;
-    dim3 dimBlock( GAUSS_NMAX * ( GAUSS_NMAX + 1 ));
+    dim3 dimBlock(  GAUSS_NMAX + 2 );
     dim3 dimGrid ( 1 );
 
     for ( problem = 1; problem < 5; problem++ ) {
@@ -152,7 +152,7 @@ int main()
 
 
         if ( M1.n < 9 ) {
-            printf( "\n solution: \n" );
+           // printf( "\n solution: \n" );
             dump_problem( M1.elements, M1.n );
             dump_x( M1.x, M1.n );
         }
@@ -172,7 +172,7 @@ int main()
 
             STOP_CUDA_TIMER( &cpu_ms )
         }
-        printf("\nelapsed time CPU: %f ms\n", cpu_ms );
+        printf("\nelapsed time CPU: %f ms\n \n ------------------------", cpu_ms );
         free_matrix( &M1 );
     }
 }

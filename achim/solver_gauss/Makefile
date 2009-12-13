@@ -1,11 +1,16 @@
 CFLAGS = -deviceemu
 CC = nvcc $(CFLAGS)
 
-##solver: gauss_plain.o gausskernel.o util.o problemsamples.o idrs.o idrsdriver
+#solver: gauss_plain.o gausskernel.o util.o problemsamples.o idrs.o idrsdriver
 #	$(CC)  -o gauss_plain gauss_plain.o gausskernel.o util.o problemsamples.o idrs.o > nul
 
-#gauss_plain.o: gauss_plain.cu util.h projektcuda.h
-#	$(CC)  -c gauss_plain.cu -o gauss_plain.o  > nul
+all: measure_gauss measure_triangle_adder
+
+measure_gauss: gauss_plain.o util.o problemsamples.o gausskernel.o
+	$(CC)  -o measure_gaus gauss_plain.o util.o problemsamples.o gausskernel.o > nul
+
+gauss_plain.o: gauss_plain.cu util.h projektcuda.h
+	$(CC)  -c gauss_plain.cu -o gauss_plain.o  > nul
 
 # redirect to nul for tweaking nmake :-/
 # see <http://forums.nvidia.com/index.php?showtopic=56803>

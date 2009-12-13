@@ -16,10 +16,11 @@ __global__ void device_gauss_solver( t_ve* p_Ab, unsigned int N, t_ve* p_x )
     unsigned int tidx =  threadIdx.x;
     unsigned int n;
 
-    t_ve t ;
-
-    if ( tidx  <  N * (N+1) ) {
-         Ab[tidx] = p_Ab[tidx];
+    if ( threadIdx.x < N + 1 ) {
+        for ( short l = 0; l < N ; l++ ) {
+           short ao = ( threadIdx.x * N + l );
+           Ab[ao] = p_Ab[ao];
+        }
     }
 
     if ( tidx == 0 ) { i = 1; }
@@ -27,9 +28,11 @@ __global__ void device_gauss_solver( t_ve* p_Ab, unsigned int N, t_ve* p_x )
     __syncthreads();
 
     while ( i <= N ) {                  /* for ( i = 1; i <= N ; i++ ) */
-        if ( tidx == 0 ) {
+
+       if ( tidx == 0 ) {
             unsigned int j;
             max = i;
+
             for( j = i + 1; j <= N; j++ ) {
                 if ( abs( Ab[ ab(j,i) ] ) > abs( Ab[ ab(max,i) ] )  ) {
                     max = j;
@@ -38,17 +41,13 @@ __global__ void device_gauss_solver( t_ve* p_Ab, unsigned int N, t_ve* p_x )
        }
        __syncthreads();
 
+       unsigned int k = tidx + 1;
 
-//       if ( threadIdx.y == 0 ) {
-           unsigned int k = tidx + 1;
-         if ( tidx == 0 ) { /* does not work in parallel on device (don't not know why :-/ ) */
-//           if ( ( k >= i ) && ( k <= N + 1 ) ) {
-            for ( k = i; k <= N + 1; k++ ) {
-               t              = Ab[ ab(i  ,k) ];
-               Ab[ ab(i,k)   ] = Ab[ ab(max,k) ];
-               Ab[ ab(max,k) ] = t;
-           }
-        }
+       if ( ( k >= i ) && ( k <= N + 1 ) ) {
+           t_ve t          = Ab[ ab(i  ,k) ];
+           Ab[ ab(i,k)   ] = Ab[ ab(max,k) ];
+           Ab[ ab(max,k) ] = t;
+      }
 
       __syncthreads();
 
@@ -63,6 +62,7 @@ __global__ void device_gauss_solver( t_ve* p_Ab, unsigned int N, t_ve* p_x )
        }
        __syncthreads();
        if ( tidx == 0 ) { i++; }
+       __syncthreads();
     }
     __syncthreads();
 
@@ -73,25 +73,16 @@ __global__ void device_gauss_solver( t_ve* p_Ab, unsigned int N, t_ve* p_x )
         for (j = N; j >= 1; j-- ) {
             t_ve t = 0.0;
             for ( k = j + 1; k <= N; k++ ) {
-                    t +=  Ab[ ab(j,k) ] * x[ k - 1 ];
+                t +=  Ab[ ab(j,k) ] * x[ k - 1 ];
             }
             x[ j - 1 ] = ( Ab[ ab(j,N+1) ] - t ) / Ab[ ab(j,j) ] ;
         }
-        /* copy result back to global memory */
 
-//        for  ( n = 0; n <  N * (N+1); n++ ) {
-//            p_Ab[n] = Ab[n];
-//        }
-//        for  ( n = 0; n < N; n++ ) {
-//            p_x[n] = x[n];
-//        }
     }
     __syncthreads();
     if ( threadIdx.x < N ) {
         p_x[threadIdx.x] = x[threadIdx.x];
     }
-    if ( threadIdx.x < N * (N+1) ) {
-        p_Ab[threadIdx.x] = Ab[threadIdx.x];
-    }
+
    __syncthreads();
 }
