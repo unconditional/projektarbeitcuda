@@ -35,11 +35,12 @@ __global__ void summup_kernel_triangle( t_ve *in, t_ve *out, unsigned int N ) {
     if ( threadIdx.x == 0 ) { out[0] = Vs[0] + Vs[t]; }
 */
 
-    short int offset = 1;
-    for ( short int i = 1; i < BLOCK_EXP ; i++ ) {
-        short int old = offset;
+    int offset = 1;
+    for (  int i = 1; i < BLOCK_EXP ; i++ ) {
+         int old = offset;
         offset <<= 1;
         if ( threadIdx.x % offset == 0 ) {
+
            Vs[threadIdx.x] += Vs[ threadIdx.x + old ];
         }
         __syncthreads();
@@ -52,33 +53,33 @@ __global__ void summup_kernel_triangle_warpop( t_ve *in, t_ve *out, unsigned int
     __shared__ t_ve Vs [DEF_BLOCKSIZE];
 
 
-    //Vs[threadIdx.x] = in[threadIdx.x];
+    Vs[threadIdx.x] = in[threadIdx.x];
 
 
     __syncthreads();
-    if ( threadIdx.x < 256 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  + 256 ]; }
+    if ( threadIdx.x < 256 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  | 256 ]; }
     //if ( threadIdx.x < 256 ) { Vs[threadIdx.x] = in[threadIdx.x] + in[threadIdx.x + 256]; }
     __syncthreads();
 
-    if ( threadIdx.x < 128 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  + 128 ];}
+    if ( threadIdx.x < 128 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  | 128 ];}
     __syncthreads();
 
-    if ( threadIdx.x <  64 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  +  64 ];}
+    if ( threadIdx.x <  64 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  |  64 ];}
     __syncthreads();
 
-    if ( threadIdx.x <  32 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  +  32 ];}
+    if ( threadIdx.x <  32 ) { Vs[threadIdx.x ] += Vs[ threadIdx.x  |  32 ];}
     __syncthreads();
 
-    if ( threadIdx.x <  16 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  + 16 ]; }
+    if ( threadIdx.x <  16 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  | 16 ]; }
     __syncthreads();
 
-    if ( threadIdx.x <   8 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  + 8 ]; }
+    if ( threadIdx.x <   8 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  | 8 ]; }
     __syncthreads();
 
-//    if ( threadIdx.x <   4 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  + 4 ]; }
+//    if ( threadIdx.x <   4 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  | 4 ]; }
 //    __syncthreads();
 
-//    if ( threadIdx.x <   2 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  + 2 ]; }
+//    if ( threadIdx.x <   2 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  | 2 ]; }
 //    __syncthreads();
 
 
@@ -217,7 +218,10 @@ int main()
         }
         STOP_CUDA_TIMER( &kerneltriangle_ms )
     }
+    e = cudaMemcpy( &outgpu_triangle, outgpu_d, sizeof(t_ve) , cudaMemcpyDeviceToHost);
 
+    CUDA_UTIL_ERRORCHECK("&outgpu_for, outgpu_dd");
+    printf("\n\n got from GPU triangle: %f", outgpu_triangle );
     {
         START_CUDA_TIMER
         for  ( int i = 0; i < ITERATIONS; i++ ) {
@@ -230,7 +234,7 @@ int main()
 
     e = cudaMemcpy( &outgpu_triangle, outgpu_d, sizeof(t_ve) , cudaMemcpyDeviceToHost);
     CUDA_UTIL_ERRORCHECK("&outgpu_triangle, outgpu_dd");
-    printf("\n\n got from GPU triangle: %f", outgpu_triangle );
+    printf("\n\n got from GPU triangleop: %f", outgpu_triangle );
     printf("\n>>> GPU 'triangle' runtime: %f ms", kerneltriangle_ms / ITERATIONS );
     printf("\n>>> GPU 'triangleop' runtime: %f ms", kerneltrianglewarpop_ms  / ITERATIONS );
 
