@@ -6,6 +6,12 @@
 
 #define ITERATIONS 5
 
+#ifdef __DEVICE_EMULATION__
+#define EMUSYNC __syncthreads()
+#else
+#define EMUSYNC
+#endif
+
 __host__ void malloc_N( unsigned int size_n, t_ve** M ) {
 
     t_ve* v =  (t_ve*) malloc( sizeof(t_ve) * size_n  );
@@ -57,38 +63,26 @@ __global__ void summup_kernel_triangle_warpop( t_ve *in, t_ve *out, unsigned int
 
 
     __syncthreads();
-    if ( threadIdx.x < 256 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  | 256 ]; }
-    //if ( threadIdx.x < 256 ) { Vs[threadIdx.x] = in[threadIdx.x] + in[threadIdx.x + 256]; }
+    if ( threadIdx.x < 256 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  + 256 ]; }
     __syncthreads();
 
-    if ( threadIdx.x < 128 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  | 128 ];}
+    if ( threadIdx.x < 128 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  + 128 ];}
     __syncthreads();
 
-    if ( threadIdx.x <  64 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  |  64 ];}
+    if ( threadIdx.x <  64 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  +  64 ];}
     __syncthreads();
 
-    if ( threadIdx.x <  32 ) { Vs[threadIdx.x ] += Vs[ threadIdx.x  |  32 ];}
-    __syncthreads();
+    if ( threadIdx.x <  32 ) {
+        Vs[threadIdx.x] += Vs[ threadIdx.x + 32 ];
+        Vs[threadIdx.x] += Vs[ threadIdx.x + 16 ];
+        Vs[threadIdx.x] += Vs[ threadIdx.x +  8 ];
+        Vs[threadIdx.x] += Vs[ threadIdx.x +  4 ];
+        Vs[threadIdx.x] += Vs[ threadIdx.x +  2 ];
+        Vs[threadIdx.x] += Vs[ threadIdx.x +  1 ];
 
-    if ( threadIdx.x <  16 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  | 16 ]; }
-    __syncthreads();
-
-    if ( threadIdx.x <   8 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  | 8 ]; }
-    __syncthreads();
-
-//    if ( threadIdx.x <   4 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  | 4 ]; }
-//    __syncthreads();
-
-//    if ( threadIdx.x <   2 ) { Vs[threadIdx.x] += Vs[ threadIdx.x  | 2 ]; }
-//    __syncthreads();
-
-
-    if ( threadIdx.x == 0 ) {
-        t_ve sum = 0;
-        for ( short int i = 0; i < 8; i++ ) {
-            sum += Vs[i];
+        if ( threadIdx.x == 0 ) {
+            out[0] =  Vs[0]  ;
         }
-        out[0] =  sum;
     }
 
 }
