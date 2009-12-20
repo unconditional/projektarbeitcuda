@@ -10,44 +10,12 @@ typedef float t_ve;
 typedef unsigned int mwSize;
 typedef int mwIndex;
 
-typedef struct DataTable{
-       float * pBody; 
-       struct DataTable * pHead;
-       struct DataTable * pTail;
-} aDataTable;
-
-void freeDataTable( aDataTable * pTable){
-     pTable->pTail = NULL;
-     pTable->pHead = NULL;
-     free(pTable->pBody);
-     free(pTable);
-}
-
-void freeTable( aDataTable * pTable){
-     aDataTable * pData;
-     aDataTable * pData1=0;
-     pData = NULL;
-     if(pTable->pTail != NULL){
-        pData = pTable->pTail;
-        freeTable(pTable);
-     }else {
-            pData = pTable;
-            if(pData->pHead!=NULL){
-               pData = pData->pHead;
-               freeDataTable(pData->pTail);
-               pData->pTail=NULL;
-               freeTable(pData);
-           }
-
-           return;
-     }
-}
-
 typedef struct Matrix{
     unsigned int m;
     unsigned int n;
     t_ve* pElement;
-} t_Matix;
+} t_FullMatrix;
+//} t_Matrix;
 
 typedef struct SparseMatrix{
     unsigned int m;
@@ -58,7 +26,7 @@ typedef struct SparseMatrix{
     t_ve* pNZElement;
 } t_SparseMatrix;
 
-void initElement(t_Matix * pMatrix)
+void initElement(t_FullMatrix * pMatrix)
 {
     int i;
     if (pMatrix != 0)
@@ -66,12 +34,47 @@ void initElement(t_Matix * pMatrix)
             pMatrix->pElement[i] = 0;  
         }
 }
-void setElement(t_Matix * pMatrix, unsigned int row, unsigned int col, float val)
+void setElement(t_FullMatrix * pMatrix, unsigned int row, unsigned int col, float val)
 {
     if((row < pMatrix->m)&&(col < pMatrix->n)){
         printf("row=%d,col=%d,val=%lf,\n",row,col, val);
         pMatrix->pElement[(row)*(pMatrix->n) + col ] = val;
     }
+}
+void calMV(t_SparseMatrix *pSparseMatrix, t_FullMatrix * pVector,t_FullMatrix * pResultVector)
+{
+    t_ve *pMatrixElements, *pVectorElements, *pResultElements;
+    unsigned int m, n, i, j;
+    unsigned int *pRow, *pCol;
+    int colbegin, colend;
+    pMatrixElements = pSparseMatrix->pNZElement;
+    pVectorElements = pVector->pElement;
+    pResultElements = pResultVector->pElement;
+    m = pSparseMatrix->m;
+    n = pSparseMatrix->n;
+    //==check size of Arguments========================================================
+    if(m != pResultVector->m*(pResultVector->n)){
+        printf("Result Vector does not match the Matrix\n");
+        return;
+    }   
+    if(n != pVector->m*(pVector->n)){
+        printf("input Vector does not match the Matrix\n");
+        return;
+    }
+    pRow = pSparseMatrix->pRow;
+    pCol = pSparseMatrix->pCol;
+    //cal
+    printf("in calMV \n");
+    for (i = 0; i < m; i++){
+        colbegin = pRow[i];
+        colend = pRow[i+1];
+        printf("colbegin = %d \n",colbegin);
+        printf("colend = %d \n",colend);
+        for(j=colbegin;j<colend;j++)pResultElements[i] += pMatrixElements[j]*pVectorElements[pCol[j]];
+    }
+    
+    
+    
 }
 /* Gateway function */
 void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
@@ -84,12 +87,16 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     int cmplx,isfull;
     double *pr,*pi,*si,*sr;
     double percent_sparse;
+    //double *pMatrix;
+    t_SparseMatrix sparseMatrix;
+    t_SparseMatrix *pSparseMatrix ;     
+    //declare Vector 
+    t_FullMatrix fullVector, ResultVector;
+    t_FullMatrix * pVector, *pResultVector;
     
-     //double *pMatrix;
-     t_SparseMatrix sparseMatrix;
-     t_SparseMatrix *pSparseMatrix ; 
-     pSparseMatrix = &sparseMatrix; 
-     
+    pSparseMatrix = &sparseMatrix; 
+    pVector = &fullVector;
+    pResultVector = &ResultVector;
     /* Check for proper number of input and output arguments */    
     if (nrhs < 2) {
 	mexErrMsgTxt("Two input argument required. First Sparse Matrix, Second Vector");
@@ -131,15 +138,29 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     }
     
     //=====get Vector==========================================================
-    t_Matix Vector;
-    t_Matix * pVector;
-    pVector = &Vector;
+ //   t_Matrix fullVector;
+ //   t_Matrix * pVector;
+
     m  = mxGetM(prhs[1]);
     n  = mxGetN(prhs[1]);
     pr = mxGetPr(prhs[1]);
     pi = mxGetPi(prhs[1]);
     pVector->m=m;
     pVector->n=n;
+    if (!((m == 1)||(n==1))){
+        mexErrMsgTxt("Second Argument must be Vector! \n");
+    } 
+    pVector->pElement = (t_ve*)mxMalloc(sizeof(t_ve)*m*n);
+    for(i = 0; i < m*n; i++) pVector->pElement[i] = pr[i];
+    //====create Result Vector==================================================================
+    pResultVector->m = pSparseMatrix->m; 
+    pResultVector->n = 1;
+    pResultVector->pElement = (t_ve*)mxMalloc(sizeof(t_ve)*m*n);
+    initElement(pResultVector);
+    //======================================================================================
+    //prepare MV caculation
+    calMV(pSparseMatrix, pVector, pResultVector);
+    
     //ir = mxGetIr(prhs[0]);
     //jc = mxGetJc(prhs[0]);
     //nzmax = mxGetNzmax(prhs[0]);
@@ -164,27 +185,21 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     jcs = mxGetJc(plhs[0]);
     
     */
-    
-  
-    /* Find the dimensions of the data */
-        //pMatrix = mxGetPr(prhs[i]); 
-       
-        /*
-        for(k=0; k < nzmax; k++){
-            printf("ir[%d]=%d \n",k,ir[k]);
-
-        }
-        for(k=0; k < n+1; k++){
-    
-            printf("jc[%d]=%d \n",k,jc[k]);
-        }
-       */
-
-        
-        printf("printf full matrix \n");
-        for(i=0; i < nzmax; i++){     
+            
+        printf("printf Sparse matrix \n");
+        for(i=0; i < pSparseMatrix->nzmax; i++){     
             printf("%f,k=%d ",pSparseMatrix->pNZElement[i],i);
-            printf("%f \n");
+            printf(" \n");
+        }
+        printf("printf Vector \n");
+        for(i=0; i < pVector->n*pVector->m; i++){     
+            printf("%f,i=%d ",pVector->pElement[i],i);
+            printf("\n");
+        }
+        printf("printf Result Vector \n");
+       for(i=0; i < pResultVector->n*pResultVector->m; i++){     
+            printf("%f,i=%d ",pResultVector->pElement[i],i);
+            printf("\n");
         }
         /*
         for(k=0; k < m*n; k++){
@@ -192,6 +207,8 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
             printf("%f \n",pIn[k]);
         }
          */
+        mxFree(pResultVector->pElement);
+        mxFree(pVector->pElement);
         mxFree( pSparseMatrix->pNZElement);
         mxFree( pSparseMatrix->pCol);
         mxFree( pSparseMatrix->pRow);
