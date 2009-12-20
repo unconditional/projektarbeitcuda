@@ -41,6 +41,7 @@ __global__ void sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSp
         //printf("input Vector does not match the Matrix\n");
         return;
     }
+	//pRow and pCol may should in share memory or texture
     pRow = pSparseMatrix->pRow;
     pCol = pSparseMatrix->pCol;
     //cal
