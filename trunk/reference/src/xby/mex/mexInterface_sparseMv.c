@@ -164,6 +164,9 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     //ir = mxGetIr(prhs[0]);
     //jc = mxGetJc(prhs[0]);
     //nzmax = mxGetNzmax(prhs[0]);
+    plhs[0] = mxCreateDoubleMatrix(pResultVector->m*pResultVector->n,1,mxREAL);
+	pr = mxGetPr(plhs[0]);
+    for (i = 0; i<(pResultVector->m*pResultVector->n); i++)pr[i] = pResultVector->pElement[i];
     
     /* Allocate space for sparse matrix 
      * NOTE:  Assume at most 20% of the data is sparse.  Use ceil
