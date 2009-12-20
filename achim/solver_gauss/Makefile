@@ -19,11 +19,11 @@ gauss_plain.o: gauss_plain.cu util.h projektcuda.h
 ##measurevectoradd: measurevectoradd.o addvector_cpu.o
 ##	$(CC) -o measurevectoradd measurevectoradd.o addvector_cpu.o > nul
 
-measure_cublas: measure_cublasdotmul.cu
-	nvcc -o measure_cublas -l cublas measure_cublasdotmul.cu > nul
+measure_cublas: measure_cublasdotmul.cu dotMul_cpu.o
+	nvcc -o measure_cublas -l cublas dotMul_cpu.o measure_cublasdotmul.cu > nul
 
-measure_cublas_emu: measure_cublasdotmul.cu
-	nvcc -deviceemu -o measure_cublas_emu -l cublasemu measure_cublasdotmul.cu > nul
+measure_cublas_emu: measure_cublasdotmul.cu dotMul_cpu.o
+	nvcc -deviceemu -o measure_cublas_emu -l cublasemu dotMul_cpu.o measure_cublasdotmul.cu > nul
 
 measure_triangle_adder: measure_triangle_adder.o
 	$(CC) -o measure_triangle_adder measure_triangle_adder.o > nul
