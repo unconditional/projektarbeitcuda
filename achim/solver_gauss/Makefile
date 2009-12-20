@@ -4,7 +4,7 @@ CC = nvcc $(CFLAGS)
 #solver: gauss_plain.o gausskernel.o util.o problemsamples.o idrs.o idrsdriver
 #	$(CC)  -o gauss_plain gauss_plain.o gausskernel.o util.o problemsamples.o idrs.o > nul
 
-all: measure_gauss measure_triangle_adder
+all: measure_gauss measure_triangle_adder measure_cublas_emu measure_cublas
 
 measure_gauss: gauss_plain.o util.o problemsamples.o gausskernel.o
 	$(CC)  -o measure_gaus gauss_plain.o util.o problemsamples.o gausskernel.o > nul
@@ -19,9 +19,14 @@ gauss_plain.o: gauss_plain.cu util.h projektcuda.h
 ##measurevectoradd: measurevectoradd.o addvector_cpu.o
 ##	$(CC) -o measurevectoradd measurevectoradd.o addvector_cpu.o > nul
 
+measure_cublas: measure_cublasdotmul.cu
+	nvcc -o measure_cublas -l cublas measure_cublasdotmul.cu > nul
+
+measure_cublas_emu: measure_cublasdotmul.cu
+	nvcc -deviceemu -o measure_cublas_emu -l cublasemu measure_cublasdotmul.cu > nul
 
 measure_triangle_adder: measure_triangle_adder.o
-	$(CC) -o measure_triangle_adder measure_triangle_adder.o
+	$(CC) -o measure_triangle_adder measure_triangle_adder.o > nul
 
 measurematrixmul: measurematrixmul.o  matrixMul_cpu.o matrixMul_kernel04.o
 	$(CC) -o measurematrixmul measuredotmul.o  matrixMul_cpu.o matrixMul_kernel04.o > nul
