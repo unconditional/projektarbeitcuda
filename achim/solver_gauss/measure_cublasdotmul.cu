@@ -77,6 +77,26 @@ int main()
 
     printf("\n measure CUBLAS dotmul\n");
 
+
+    int deviceCount;
+    cudaGetDeviceCount(&deviceCount);
+
+    if (deviceCount == 0)
+        printf("There is no device supporting CUDA\n");
+
+    int dev;
+    for (dev = 0; dev < deviceCount; ++dev) {
+        cudaDeviceProp deviceProp;
+        cudaGetDeviceProperties(&deviceProp, dev);
+
+        printf("  Number of multiprocessors:                     %d\n", deviceProp.multiProcessorCount);
+
+        printf("\nDevice %d: \"%s\"\n", dev, deviceProp.name);
+        printf("  CUDA Capability Major revision number:         %d\n", deviceProp.major);
+        printf("  CUDA Capability Minor revision number:         %d\n", deviceProp.minor);
+        printf("  Maximum number of threads per block:           %d\n", deviceProp.maxThreadsPerBlock);
+    }
+
     cublasStatus ce;
 
     ce = cublasInit();
