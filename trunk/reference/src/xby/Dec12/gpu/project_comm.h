@@ -16,9 +16,30 @@
 #define BS(i) Bs[i]
 #endif
 
-#define VECTOR_BLOCK_SIZE 512
+
+
+
 
 #include <time.h>
+#define VECTOR_BLOCK_SIZE 512
 #define ITERATE 100
+typedef struct Matrix{
+    unsigned int m;
+    unsigned int n;
+    //size m*n
+	t_ve* pElement;
+} t_FullMatrix;
+//} t_Matrix;
+typedef struct SparseMatrix{
+    unsigned int m;
+    unsigned int n;
+    unsigned int nzmax;
+	//size m+1
+    unsigned int *pRow;
+    //size nzmax
+	unsigned int *pCol;
+	//size : nzmax
+    t_ve* pNZElement;
+} t_SparseMatrix;
 
 #endif //?PROJECT_COMM_H__
