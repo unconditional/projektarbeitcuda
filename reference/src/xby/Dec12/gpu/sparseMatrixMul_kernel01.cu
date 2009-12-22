@@ -5,8 +5,8 @@
 
 /* Kernel to square elements of the array on the GPU */
 /*
-	Matrix A is mA x nB  , Vector B is nB
-	Vector C output vector in size of mA
+	input Matrix pSparseMatrix  ,input Vector pVector 
+	Vector pResultVector output vector 
 	C=A*B
 description:
 	each row of A occuppy one block. if gridDim is smaller than the row number of A  
