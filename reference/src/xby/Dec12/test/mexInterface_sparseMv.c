@@ -108,7 +108,7 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
      
      
     /* Get the size and pointers to input data */
-     
+    //prepare MV caculation
     //====get SparseMatrix============================================
     m  = mxGetM(prhs[0]);
     n  = mxGetN(prhs[0]);
@@ -155,10 +155,14 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     pResultVector->pElement = (t_ve*)mxMalloc(sizeof(t_ve)*m*n);
     initElement(pResultVector);
     //======================================================================================
-    //prepare MV caculation
+    // call cpu
     calMV(pSparseMatrix, pVector, pResultVector);
     
-    //ir = mxGetIr(prhs[0]);
+	//call gpu
+	//host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMatrix, t_FullMatrix * pVector)
+	//host_sparseMatrixMul(pResultVector, pSparseMatrix, pVector);
+    
+	//ir = mxGetIr(prhs[0]);
     //jc = mxGetJc(prhs[0]);
     //nzmax = mxGetNzmax(prhs[0]);
     plhs[0] = mxCreateDoubleMatrix(pResultVector->m*pResultVector->n,1,mxREAL);
