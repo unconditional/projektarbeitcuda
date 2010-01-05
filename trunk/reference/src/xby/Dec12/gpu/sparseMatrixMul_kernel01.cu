@@ -16,17 +16,20 @@ __global__ void sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSp
 	//__shared__ float As[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim 512
 	//__shared__ float Bs[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim 512
 	__shared__ float Cs[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim 512
-	int idx = gridIndex*gridDim.x + blockIdx.x*blockDim.x+threadIdx.x;
+	//define gridIndex, if gridDim < mA, gridIndex > 0; 
+	int gridIndex = 0;
+	//int idx = gridIndex*gridDim.x + blockIdx.x*blockDim.x+threadIdx.x;
     t_ve *pMatrixElements, *pVectorElements, *pResultElements;
-    unsigned int m, n, i, j;
+    unsigned int m, n;//, i, j;
     unsigned int *pRow, *pCol;
-    unsigned int colbegin, colend;
+    //unsigned int colbegin, colend;
     pMatrixElements = pSparseMatrix->pNZElement;
     pVectorElements = pVector->pElement;
     pResultElements = pResultVector->pElement;
     m = pSparseMatrix->m;
     n = pSparseMatrix->n;
 	int aBegin = 0;
+	int aEnd = pSparseMatrix->m;
 	int bBegin = 0;
 	//int aStep = gridDim.x;
 	int bStep = VECTOR_BLOCK_SIZE; // blockDim.x
@@ -45,18 +48,17 @@ __global__ void sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSp
     pRow = pSparseMatrix->pRow;
     pCol = pSparseMatrix->pCol;
     //cal
-	
 
 		if(threadIdx.x==0){
-			pResultElements[blockIdx.x]=0;
+			pResultElements[blockIdx.x]=0;//?????????????
 		//C[gridIndex*gridDim.x+blockIdx.x]=0;
 		}
 		//following is operations within one block 
 		// initialize the dot product for each row in A and vector B
 		t_ve blocksum = 0;
 		//if nB> blockDim, split repeat the
-		bBegin = pRow[blockIdx.x];
-		bEnd = pRow[blockIdx.x + 1];
+		bBegin = pRow[blockIdx.x];//?????????????
+		bEnd = pRow[blockIdx.x + 1];//?????????????
 		for(int b = bBegin; (b < bEnd)&&((threadIdx.x+b) < bEnd); b += bStep ) {
 			//initialise Cs 
 			//As[threadIdx.x] = 0;
@@ -71,7 +73,7 @@ __global__ void sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSp
 			// } 
 			if (( (gridIndex*gridDim.x+blockIdx.x)<aEnd)&&((b+threadIdx.x) < bEnd)) {
 				
-				Cs[threadIdx.x] = pMatrixElements[b + threadIdx.x] * pVectorElements[pCol[b + threadIdx.x ]];
+				Cs[threadIdx.x] = pMatrixElements[b + threadIdx.x] * pVectorElements[pCol[b + threadIdx.x ]];//?????????????
 			}
 			__syncthreads();
 				
@@ -90,7 +92,7 @@ __global__ void sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSp
 		}//for b
 		__syncthreads();
 
-		if(threadIdx.x == 0) pResultElements[blockIdx.x] = blocksum;
+		if(threadIdx.x == 0) pResultElements[blockIdx.x] = blocksum;//?????????????
 		__syncthreads();	
     
  
