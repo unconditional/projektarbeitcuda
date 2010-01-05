@@ -29,7 +29,7 @@ typedef struct Matrix{
     //size m*n
 	t_ve* pElement;
 } t_FullMatrix;
-//} t_Matrix;
+
 typedef struct SparseMatrix{
     unsigned int m;
     unsigned int n;

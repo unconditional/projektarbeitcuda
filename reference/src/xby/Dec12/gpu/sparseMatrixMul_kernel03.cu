@@ -11,56 +11,54 @@
 description:
 	each row of A occuppy one block. if gridDim is smaller than the row number of A  
 */
-__global__ void sparseMatrixMul(t_ve * pResultVector,t_ve *pSparseMatrix,unsigned int *pRow,unsigned int *pCol,unsigned int nzmax,unsigned int mA,unsigned int nB, t_ve * pVector)
+__global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSparseMatrix, t_FullMatrix pVector)
 {
 	//__shared__ float As[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim 512
 	//__shared__ float Bs[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim 512
 	__shared__ float Cs[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim 512
 	//define gridIndex, if gridDim < mA, gridIndex > 0; 
 	int gridIndex = 0;
-	int idx = gridIndex*gridDim.x + blockIdx.x*blockDim.x+threadIdx.x;
+	//int idx = gridIndex*gridDim.x + blockIdx.x*blockDim.x+threadIdx.x;
     t_ve *pMatrixElements, *pVectorElements, *pResultElements;
-    unsigned int m, n, i, j;
-    //unsigned int *pRow, *pCol;
-    unsigned int colbegin, colend;
-    pMatrixElements = pSparseMatrix;
-    pVectorElements = pVector;
-    pResultElements = pResultVector;
-//    m = pSparseMatrix->m;
-//    n = pSparseMatrix->n;
-	m = mA;
-	n = nB;
+    unsigned int m, n;//, i, j;
+    unsigned int *pRow, *pCol;
+    //unsigned int colbegin, colend;
+    pMatrixElements = pSparseMatrix.pNZElement;
+    pVectorElements = pVector.pElement;
+    pResultElements = pResultVector.pElement;
+    m = pSparseMatrix.m;
+    n = pSparseMatrix.n;
 	int aBegin = 0;
+	int aEnd = pSparseMatrix.m;
 	int bBegin = 0;
 	//int aStep = gridDim.x;
 	int bStep = VECTOR_BLOCK_SIZE; // blockDim.x
 	//int aEnd = mA;
 	int bEnd;
     //==check size of Arguments========================================================
-    if(m != pResultVector->m*(pResultVector->n)){
+    if(m != pResultVector.m*(pResultVector.n)){
         //printf("Result Vector does not match the Matrix\n");
         return;
     }   
-    if(n != pVector->m*(pVector->n)){
+    if(n != pVector.m*(pVector.n)){
         //printf("input Vector does not match the Matrix\n");
         return;
     }
 	//pRow and pCol may should in share memory or texture
-    //pRow = pSparseMatrix->pRow;
-    //pCol = pSparseMatrix->pCol;
+    pRow = pSparseMatrix.pRow;
+    pCol = pSparseMatrix.pCol;
     //cal
-	
 
 		if(threadIdx.x==0){
-			pResultElements[blockIdx.x]=0;
+			pResultElements[blockIdx.x]=0;//?????????????
 		//C[gridIndex*gridDim.x+blockIdx.x]=0;
 		}
 		//following is operations within one block 
 		// initialize the dot product for each row in A and vector B
 		t_ve blocksum = 0;
 		//if nB> blockDim, split repeat the
-		bBegin = pRow[blockIdx.x];
-		bEnd = pRow[blockIdx.x + 1];
+		bBegin = pRow[blockIdx.x];//?????????????
+		bEnd = pRow[blockIdx.x + 1];//?????????????
 		for(int b = bBegin; (b < bEnd)&&((threadIdx.x+b) < bEnd); b += bStep ) {
 			//initialise Cs 
 			//As[threadIdx.x] = 0;
@@ -75,7 +73,7 @@ __global__ void sparseMatrixMul(t_ve * pResultVector,t_ve *pSparseMatrix,unsigne
 			// } 
 			if (( (gridIndex*gridDim.x+blockIdx.x)<aEnd)&&((b+threadIdx.x) < bEnd)) {
 				
-				Cs[threadIdx.x] = pMatrixElements[b + threadIdx.x] * pVectorElements[pCol[b + threadIdx.x ]];
+				Cs[threadIdx.x] = pMatrixElements[b + threadIdx.x] * pVectorElements[pCol[b + threadIdx.x ]];//?????????????
 			}
 			__syncthreads();
 				
@@ -94,7 +92,7 @@ __global__ void sparseMatrixMul(t_ve * pResultVector,t_ve *pSparseMatrix,unsigne
 		}//for b
 		__syncthreads();
 
-		if(threadIdx.x == 0) pResultElements[blockIdx.x] = blocksum;
+		if(threadIdx.x == 0) pResultElements[blockIdx.x] = blocksum;//?????????????
 		__syncthreads();	
     
  
