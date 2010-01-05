@@ -1,0 +1,60 @@
+% E.G. Oct, 1999
+
+\catcode`@=11
+\def\frownfill{$\scriptscriptstyle\m@th\mathord\frown$}
+\def\bow#1{\vbox{\m@th\ialign{##\crcr
+      \hfil\frownfill\hfil\crcr\noalign{\kern-0.2\p@\nointerlineskip}
+      $\hfil\displaystyle{#1}\hfil$\crcr}}}
+\def\bbow#1{\vbox{\m@th\ialign{##\crcr
+     \hfil\frownfill\hfil\crcr\noalign{\kern-0.7\p@\nointerlineskip}
+     \hfil\frownfill\hfil\crcr\noalign{\kern-0.3\p@\nointerlineskip}
+      $\hfil\displaystyle{#1}\hfil$\crcr}}}
+\def\widefrownfill{$\m@th\mathord\frown$}
+\def\widebow#1{\vbox{\m@th\ialign{##\crcr
+      \hfil\widefrownfill\hfil\crcr\noalign{\kern-0.9\p@\nointerlineskip}
+      $\hfil\displaystyle{#1}\hfil$\crcr}}}
+\def\widebbow#1{\vbox{\m@th\ialign{##\crcr
+     \hfil\widefrownfill\hfil\crcr\noalign{\kern-1.8\p@\nointerlineskip}
+     \hfil\widefrownfill\hfil\crcr\noalign{\kern-0.9\p@\nointerlineskip}
+      $\hfil\displaystyle{#1}\hfil$\crcr}}}
+
+\newcommand{\ve}{\protect\bow{\rm\bf e}}
+\newcommand{\vE}{\protect\bow{E}}
+\newcommand{\va}{\protect\bow{\rm\bf a}}
+\newcommand{\vA}{\protect\bow{A}}
+\newcommand{\fb}{\protect\bbow{\rm\bf b}}
+\newcommand{\fB}{\protect\bbow{B}}
+\newcommand{\vh}{\protect\bow{\rm\bf h}}
+\newcommand{\vH}{\protect\bow{H}}
+\newcommand{\fd}{\protect\bbow{\rm\bf d}}
+\newcommand{\fD}{\protect\bbow{D}}
+\newcommand{\fj}{\protect\bbow{\rm\bf j}}
+\newcommand{\vvi}{\protect\bow{\rm\bf v}}
+\newcommand{\fJ}{\protect\bbow{J}}
+\newcommand{\vV}{\protect\bow{V}}
+
+\newcommand{\vm}{\protect\widebow{\rm\bf m}}
+
+\newcommand{\rhs}{\mbox{\rm\bf r}}
+\newcommand{\q}{\mbox{\rm\bf q}}
+\newcommand{\T}{\mbox{\rm\bf T}}
+
+\newcommand{\fDeps}{\mbox{\rm\bf D}_{\varepsilon}}
+\newcommand{\fDkap}{\mbox{\rm\bf D}_{\kappa}}
+\newcommand{\fDsig}{\mbox{\rm\bf D}_{\sigma}}
+\newcommand{\fDmu}{\mbox{\rm\bf D}_{\mu}}
+\newcommand{\fDnu}{\mbox{\rm\bf D}_{\nu}}
+\newcommand{\fDD}{\mbox{\rm\bf D}}
+\newcommand{\fDvi}{\mbox{\rm\bf D}_{\V}^{-1}}
+\newcommand{\C}{\mbox{\rm\bf  C}}
+\renewcommand{\S}{\mbox{\rm\bf S}}
+
+\newcommand{\Gt}{\widetilde{G}}
+\newcommand{\Ct}{\widetilde{\rm\bf C}}
+\newcommand{\St}{\widetilde{\rm\bf S}}
+
+\newcommand{\fMeps}{\mbox{\rm\bf M}_{\varepsilon}}
+\newcommand{\fMkap}{\mbox{\rm\bf M}_{\kappa}}
+\newcommand{\fMsig}{\mbox{\rm\bf M}_{\sigma}}
+\newcommand{\fMmu}{\mbox{\rm\bf M}_{\mu}}
+\newcommand{\fMnu}{\mbox{\rm\bf M}_{\nu}}
