@@ -1,0 +1,455 @@
+\documentclass[twocolumn]{IEEEtran}
+\usepackage{epsf}
+\usepackage{./fit}
+\usepackage{./forms}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}
+\kern-.08em T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\setcounter{page}{1}
+\setlength\arraycolsep{1pt}
+
+\newcommand{\fMm}{{\bf M}_{\rm m}}
+\newcommand{\fMl}{{\bf M}_{\lambda}}
+
+\begin{document}
+
+\title{Titel der Seminarausarbeitung
+%
+\thanks{\hrule}%
+\thanks{Manuscript received October 25, 1999}%
+\thanks{N. Author1 (Matnr.), E. Author2 (Matnr.) are
+at the Technische Universit\"at Darmstadt, FB 18 Elektrotechnik
+und Informationstechnik, Fachgebiet Theorie Elektromagnetischer Felder,
+Schlo\ss{}gartenstr.~8, D-64289~Darmstadt, Germany}%
+\thanks{}
+\thanks{Email: author1/author2@temf.\-tu\--darm\-stadt.\-de}%
+}
+
+\author{M. Author1 and E. Author2}
+
+\markboth{Ausarbeitung zum Seminar {\it Rechnergest\"utzte Methode der Feldberechnung 1} }%
+{Thema der Ausarbeitung}
+
+\maketitle
+
+\begin{abstract}
+Zusammenfassender Kurztext, nicht mehr als 150 Worte.
+\end{abstract}
+
+\begin{keywords}
+Stichw\"orter
+\end{keywords}
+
+\section{Introduction}
+Temperature dependent material properties  and Joule heat losses in
+dissipative media imply coupled thermal and electromagnetic processes.
+Microwave heating, the self heating of semiconductor devices and the
+induction-heat treatment of metals are a few examples of applications,
+where such a coupling occurs. For the design and optimization of
+these applications, an accurate, simultaneous solution of Maxwell's
+equation and of the heat conduction equation is required.
+
+Several {\bf FEM} algorithms for the solution of the coupled thermal
+and electromagnetic equations have been suggested (cf.~\cite{Hameyer}).
+However, it remains difficult to achieve satisfactory convergence
+conditions and consistent numerical results \cite{Kost}. This is
+mainly due to the different nature of the two sets of equations,
+implying very distinct time scales $t_{\srr EM}$ and $t_{\srr T}$,
+characteristic for the electromagnetic and thermal precesses,
+respectively.
+
+The Finite Integration ({\bf FI}) Method has been successfully
+employed for the solution of Maxwell's equations \cite{Weiland96e:01}.
+The resulting Maxwell-Grid-Equations ({\bf MGE}) allow for strict
+conservation of charge, momentum and energy, and thus guarantee for the
+long-time-stability of the numerical solution. This feature is especially
+attractive for the simulation of the slowly changing thermal fields,
+which are typically characterized by long transient states. The
+{\bf FI} Method  has also been used in the calculation of stationary
+thermal and electromagnetic field distributions
+\cite{RienenPinderWeiland96e:01}.
+
+The present work extends the previous study \cite{RienenPinderWeiland96e:01}
+to the calculation of transient fields. The time dependent heat conduction
+equation for isotropic media reads
+\beq
+\varrho(\bvec{r},T) c(\bvec{r},T)
+\dif{T(\bvec{r},t)}{t} = - \di\bvec{J}_w(\bvec{r},t) +
+Q_w(\bvec{r},t) \; ,
+\label{eqn:1}
+\enq
+where $\varrho$ and $c$ denote the generally temperature dependent
+density and volumetric heat capacity of the medium. The thermal
+current density $\bvec{J}_w$ is given by the Fourier law,
+\beq
+\bvec{J}_w(\bvec{r},t) = - \lambda\grad T(\bvec{r},t)
+\label{eqn:2}
+\enq
+with $\lambda=\lambda(\bvec{r},T)$ the thermal conductivity. Except
+for the Joule heat excitation term $Q_w$ appearing in the thermal
+equation, also the radiant and convective boundary conditions are
+accommodated in the model. The algorithm for the integration in
+the time domain makes explicitly use of the different time scales
+$t_{\srr EM}$ and $t_{\srr T}$. Thus, unnecessary iterations in the
+electromagnetic computation are excluded and the solution speed and
+convergence rate are improved. Currently, only temperature dependent
+material properties are supported, whereas nonlinear properties of,
+e.g., ferromagnetic materials are not yet implemented.
+
+\section{The {\bf FI} Method}
+The {\bf FI} discretization scheme is based on a dual grid-doublet
+$\{G,\Gt\}$, which decomposes the computation domain into two sets of
+dual cells \cite{Weiland96e:01}. Integral quantities $\q$, $\ve$ and
+$\fb$ are defined on the grid $G$, corresponding to the total charge
+in the cell volumes, to the electric voltage along the cell edges
+and to the magnetic induction flux on the cell facets, respectively.
+Analogously, $\fj$, $\fd$ and $\vh$ are the vectors of charge current,
+electric displacement flux and magnetic voltage defined on the
+facets and edges of the dual grid $\Gt$. Fig.~\ref{fig:1}
+illustrates the allocation of fluxes and voltages in the
+case of rectangular dual grids $G$ and $\Gt$.
+\befig[htb]
+\centering
+\mbox{\epsfxsize=86mm\epsfbox{e-fit.eps}} \\[-5pt]
+\caption{{\bf (a)} Two cells of the rectangular dual grids $G$ and
+$\Gt$ with given indices $(i,j,k)$ and the allocation of charge $\q$
+are shown. {\bf (b)} Allocation of electric voltage $\ve$
+and of magnetic induction flux $\fb$ on the direct grid $G$.}
+\label{fig:1}
+\enfig
+
+Using these integral quantities, Maxwell's equations in discrete form,
+the so-called Maxwell-Grid-Equations ({\bf MGE}) are obtained:
+\beqarr
+\left\{
+\begin{array}{llllll}
+\C  \ve & = & \displaystyle - \ddif{}{t}\fb \; , \qquad &\Ct \vh
+      & = &  \displaystyle \ddif{}{t}\fd + \fj \; ,      \\[5pt]
+\displaystyle
+\S  \fb &=& {\bf 0} \; ,          & \St \fd &=& \q \; .
+\end{array}\right.
+\label{eqn:3}
+\enqarr
+The support matrix operators $(\C,\S)$ and $(\Ct,\St)$  defined
+on $G$ and $\Gt$ are discrete mappings of the differential ``$\curl$''
+and ``$\di$''. It follows from the topology of the dual grid-doublet
+\cite{Weiland96e:01}, that the operators $\C$, $\S$, $\Ct$ and
+$\St$ fulfill the identities $\S\C = \C\St^{\rm T} = 0$ and
+$\St\Ct = \Ct\S^{\rm T} = 0$, which obviously correspond to the
+continuum relations $\di\curl = 0$ and $\curl\grad = \nmbr{0}$. Note,
+that equations (\ref{eqn:3}) hold true exactly, thus exact conservation
+laws in discrete form for charge, momentum and energy may be
+derived \cite{Thoma:Weiland}.
+
+The discretization approximation enters the {\bf FI} Method through
+the constitutive material equations
+\begin{equation}
+\fd=\fMeps\ve + \mbox{\rm\bf p}, ~~~\fj=\fMsig\ve
+\quad\mbox{\rm and}\quad \fb=\fMmu\vh + \mbox{\rm\bf m}\; ,
+\label{eqn:4}
+\end{equation}
+which close the system of {\bf MGE} (\ref{eqn:3}) and relate
+vectors defined on $G$ and $\Gt$. Here, $\fMeps$, $\fMsig$ and
+$\fMmu$ are matrix operators taking into account the average effects of
+linear polarization, electric conductivity and linear magnetization of
+the material medium. Details on the material and geometry averaging
+techniques used with the {\bf FI} Method are found in \cite{Weiland96e:01}.
+For dual orthogonal grids $G$ and $\Gt$ the global discretization error
+of this approximation is of second order accuracy in the discrete solutions
+of (\ref{eqn:3}) and (\ref{eqn:4}).
+
+The discretization of the heat conduction equation is carried out
+analogously on the same dual grid-doublet $\{G,\Gt\}$ as above.
+Integrating equation (\ref{eqn:1}) over the cell volumes of the grid
+$G$ and equation (\ref{eqn:2}) over the cell facets of the dual grid
+$\Gt$ one obtains the set of discrete equations,
+\beq
+\left\{
+\begin{array}{l}\displaystyle
+\fMm\ddif{}{t}\T=-\St \fj_w  + \q_w \\[5pt]
+\displaystyle \fj_w = \fMl\St^{\rm T} \T \; .
+\end{array}\right.
+\label{eqn:5}
+\enq
+The vector $\fj_w$ of thermal currents is defined on the facets of the
+dual grid $\Gt$, $\T$ is the vector of all temperature values allocated
+on the nodes of the grid $G$. Similarly, the vector $\q_w$ of Joule heat
+losses is allocated on the nodes of $G$ (see Fig.~\ref{fig:2} for the
+allocation in the case of rectangular dual grids). The matrixes $\fMm$
+and $\fMl$ contain information on the (cell-averaged) heat capacity
+and thermal conductivity of the material medium. Combining equations
+(\ref{eqn:1}) and (\ref{eqn:2}) yields
+\beq
+\fMm\ddif{}{t}\T=-\St\fMl\St^{\rm T} \T + \q_w \; ,
+\label{eqn:6}
+\enq
+which is the discrete thermal equation in the {\bf FI} formulation.
+Note, that this formulation implies energy conservation at any given
+time $t$. Since the thermal current $\fj_w$ has the same value and
+direction on the common facet of two neighboring cells, no energy
+loss occurs while heat is transferred from one cell to the other.
+\befig[htb]
+\centering
+\mbox{\epsfxsize=86mm\epsfbox{t-fit.eps}} \\[-5pt]
+\caption{{\bf (a)} Allocation of temperature $T$, heat source
+${\bf q}_w$ and thermal current $\fj_w$ on a rectangular dual
+grid-doublet $\{G,\Gt\}$. {\bf (b)} Allocation of thermal
+current on $\Gt$.}
+\label{fig:2}
+\enfig
+\section{Integration in the time domain}
+The time domain equivalent to the {\bf FI} Method is the well known
+{\bf FDTD} scheme of leapfrog integration. Applied to the time dependent
+{\bf MGE} (\ref{eqn:3}) this procedure is restricted by the Courant
+stability criterion on the time step length:  $\Delta t \le
+\Delta t^{\srr max}_{\srr EM}$, where
+\beq
+\Delta t^{\srr max}_{\srr EM}=\min_G\left\{\sqrt{\varepsilon_i\mu_i}
+\left(\frac{1}{\Delta x_i^2}+\frac{1}{\Delta y_i^2}+\frac{1}{\Delta
+z_i^2} \right)^{-\frac{1}{2}} \right\} \; .
+\label{eqn:7}
+\enq
+
+For the time integration of equation (\ref{eqn:6}) an explicit forward
+time difference scheme is used. The corresponding update relation is
+\beq
+\T^{n+1}=( \One -\Delta t \fMm^{-1} \St \fMl\St^{\rm T} )
+\T^{n} + \Delta t\fMm^{-1}\q_w^n \; ,
+\label{eqn:8}
+\enq
+with the maximal stable time step given by
+\beq
+\Delta t^{\srr max}_{\srr T} =
+\min_G\left\{\frac{\rho_i c_i}{2\lambda_i} \left(
+\frac{1}{\Delta x_i^2}+\frac{1}{\Delta y_i^2}+\frac{1}{\Delta
+z_i^2} \right)^{-1} \right\} \; .
+\label{eqn:9}
+\enq
+Equation (\ref{eqn:9}) is slightly modified, if radiant and convective
+boundary conditions are considered (see \cite{Pinder} for details).
+For homogeneous material media and equidistant grid points the integration
+scheme (\ref{eqn:8}) reduces to Richardson's explicit method for linear
+diffusion equations.
+
+Since the stability criterion (\ref{eqn:9}) may become restrictive,
+an implicit time integration scheme is used, alternatively. The update
+relation for the heat equation in this case reads
+\beq
+\T^{n+1} = (2\cdot\One + \mbox{\boldmath$\Gamma$})^{-1} (2\cdot\One -
+\mbox{\boldmath$\Gamma$})\T^{n}+\Delta t\cdot\fMm^{-1}(\q_w^{n+1}+\q_w^n) \; ,
+\label{eqn:10}
+\enq
+with $\mbox{\boldmath$\Gamma$}= \Delta t\cdot\fMm^{-1}\St\fMl\St^{\rm T}$.
+If the material medium is homogeneous and the grid points equidistant,
+this procedure corresponds to the well known Crank-Nicolson implicit
+time integration scheme. For the solution of the implicit recursion in
+(\ref{eqn:10}) a Preconditioned Conjugate Gradient ({\bf PCG}) method
+is used.
+
+The calculation effort for the coupled electromagnetic and thermal fields
+may be significantly reduced, if the time scales $t_{\srr EM}$ and
+$t_{\srr T}$ are taken into account. The electromagnetic time
+scale $t_{\srr EM}$ describes, e.g., the time interval until the
+steady state distribution of the electromagnetic fields is established.
+The thermal time scale $t_{\srr T}$ describes the velocity of diffusion
+of the temperature field in absence of external heat sources. If the
+same dual grid-doublet $\{G,\Gt\}$ is used for both discretizations
+in (\ref{eqn:3}) and (\ref{eqn:6}), then the maximal stable time steps
+given in (\ref{eqn:7}) and (\ref{eqn:9}) are appropriate estimations
+of the time scales $t_{\srr EM}$ and $t_{\srr T}$, respectively.
+For many material media, it is generally observed, that
+$\Delta t^{\srr max}_{\srr EM} \ll \Delta t^{\srr max}_{\srr T}$
+(e.g., for a copper material block discretized with $\Delta x =
+\Delta y = \Delta z = \nmbr{1}\cm$ one obtains
+$\Delta t^{\srr max}_{\srr EM} = \nmbr{1.93}\cdot \nmbr{10}^{-11}\secs$
+and $\Delta t^{\srr max}_{\srr T} = \nmbr{0.15}\secs$). Therefore,
+a stationary electromagnetic field distribution is established long
+before significant modifications of the temperature distribution
+are observed. For such a weak coupling the algorithm shown in
+Fig.~\ref{fig:3} is applicable. Here, the electromagnetic
+computation is initiated only if the change in the temperature
+distribution is significant, i.e., if the electromagnetic material
+properties $\varepsilon(\bvec{r},T)$, $\mu(\bvec{r},T)$ change.
+\befig[htb]
+\centering
+\mbox{\epsfxsize=85mm\epsfbox{diagram.eps}} \\[-5pt]
+\caption{Transient solution algorithm for the coupled thermal
+and electromagnetic equations.}
+\label{fig:3}
+\enfig
+\section{Validation}
+The validity of the method is demonstrated in the calculation
+of the transient temperature distribution of a lossy dielectric
+rod heated by microwaves. The sample is aligned along the axes
+of a cylindrical cavity as shown in Fig.~\ref{fig:4}a. Hybrid heating,
+due to microwave absorption as well as to thermal radiation from the
+sample surface is considered.
+\befig[htb]
+\centering
+\mbox{\epsfxsize=86mm\epsfbox{cavity.eps}} \\[-5pt]
+\caption{{\bf (a)} Lossy dielectric rod in the microwave cavity.
+{\bf (b)} Magnetic flux density created by the ground mode
+${\bf TM}_{010}$ at $T=25\celcius$ (the resonance frequency
+is $\omega_{\rm R}=1.09\GHz$).}
+\label{fig:4}
+\enfig
+
+Jackson et al.\ \cite{Jackson:01,Jackson:02} developed an analytical
+method for calculating the transient temperature profile in this
+model. In particular, in the case of a single driving mode of the type
+${\bf TM}_{010}$ the spatial variation of both, thermal and electromagnetic
+fields is on the radial direction alone and analytical results are
+easier to obtain. The sample discussed in \cite{Jackson:01,Jackson:02}
+was an alumina rod of radius $\nmbr{1.87}\cm$, length $\nmbr{6.63}\cm$
+and thermal emissivity $\nmbr{0.31}$. The radius of the cavity was
+$\nmbr{4.69}\cm$ and the cavity walls were considered as perfectly
+absorbing at a constant temperature of $\nmbr{25}\celcius$. The amplitude
+of the driving mode ${\bf TM}_{010}$ corresponded to a constant input
+power of $\nmbr{400}\watt$. The temperature dependent values of
+$\varepsilon$ and $\lambda$ for nominal alumina materials refer to
+the experimental data given in \cite{Fukushima}.
+
+Figures~\ref{fig:5}-\ref{fig:7} show the results of the numerical
+simulation with the {\bf FI} Method. Fig.~\ref{fig:5} shows the
+transient temperature profile on the rod axes until the stationary
+state is established. The relative deviation from the analytical
+results (see Fig.~\ref{fig:6}) remains well below $\nmbr{1}\%$.
+Fig.~\ref{fig:7} shows the electric field strength inside the cavity
+at different times. Also in this calculation the deviation from the
+reference solution is negligible. Additional results related to
+the microwave heating of the cylindrical sample, including runaway
+heating effects, are given in \cite{Jackson:01} and \cite{Pinder}.
+\befig[htb]
+\centering
+\mbox{\epsfxsize=68mm\epsfbox{t-center.eps}} \\[-5pt]
+\caption{Temperature profile on the rod axes as a function of time.}
+\label{fig:5}
+\enfig
+\befig[htb]
+\centering
+\mbox{\epsfxsize=68mm\epsfbox{t-error.eps}} \\[-5pt]
+\caption{Relative deviation $\Delta T/T$ from the reference solution.}
+\label{fig:6}
+\enfig
+\befig[htb]
+\centering
+\mbox{\epsfxsize=68mm\epsfbox{e-rod.eps}} \\[-5pt]
+\caption{Electric field strength $|E|$ inside the cavity as a function
+of the radial coordinate $r$.}
+\label{fig:7}
+\enfig
+\section{Transient microwave heating of a jelly block}
+As a second application of the method, the heating of a jelly
+block in a PTFE container inside a rectangular microwave cavity
+is considered (see Fig.~\ref{fig:8}). Convective boundary conditions
+for a constant air temperature of $\nmbr{30}\celcius$ and a convective
+heat exchange parameter of $\nmbr{10}\watt/(\m^2\kelvin)$ are applied
+on all faces of the block. The incoming mode, ${\bf TE}_{01}$ is exited
+at $\nmbr{2.45}\GHz$, providing an input power of $\nmbr{600}\watt$.
+Experimental data on the temperature dependent thermal and electromagnetic
+material properties of jelly and PTFE are available in \cite{Ma}.
+\befig[htb]
+\centering
+\mbox{\epsfxsize=85mm\epsfbox{oven.eps}} \\[-5pt]
+\caption{Geometry of the jelly block and microwave cavity. {\bf (a)}
+Vertical cut. {\bf (b)} Horizontal cut.}
+\label{fig:8}
+\enfig
+
+The application of the method implies several steps. The discretization
+according to the {\bf FI} technique is realized with a total of ca.\
+$\nmbr{300.000}$ grid points. Then, the higher modes exited in the cavity
+are calculated in the time domain. Because of the energy loss in the
+jelly block, the steady state is established after $\approx\nmbr{10}\nano$.
+Finally, the coupled thermal and electromagnetic calculation is performed
+according to the algorithm in Fig.~\ref{fig:3}.
+
+The calculated temperature distribution inside the jelly block
+after $180\secs$ of microwave heating is shown in Fig.~\ref{fig:9}b.
+Fig.~\ref{fig:9}a shows the temperature distribution taken by
+a thermal camera in an experimental setup. Both figures show good
+agreement, especially concerning the location of hot spots.
+Discrepancies arise mainly because of the inevitable material
+cooling before the measurement takes place.
+\befig[htb]
+\centering
+\mbox{\epsfxsize=85mm\epsfbox{t-oven.eps}} \\[-5pt]
+\caption{Measurement and simulation of the temperature distribution
+inside the jelly block (horizontal cut).}
+\label{fig:9}
+\enfig
+
+The temperature as a function of time at a fixed point inside
+the block is shown in Fig.~\ref{fig:10}. In the same Figure, the
+temperature at this point for an uncoupled calculation is also shown.
+In the latter, the jelly material retains its thermal and electromagnetic
+properties at initial temperature. The final temperature in the uncoupled
+model is almost $\nmbr{20}\%$ higher than in the coupled simulation.
+\befig[htb]
+\centering
+\mbox{\epsfxsize=62mm\epsfbox{uncoupled.eps}} \\[-5pt]
+\caption{Temperature profile for coupled und uncoupled calculations.}
+\label{fig:10}
+\enfig
+\section{Conclusion}
+In the present study a consistent formulation for the calculation
+of coupled transient thermal and electromagnetic fields using the
+{\bf FI} Method is presented. Due to the weak coupling between both
+fields, an iterative algorithm was implemented, which considerably
+reduces the calculation effort. The validity of the model was demonstrated
+in two microwave heating examples, showing good agreement to analytical
+and experimental data, respectively.
+
+\bibliographystyle{IEEE}
+
+\begin{thebibliography}{9}
+
+\bibitem{Hameyer}
+J. Driesen, R. Belmans, K. Hameyer, ``Adaptive relaxation algorithms
+for thermo-electromagnetic FEM problems'', IEEE Trans. on Magnetics,
+Vol.\ 35, No.\ 3, 1999, pp.~1622-1625.
+
+\bibitem{Kost}
+L. J\"anicke, A. Kost, ``Convergence properties of of the Newton-Raphson
+Method for nonlinear problems'', in Proc.  $\rm XI^{th}$ IEEE COMPUMAG,
+Rio de Janeiro, Brazil, PF3-6, 1997, pp.~585-586.
+
+\bibitem{Weiland96e:01}
+T. Weiland, ``Time domain electromagnetic field computation with Finite
+Difference Methods'', Int.\ J.\ Num.\ Mod., Vol.~9, 1996, pp.~259-319.
+
+\bibitem{RienenPinderWeiland96e:01}
+U.~van Rienen, P. Pinder, and T. Weiland, ``Consistent finite integration
+approach for coupled calculations of electromagnetic fields and stationary
+temperature distributions'', in  Proc.\ $\rm VII^{th}$ IEEE CEFC, Okayama,
+1996, pp.~294.
+
+\bibitem{Thoma:Weiland}
+P. Thoma, T. Weiland, ``Numerical stability of Finite Difference Time Domain
+Methods'', IEEE Trans. on Magnetics, Vol.\ 34, No.\ 5, 1998, pp.~2740-2743.
+
+\bibitem{Pinder}
+P. Pinder, ``Zur numerischen Berechnung gekoppelter elektromagnetischer
+und thermischer Felder'', PhD Thesis, Darmstadt, 1998.
+
+\bibitem{Jackson:01}
+H. Jackson, H. Barmatz, P. Wagner, ``Transient temperature distribution
+in a cylinder heated by microwaves'', Mat.\ Res.\ Soc., Spring Meeting,
+San Francisco, California, April 8, 1996.
+
+\bibitem{Jackson:02}
+H. Jackson H. Barmatz, P. Wagner, priv. comm., 1998.
+
+\bibitem{Fukushima}
+L. Fukushima, T. Yamanaka and M. Matsui, J.\ of Japan Soc.\ of Prec.\
+Eng.\ {\bf 53}, 1987, pp.~743-748.
+
+\bibitem{Ma} L. Ma, D. Paul, N. Pothecary, C. Railton, ``Experimental
+validation of a combined electromagnetic and thermal FDTD model of a
+microwave heating process'', IEEE Trans.\ on Microwave Theory and
+Techniques, Vol.\ 43, No.\ 11, 1995, pp.~2565-2572.
+
+\end{thebibliography}
+
+\end{document}
