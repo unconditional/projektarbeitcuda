@@ -123,6 +123,7 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     pSparseMatrix->nzmax = nzmax;
     printf("m=%d,n=%d,nzmax=%d, \n",m,n,nzmax);
     cmplx = (pi==NULL ? 0 : 1);
+	
     pSparseMatrix->pNZElement = (t_ve *)mxMalloc(sizeof(t_ve)*nzmax);
     pSparseMatrix->pCol = (unsigned int*) mxMalloc(sizeof(unsigned int)*nzmax); 
     pSparseMatrix->pRow = (unsigned int*) mxMalloc(sizeof(unsigned int)*(n+1)); 
@@ -201,12 +202,7 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
             printf("%f,i=%d ",pResultVector->pElement[i],i);
             printf("\n");
         }
-        /*
-        for(k=0; k < m*n; k++){
-            pIn[k] = (t_ve)pr[k];
-            printf("%f \n",pIn[k]);
-        }
-         */
+
         mxFree(pResultVector->pElement);
         mxFree(pVector->pElement);
         mxFree( pSparseMatrix->pNZElement);
