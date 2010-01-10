@@ -79,7 +79,9 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	}
 	
 	printf("get Result \n");
-	cudaMemcpy( data_out_host->pElement,pResultVector->pElement,  size_RElement, cudaMemcpyDeviceToHost);
+	//cudaMemcpy( data_out_host->pElement,pResultVector->pElement,  size_RElement, cudaMemcpyDeviceToHost);
+	cudaMemcpy( pResultVector->pElement,data_out_host->pElement,  size_RElement, cudaMemcpyDeviceToHost);
+	
 	pResultVector->m = pSparseMatrix->m;
 	pResultVector->n = 1;
 	//=========debug==============
