@@ -50,15 +50,15 @@ __global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSpars
     //cal
 
 		if(threadIdx.x==0){
-			pResultElements[blockIdx.x]=0;//?????????????
+			pResultElements[blockIdx.x]=0;
 		//C[gridIndex*gridDim.x+blockIdx.x]=0;
 		}
 		//following is operations within one block 
 		// initialize the dot product for each row in A and vector B
 		t_ve blocksum = 0;
 		//if nB> blockDim, split repeat the
-		bBegin = pRow[blockIdx.x];//?????????????
-		bEnd = pRow[blockIdx.x + 1];//?????????????
+		bBegin = pRow[blockIdx.x];
+		bEnd = pRow[blockIdx.x + 1];
 		for(int b = bBegin; (b < bEnd)&&((threadIdx.x+b) < bEnd); b += bStep ) {
 			//initialise Cs 
 			//As[threadIdx.x] = 0;
@@ -73,12 +73,11 @@ __global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSpars
 			// } 
 			if (( (gridIndex*gridDim.x+blockIdx.x)<aEnd)&&((b+threadIdx.x) < bEnd)) {
 				
-				Cs[threadIdx.x] = pMatrixElements[b + threadIdx.x] * pVectorElements[pCol[b + threadIdx.x ]];//?????????????
+				Cs[threadIdx.x] = pMatrixElements[b + threadIdx.x] * pVectorElements[pCol[b + threadIdx.x ]];
 			}
 			__syncthreads();
 				
 			if(threadIdx.x == 0){
-				//30.Nov.2009 fixeded for Cs summe
 				int kEnd = bEnd-b;
 				if(kEnd > VECTOR_BLOCK_SIZE)kEnd = VECTOR_BLOCK_SIZE;
 				//Because I add Cs[0...k], if blockSize and Matrix does not fit, Parts of Cs[k] are not initialized as 0.  		

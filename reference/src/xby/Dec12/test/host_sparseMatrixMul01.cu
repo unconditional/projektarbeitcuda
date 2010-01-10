@@ -6,12 +6,19 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	t_FullMatrix data_in2,*data_in2_host,*data_in2_gpu;//input vector
 	t_FullMatrix data_out,*data_out_host,*data_out_gpu;//output vector
 	size_t size_NZElement,size_Row,size_Col;
-	int sizeBlock;
+	int sizeBlock,i;
 	data_in1_host=&data_in1;
 	data_in2_host=&data_in2;
 	data_out_host=&data_out;
 	
 	sizeBlock = VECTOR_BLOCK_SIZE;
+	
+	
+	//=====debug==================
+	printf("=======in host========== \n");
+	printf("pSparseMatrix->m=%d \n",pSparseMatrix->m);
+	printf("pSparseMatrix->n=%d \n",pSparseMatrix->n);
+	//============================
 	
 	size_NZElement = sizeof(t_ve)*pSparseMatrix->nzmax;
 	size_Row = sizeof(int)*pSparseMatrix->m;
@@ -19,7 +26,7 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	// Create an input and output data array on the GPU
 	//malloc memory for Input Sparse-Matrix
 	
-		
+	printf("malloc sparse Matrix \n");
 	cudaMalloc( (void **) &(data_in1_host->pNZElement),size_NZElement);
 	cudaMalloc( (void **) &(data_in1_host->pRow),size_Row);
 	cudaMalloc( (void **) &(data_in1_host->pCol),size_Col);
@@ -33,6 +40,7 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	//cudaMemcpy(data_in1_gpu,data_in1_host,sizeof(t_SparseMatrix)*1,cudaMemcpyHostToDevice);
 	
 	//malloc device memory for Input vector
+	printf("malloc vector \n");
 	size_t size_VElement, size_RElement;
 	size_VElement = sizeof(t_ve)*pVector->m*pVector->n;
 	size_RElement = sizeof(t_ve)*pSparseMatrix->m;
@@ -45,7 +53,7 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 
 	
 	
-	
+	printf("malloc output \n");
 	//malloc output Vector
 	data_out_host->m = pSparseMatrix->m;
 	data_out_host->n = 1;
@@ -60,6 +68,7 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	//if ( (sizeA) % sizeBlock !=0 ) dimGrid.x+=1;
 //sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMatrix, t_FullMatrix * pVector)
 	//sparseMatrixMul<<<dimGrid,dimBlock>>>(data_out_gpu,data_in1_gpu,data_in2_gpu);
+	printf("calling kernel \n");
 	sparseMatrixMul<<<dimGrid,dimBlock>>>(data_out,data_in1,data_in2);
 	cudaError_t e;	
 	e = cudaGetLastError();
@@ -68,9 +77,18 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 			fprintf(stderr, "CUDA Error on square_elements: '%s' \n", cudaGetErrorString(e));
 			exit(-1);
 	}
-	cudaMemcpy( data_out_gpu->pElement,pResultVector->pElement,  size_RElement, cudaMemcpyDeviceToHost);
+	
+	printf("get Result \n");
+	cudaMemcpy( data_out_host->pElement,pResultVector->pElement,  size_RElement, cudaMemcpyDeviceToHost);
 	pResultVector->m = pSparseMatrix->m;
-	pResultVector->m = 1;
+	pResultVector->n = 1;
+	//=========debug==============
+		printf("==================Result in host============\n");
+		for( i = 0; i < pResultVector->m; i++) printf("pResultVector->pElement[%d]=%f \n",i,pResultVector->pElement[i]);
+	//=======================
+	
+	
+	printf("free host \n");
 	cudaFree(data_in1_host->pNZElement);
 	cudaFree(data_in1_host->pRow);
 	cudaFree(data_in1_host->pCol);
