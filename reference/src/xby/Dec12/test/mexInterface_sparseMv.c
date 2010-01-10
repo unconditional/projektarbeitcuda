@@ -195,11 +195,11 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
             printf("%f,k=%d ",pSparseMatrix->pNZElement[i],i);
             printf(" \n");
         }
-        printf("printf Vector \n");
-        for(i=0; i < pVector->n*pVector->m; i++){     
-            printf("%f,i=%d ",pVector->pElement[i],i);
-            printf("\n");
-        }
+        // printf("printf Vector \n");
+        // for(i=0; i < pVector->n*pVector->m; i++){     
+            // printf("%f,i=%d ",pVector->pElement[i],i);
+            // printf("\n");
+        // }
         printf("printf Result Vector \n");
        for(i=0; i < pResultVector->n*pResultVector->m; i++){     
             printf("%f,i=%d ",pResultVector->pElement[i],i);
