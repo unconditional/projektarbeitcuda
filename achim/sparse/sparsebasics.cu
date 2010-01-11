@@ -16,6 +16,19 @@ typedef struct SparseMatrix{
 
 } t_SparseMatrix;
 
+// ---------------------------------------------------------------------
+__global__ void kernel_sparse( t_SparseMatrix m ) {
+
+
+    t_ve sum = 0;
+    if ( threadIdx.x ==  0) {
+       for ( int i = 0; i < m.cnt_elements; i++ ) {
+          sum += m.pr[i];
+       }
+       printf("got sum: %f",  sum);
+    }
+}
+// ---------------------------------------------------------------------
 __host__ void set_sparse_data( t_SparseMatrix* m, void* mv ) {
 
    m->ir = (t_mindex *) mv;
@@ -23,7 +36,7 @@ __host__ void set_sparse_data( t_SparseMatrix* m, void* mv ) {
    m->jc = (t_mindex *) (&m->pr[m->cnt_elements]);
 
 }
-
+// ---------------------------------------------------------------------
 __host__ void dump_sparse_matrix( t_SparseMatrix m ) {
 
     printf( "\n cols: %u elements: %u \n",  m.cnt_colums, m.cnt_elements );
@@ -39,13 +52,13 @@ __host__ void dump_sparse_matrix( t_SparseMatrix m ) {
     }
     printf("\n\n");
 }
-
+// ---------------------------------------------------------------------
 __host__ int smat_size( int cnt_elements, int cnt_cols ) {
 
     return   ( sizeof(t_ve) + sizeof(t_mindex) ) * cnt_elements
            + sizeof(t_mindex)  * (cnt_cols + 1);
 }
-
+// ---------------------------------------------------------------------
 int main()
 
 {
@@ -113,6 +126,15 @@ int main()
    CUDA_UTIL_ERRORCHECK("cudaMemcpy")
 
    set_sparse_data( &device_m, devicemem);
+
+   dim3 dimGrid ( 1 );
+   dim3 dimBlock(32);
+
+
+   kernel_sparse<<<dimGrid,dimBlock>>>( device_m );
+   e = cudaGetLastError();
+   CUDA_UTIL_ERRORCHECK("summup_kernel_kernel_dotmul");
+
 
 }
 
