@@ -25,7 +25,7 @@ __global__ void kernel_sparse( t_SparseMatrix m ) {
        for ( int i = 0; i < m.cnt_elements; i++ ) {
           sum += m.pr[i];
        }
-       printf("got sum: %f",  sum);
+       //printf("got sum: %f",  sum);
     }
 }
 // ---------------------------------------------------------------------
