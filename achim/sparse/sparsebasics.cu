@@ -16,6 +16,14 @@ typedef struct SparseMatrix{
 
 } t_SparseMatrix;
 
+__host__ void set_sparse_data( t_SparseMatrix* m, void* mv ) {
+
+   m->ir = (t_mindex *) mv;
+   m->pr = (t_ve *) (&m->ir[m->cnt_elements] ) ;
+   m->jc = (t_mindex *) (&m->pr[m->cnt_elements]);
+
+}
+
 __host__ void dump_sparse_matrix( t_SparseMatrix m ) {
 
     printf( "\n cols: %u elements: %u \n",  m.cnt_colums, m.cnt_elements );
@@ -42,10 +50,13 @@ int main()
 
 {
 
-    t_SparseMatrix host_m;
+    t_SparseMatrix host_m, device_m;
 
     host_m.cnt_elements = 6;
     host_m.cnt_colums   = 3;
+
+    device_m.cnt_elements = host_m.cnt_elements;
+    device_m.cnt_colums   = host_m.cnt_colums;
 
     printf("\n Testting sparse basics \n");
 
@@ -53,8 +64,8 @@ int main()
 
     printf(" got result %u \n", msize);
 
-    void *v =   malloc( msize );
-    if ( v == NULL) {
+    void *hostmem =   malloc( msize );
+    if ( hostmem == NULL) {
            fprintf(stderr, "sorry, can not allocate memory for you");
            exit( -1 );
     }
@@ -63,9 +74,11 @@ int main()
 
 
 
-   host_m.ir = (t_mindex *) v;
-   host_m.pr = (t_ve *) (&host_m.ir[6]);
-   host_m.jc  = (t_mindex *) (&host_m.pr[6]);
+//   host_m.ir = (t_mindex *) hostmem;
+//   host_m.pr = (t_ve *) (&host_m.ir[6]);
+//   host_m.jc  = (t_mindex *) (&host_m.pr[6]);
+
+   set_sparse_data( &host_m, hostmem);
 
    host_m.jc[0] = 0;
    host_m.jc[1] = 2;
@@ -88,5 +101,18 @@ int main()
 
 
    dump_sparse_matrix( host_m );
+
+
+   void *devicemem;
+   cudaError_t e;
+
+   e = cudaMalloc ( &devicemem, msize );
+   CUDA_UTIL_ERRORCHECK("cudaMalloc")
+
+   e = cudaMemcpy(  devicemem, hostmem, msize , cudaMemcpyHostToDevice);
+   CUDA_UTIL_ERRORCHECK("cudaMemcpy")
+
+   set_sparse_data( &device_m, devicemem);
+
 }
 
