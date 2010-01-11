@@ -173,9 +173,6 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     /* Allocate space for sparse matrix 
      * NOTE:  Assume at most 20% of the data is sparse.  Use ceil
      * to cause it to round up. 
-     *
-     *
-     *
      *Nonzero elements
      *if(jc[i]!=jc[i+1]) for(int k = jc[i]; k<jc[i+1]; k++)A[ir[k][i]=pr[k]+pi[k]
      */
@@ -202,9 +199,11 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
             printf("\n");
         }
         printf("printf Result Vector \n");
-       for(i=0; i < pResultVector->n*pResultVector->m; i++){     
+       for(i=0; i < pResultVector->n*pResultVector->m; i++){  
             printf("%f,i=%d ",pResultVector->pElement[i],i);
             printf("\n");
+			//copy result back to matlab;
+			pr[i] = (double)pResultVector->pElement[i];
         }
         /*
         for(k=0; k < m*n; k++){
