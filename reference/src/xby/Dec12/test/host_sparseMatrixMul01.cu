@@ -64,7 +64,9 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	// Compute execution configuration using 128 threads per block 
 	dim3 dimBlock(sizeBlock);
 	//dim3 dimGrid((sizeIn)/dimBlock.x);
-	dim3 dimGrid(pSparseMatrix->m);
+	int sizeGrid = 65535;
+	if (sizeGrid > pSparseMatrix->m)sizeGrid = pSparseMatrix->m;
+	dim3 dimGrid(sizeGrid);
 	//if ( (sizeA) % sizeBlock !=0 ) dimGrid.x+=1;
 //sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMatrix, t_FullMatrix * pVector)
 	//sparseMatrixMul<<<dimGrid,dimBlock>>>(data_out_gpu,data_in1_gpu,data_in2_gpu);
