@@ -10,10 +10,7 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	data_in1_host=&data_in1;
 	data_in2_host=&data_in2;
 	data_out_host=&data_out;
-	
 	sizeBlock = VECTOR_BLOCK_SIZE;
-	
-	
 	//=====debug==================
 	printf("=======in host========== \n");
 	printf("pSparseMatrix->m=%d \n",pSparseMatrix->m);
@@ -21,8 +18,8 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	//============================
 	
 	size_NZElement = sizeof(t_ve)*pSparseMatrix->nzmax;
-	size_Row = sizeof(int)*pSparseMatrix->m;
-	size_Col = sizeof(int)*(pSparseMatrix->n+1);
+	size_Row =sizeof(int)*(pSparseMatrix->m+1); //sizeof(int)*pSparseMatrix->m;
+	size_Col = sizeof(int)*pSparseMatrix->nzmax;//sizeof(int)*(pSparseMatrix->n+1);
 	// Create an input and output data array on the GPU
 	//malloc memory for Input Sparse-Matrix
 	
@@ -64,11 +61,15 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	// Compute execution configuration using 128 threads per block 
 	dim3 dimBlock(sizeBlock);
 	//dim3 dimGrid((sizeIn)/dimBlock.x);
+	cudaDeviceProp deviceProp;
+	cudaGetDeviceProperties(&deviceProp,0);
+	printf("number of multiProcessors: %d \n",deviceProp.multiProcessorCount);
 	int sizeGrid = 65535;
 	if (sizeGrid > pSparseMatrix->m)sizeGrid = pSparseMatrix->m;
+	printf("grid size = %d\n",sizeGrid);
 	dim3 dimGrid(sizeGrid);
 	//if ( (sizeA) % sizeBlock !=0 ) dimGrid.x+=1;
-//sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMatrix, t_FullMatrix * pVector)
+	//sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMatrix, t_FullMatrix * pVector)
 	//sparseMatrixMul<<<dimGrid,dimBlock>>>(data_out_gpu,data_in1_gpu,data_in2_gpu);
 	printf("calling kernel \n");
 	sparseMatrixMul<<<dimGrid,dimBlock>>>(data_out,data_in1,data_in2);
@@ -91,16 +92,13 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 		for( i = 0; i < pResultVector->m; i++) printf("pResultVector->pElement[%d]=%f \n",i,pResultVector->pElement[i]);
 	//=======================
 	
-	
 	printf("free host \n");
 	cudaFree(data_in1_host->pNZElement);
 	cudaFree(data_in1_host->pRow);
 	cudaFree(data_in1_host->pCol);
 	cudaFree(data_in2_host->pElement);
 	cudaFree(data_out_host->pElement);
-	//cudaFree(data_in1_gpu);
-	//cudaFree(data_in2_gpu);
-	//cudaFree(data_out_gpu);
+
 }
 
 

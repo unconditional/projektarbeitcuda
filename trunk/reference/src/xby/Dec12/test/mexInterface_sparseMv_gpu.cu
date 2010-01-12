@@ -125,13 +125,14 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     //cmplx = (pi==NULL ? 0 : 1);
     pSparseMatrix->pNZElement = (t_ve *)mxMalloc(sizeof(t_ve)*nzmax);
     pSparseMatrix->pCol = (unsigned int*) mxMalloc(sizeof(unsigned int)*nzmax); 
-    pSparseMatrix->pRow = (unsigned int*) mxMalloc(sizeof(unsigned int)*(n+1)); 
+    pSparseMatrix->pRow = (unsigned int*) mxMalloc(sizeof(unsigned int)*(pSparseMatrix->m+1)); 
     for(i = 0; i < nzmax; i++){
         pSparseMatrix->pNZElement[i] =(t_ve) pr[i];
         pSparseMatrix->pCol[i] = ir[i];
     }
     for(i = 0; i < n+1; i++){  
         pSparseMatrix->pRow[i] = jc[i];
+		printf("pSparseMatrix->pRow[%d] = %d \n",i,pSparseMatrix->pRow[i]);
     }
     
     //=====get Vector==========================================================
@@ -176,28 +177,18 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
      *Nonzero elements
      *if(jc[i]!=jc[i+1]) for(int k = jc[i]; k<jc[i+1]; k++)A[ir[k][i]=pr[k]+pi[k]
      */
-    /*
-    percent_sparse = 0.2;
-    nzmax=(mwSize)ceil((double)m*(double)n*percent_sparse);
 
-    plhs[0] = mxCreateSparse(m,n,nzmax,cmplx);
-    sr  = mxGetPr(plhs[0]);
-    si  = mxGetPi(plhs[0]);
-    irs = mxGetIr(plhs[0]);
-    jcs = mxGetJc(plhs[0]);
-    
-    */
             
-        printf("printf Sparse matrix \n");
-        for(i=0; i < pSparseMatrix->nzmax; i++){     
-            printf("%f,k=%d ",pSparseMatrix->pNZElement[i],i);
-            printf(" \n");
-        }
-        printf("printf Vector \n");
-        for(i=0; i < pVector->n*pVector->m; i++){     
-            printf("%f,i=%d ",pVector->pElement[i],i);
-            printf("\n");
-        }
+        // printf("printf Sparse matrix \n");
+        // for(i=0; i < pSparseMatrix->nzmax; i++){     
+            // printf("%f,k=%d ",pSparseMatrix->pNZElement[i],i);
+            // printf(" \n");
+        // }
+        // printf("printf Vector \n");
+        // for(i=0; i < pVector->n*pVector->m; i++){     
+            // printf("%f,i=%d ",pVector->pElement[i],i);
+            // printf("\n");
+        // }
         printf("printf Result Vector \n");
        for(i=0; i < pResultVector->n*pResultVector->m; i++){  
             printf("%f,i=%d ",pResultVector->pElement[i],i);
@@ -205,12 +196,7 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
 			//copy result back to matlab;
 			pr[i] = (double)pResultVector->pElement[i];
         }
-        /*
-        for(k=0; k < m*n; k++){
-            pIn[k] = (t_ve)pr[k];
-            printf("%f \n",pIn[k]);
-        }
-         */
+
         mxFree(pResultVector->pElement);
         mxFree(pVector->pElement);
         mxFree( pSparseMatrix->pNZElement);
