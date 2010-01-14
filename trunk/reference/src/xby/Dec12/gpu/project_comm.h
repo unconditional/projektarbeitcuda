@@ -23,21 +23,22 @@
 #include <time.h>
 #define VECTOR_BLOCK_SIZE 512
 #define ITERATE 100
+typedef unsigned int t_mindex;
 typedef struct Matrix{
-    unsigned int m;
-    unsigned int n;
+    t_mindex m;
+    t_mindex n;
     //size m*n
 	t_ve* pElement;
 } t_FullMatrix;
 
 typedef struct SparseMatrix{
-    unsigned int m;
-    unsigned int n;
-    unsigned int nzmax;
+    t_mindex m;
+    t_mindex n;
+    t_mindex nzmax;
 	//size m+1
-    unsigned int *pRow;
+    t_mindex *pRow;
     //size nzmax
-	unsigned int *pCol;
+	t_mindex *pCol;
 	//size : nzmax
     t_ve* pNZElement;
 } t_SparseMatrix;
