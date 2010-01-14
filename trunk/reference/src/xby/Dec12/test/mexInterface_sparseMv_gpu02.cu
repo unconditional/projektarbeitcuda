@@ -1,15 +1,14 @@
 #include <math.h> /* Needed for the ceil() prototype */
 #include "mex.h"
-#include "host_sparseMatrixMul01.cu"
+#include "host_sparseMatrixMul02.cu"
 #if defined(NAN_EQUALS_ZERO)
 #define IsNonZero(d) ((d)!=0.0 || mxIsNaN(d))
 #else
 #define IsNonZero(d) ((d)!=0.0)
 #endif
 //typedef NULL 0;
-typedef float t_ve;
+//typedef float t_ve;
 typedef int mwIndex;
-
 
 void initElement(t_FullMatrix * pMatrix)
 {
@@ -109,12 +108,18 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     printf("m=%d,n=%d,nzmax=%d, \n",m,n,nzmax);
     //cmplx = (pi==NULL ? 0 : 1);
 	
-	//=========================================================================================
-	
-
-    pSparseMatrix->pNZElement = (t_ve *)mxMalloc(sizeof(t_ve)*nzmax);
-    pSparseMatrix->pCol = (unsigned int*) mxMalloc(sizeof(unsigned int)*nzmax); 
-    pSparseMatrix->pRow = (unsigned int*) mxMalloc(sizeof(unsigned int)*(pSparseMatrix->m+1)); 
+	//====using new method to malloc memory for sparse matrix=====================================================================================
+	int msize = smat_size( pSparseMatrix->nzmax, pSparseMatrix->m);
+    printf(" got result %u \n", msize);
+    void *hostmem =   mxMalloc( msize );
+    if ( hostmem == NULL) {
+           fprintf(stderr, "sorry, can not allocate memory for you");
+           exit( -1 );
+    }
+	set_sparse_data( pSparseMatrix, hostmem);
+    //pSparseMatrix->pNZElement = (t_ve *)mxMalloc(sizeof(t_ve)*nzmax);
+    //pSparseMatrix->pCol = (unsigned int*) mxMalloc(sizeof(unsigned int)*nzmax); 
+    //pSparseMatrix->pRow = (unsigned int*) mxMalloc(sizeof(unsigned int)*(pSparseMatrix->m+1)); 
     
 	for(i = 0; i < nzmax; i++){
         pSparseMatrix->pNZElement[i] =(t_ve) pr[i];
@@ -126,8 +131,6 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     }
     
     //=====get Vector==========================================================
- //   t_Matrix fullVector;
- //   t_Matrix * pVector;
 
     m  = mxGetM(prhs[1]);
     n  = mxGetN(prhs[1]);
@@ -189,9 +192,10 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
 
         mxFree(pResultVector->pElement);
         mxFree(pVector->pElement);
-        mxFree( pSparseMatrix->pNZElement);
-        mxFree( pSparseMatrix->pCol);
-        mxFree( pSparseMatrix->pRow);
+		mxFree(hostmem);
+        //mxFree( pSparseMatrix->pNZElement);
+        //mxFree( pSparseMatrix->pCol);
+        //mxFree( pSparseMatrix->pRow);
        
    
 }
