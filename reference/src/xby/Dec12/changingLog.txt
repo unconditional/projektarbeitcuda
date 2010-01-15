@@ -1,0 +1,4 @@
+15.Jan.2010
+1. renew ".\gpu\projektcuda.h" frm achim
+2. solve the limitatin of matrix size <65535 in ".\gpu\sparseMatrixMul_kernel04.cu"
+3. renew memcpy of sparse matrix ".\test\host_sparseMatrixMul02.cu" and ".\test\mexInterface_sparseMv_gpu02.cu"

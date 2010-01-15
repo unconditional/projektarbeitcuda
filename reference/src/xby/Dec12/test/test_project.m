@@ -3,6 +3,7 @@ clear all
 %nvmex -f nvmexopts_bb_double.bat mexUnitTestMain.cu -IC:\CUDA\include -LC:\CUDA\lib -lcudart
 %nvmex -f nvmexopts_bb_double.bat mexUnitTestMain_cpu.cu -IC:\CUDA\include -LC:\CUDA\lib -lcudart
 %nvmex -f nvmexopts_bb_double.bat mexInterface_sparseMv_gpu.cu -IC:\CUDA\include -LC:\CUDA\lib -lcudart
+%nvmex -f nvmexopts_bb_double.bat mexInterface_sparseMv_gpu02.cu -IC:\CUDA\include -LC:\CUDA\lib -lcudart
 % mex mexInterface_sparseMv.c
 %mex mexUnitTestMain_cpu.c
 
@@ -34,9 +35,10 @@ clear all
 %toc
 %==================================
 %max 65000
-N=65535;
+N=655370;
 A = sparse(1:N,1:N,1,N,N);
 b = [1:N];
 %c = mexInterface_sparseMv(A,b)
-c = mexInterface_sparseMv_gpu(A,b);
+%c = mexInterface_sparseMv_gpu(A,b);
+c = mexInterface_sparseMv_gpu02(A,b);
 %==================================
