@@ -68,8 +68,8 @@ __global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSpars
 		// initialize the dot product for each row in A and vector B
 		t_ve blocksum = 0;
 		//if nB> blockDim, split repeat the
-		bBegin = pRow[blockIdx.x];
-		bEnd = pRow[blockIdx.x + 1];
+		bBegin = pRow[gridIndex*gridDim.x+blockIdx.x];
+		bEnd = pRow[gridIndex*gridDim.x+blockIdx.x + 1];
 		for(int b = bBegin; (b < bEnd)&&((threadIdx.x+b) < bEnd); b += bStep ) {
 			//initialise Cs 
 			//As[threadIdx.x] = 0;
@@ -102,7 +102,7 @@ __global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSpars
 		}//for b
 		__syncthreads();
 
-		if(threadIdx.x == 0) pResultElements[blockIdx.x] = blocksum;//?????????????
+		if(threadIdx.x == 0) pResultElements[gridIndex*gridDim.x+blockIdx.x] = blocksum;//?????????????
 		__syncthreads();	
     
 	}//for {int a = aBegin;....

@@ -24,6 +24,7 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	//t_FullMatrix data_in2,*data_in2_host,*data_in2_gpu;//input vector
 	//t_FullMatrix data_out,*data_out_host,*data_out_gpu;//output vector
 	size_t size_NZElement,size_Row,size_Col;
+	cudaError_t e;	
 	int sizeBlock,i;
 	//data_in1_host=&data_in1;
 	//data_in2_host=&data_in2;
@@ -63,7 +64,7 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	int msize = smat_size( dev_SparseMatrix.nzmax, dev_SparseMatrix.n );
     printf(" got result %u \n", msize);
 	void *devicemem;
-    cudaError_t e;
+    
 	e = cudaMalloc ( &devicemem, msize );
 	CUDA_UTIL_ERRORCHECK("cudaMalloc")
 	//pSparseMatrix->pCol is the begin of memery block
@@ -92,7 +93,7 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	cudaDeviceProp deviceProp;
 	cudaGetDeviceProperties(&deviceProp,0);
 	printf("number of multiProcessors: %d \n",deviceProp.multiProcessorCount);
-	int sizeGrid = 65535;
+	int sizeGrid = 24;
 	if (sizeGrid > pSparseMatrix->m)sizeGrid = pSparseMatrix->m;
 	printf("grid size = %d\n",sizeGrid);
 	dim3 dimGrid(sizeGrid);
@@ -101,7 +102,7 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	//sparseMatrixMul<<<dimGrid,dimBlock>>>(data_out_gpu,data_in1_gpu,data_in2_gpu);
 	printf("calling kernel \n");
 	sparseMatrixMul<<<dimGrid,dimBlock>>>(dev_ResultVector,dev_SparseMatrix,dev_Vector);
-	cudaError_t e;	
+	
 	e = cudaGetLastError();
 	if ( e != cudaSuccess)
 	{
