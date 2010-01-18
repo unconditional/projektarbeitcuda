@@ -1,7 +1,7 @@
 
 
 __host__ void idrs(
-                     t_ve* A,
+                     SparseMatrix A,
                      t_ve* b,
                      unsigned int s,
                      t_ve  tol,
