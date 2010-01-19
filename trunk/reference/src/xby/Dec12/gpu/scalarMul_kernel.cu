@@ -2,10 +2,14 @@
 #include <stdio.h>
 #include "projektcuda.h"
 #include "project_comm.h"
-//#include "mex.h"
-/* Kernel to square elements of the array on the GPU */
 
-/**/
+/* Kernel to computing Vector x scalar on the GPU */
+
+/*scalarMul_kernel.cu*/
+//pIn1: input Vector;
+// N: Vectorsize;
+// pIn2: input scalar;
+//pOut: output Vector;
 __global__ void device_scalarMul(t_ve* pIn1, t_ve* pIn2,t_ve* pOut, unsigned int N)
 {
 	//__shared__ float Cs[VECTOR_BLOCK_SIZE];
