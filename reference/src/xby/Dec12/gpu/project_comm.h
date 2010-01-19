@@ -43,4 +43,6 @@ typedef struct SparseMatrix{
     t_ve* pNZElement;
 } t_SparseMatrix;
 
+texture<t_ve,1,cudaReadModeElementType> texRef;
+
 #endif //?PROJECT_COMM_H__

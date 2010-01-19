@@ -11,23 +11,7 @@ typedef struct{
         int stride;
         float * elements;
 } Matrix;
-///
-__device__ float GetVectorElement(const Matrix A, int row, int offset){
-          return A.elements[row * VECTOR_BLOCK_SIZE + offset];           
-}
 
-///??????????????????
-__device__ void setVectorElement(Matrix A, int row, int offset, float value){
-           A.elements[row * VECTOR_BLOCK_SIZE + offset] = value;           
-}
-
-__device__ Matrix GetSubVector(Matrix A, int row){
-           Matrix Asub;
-           Asub.width = 1;     
-           Asub.height = VECTOR_BLOCK_SIZE;
-           Asub.stride = 1;
-           Asub.elements = & A.elements[row * VECTOR_BLOCK_SIZE]      
-}
 */
 /*
 N size of Vector  
