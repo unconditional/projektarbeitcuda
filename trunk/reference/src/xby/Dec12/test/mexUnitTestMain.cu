@@ -6,11 +6,12 @@ mexUnitTestMain.cu
 #include "host_dotMul.cu"
 #include "host_norm.cu"
 #include "host_matrixMul.cu"
+#include "host_scalarMul.cu"
 
 void callTestFunction(double** ppIn,int *pmIn,int *pnIn, int callFuncType,double** ppOut){
 //call gpu
 //testdotMul
-	//printf("in callTestFunction \n");
+	printf("in callTestFunction and callFuncType = %d\n",callFuncType);
 
 	switch(callFuncType){
 		case 0://dotMul
@@ -19,7 +20,7 @@ void callTestFunction(double** ppIn,int *pmIn,int *pnIn, int callFuncType,double
 			}
 			break;
 		case 1://norm
-			//printf("call norm \n");	
+			printf("call norm \n");	
 				if(1==pnIn[0])mexTest_norm(ppIn[0],ppOut[0],pmIn[0]);
 		break;
 		case 2: //matrixMul
@@ -30,7 +31,14 @@ void callTestFunction(double** ppIn,int *pmIn,int *pnIn, int callFuncType,double
 			//mexTest_matrixMul(double* pC, double *pA,double *pB, int mA, int nB);
 				mexTest_matrixMul(ppOut[0],ppIn[0],ppIn[1],pmIn[0], pmIn[1]);
 			}
+		case 3: //scalarMul
+			//test scalarxMul
+			printf("call scalarMul \n");	
+			if(1==pmIn[1]*pnIn[1]){
+				if(1==pnIn[0])mexTest_scalarMul(ppIn[0],ppIn[1],ppOut[0],pmIn[0]);
+			}
 		default:  
+			printf("call default \n");	
 			if((pmIn[0]==pmIn[1])&&(pnIn[0]==pnIn[1])){
 				if(1==pnIn[0])mexTest_dotMul(ppIn[0],ppIn[1],ppOut[0],pmIn[0]);
 			}
@@ -52,6 +60,9 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
      int *pmIn;
      int *pnIn;
 	 outNum=0;
+	 //pnIn size of each Input matrix in n coordinate
+	 //pmIn size of each Input matrix in n coordinate
+	 //ppIn
      pnIn = (int*)mxMalloc(sizeof(int)*nrhs);
      pmIn = (int*)mxMalloc(sizeof(int)*nrhs);
      ppIn = (double**)mxMalloc(sizeof(double*)*nrhs);
@@ -89,6 +100,9 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
 			break;
 			case 2://matrixMul
 				outNum = pmIn[0];
+			break;
+			case 3://scalarMul
+				outNum = pmIn[0]*pnIn[0];
 			break;
 			default://0
 				outNum = 1;

@@ -7,15 +7,28 @@ clear all
 % mex mexInterface_sparseMv.c
 %mex mexUnitTestMain_cpu.c
 
-%a1 = 3*ones(9000,1);
-%a2 = a1;
+
+%scalarMul
+ a1 = [1:10000]';%1*ones(10,1);
+ a2 = 2;
 %tic
-%b1 = mexUnitTestMain_cpu(a1,1)
+%  b3=mexUnitTestMain_cpu(a1,a2,3)
 %toc
 %tic
-%b12 = mexUnitTestMain(a1,1)
+b33 = mexUnitTestMain(a1,a2,3)
 %toc
 
+% %norm
+% a1 = 1*ones(9000,1);
+% a2 = a1;
+% tic
+% b1 = mexUnitTestMain_cpu(a1,1)
+% toc
+% tic
+% b12 = mexUnitTestMain(a1,1)
+% toc
+
+%dotmul
 %tic
 %  b2=mexUnitTestMain_cpu(a1,a2,0)
 %toc
@@ -34,11 +47,11 @@ clear all
 %b32 = mexUnitTestMain(A,B,2);
 %toc
 %==================================
-%max 65000
-N=655370;
-A = sparse(1:N,1:N,1,N,N);
-b = [1:N];
-%c = mexInterface_sparseMv(A,b)
-%c = mexInterface_sparseMv_gpu(A,b);
-c = mexInterface_sparseMv_gpu02(A,b);
+%
+% N=10;
+% A = sparse(1:N,1:N,1,N,N);
+% b = [1:N];
+% %c = mexInterface_sparseMv(A,b)
+% %c = mexInterface_sparseMv_gpu(A,b);
+% c = mexInterface_sparseMv_gpu02(A,b);
 %==================================
