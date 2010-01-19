@@ -6,16 +6,17 @@ clear all
 %nvmex -f nvmexopts_bb_double.bat mexInterface_sparseMv_gpu02.cu -IC:\CUDA\include -LC:\CUDA\lib -lcudart
 % mex mexInterface_sparseMv.c
 %mex mexUnitTestMain_cpu.c
+mex mexInterface_idrs.c
 
 
 %scalarMul
- a1 = [1:10000]';%1*ones(10,1);
- a2 = 2;
+% a1 = [1:10000]';%1*ones(10,1);
+% a2 = 2;
 %tic
 %  b3=mexUnitTestMain_cpu(a1,a2,3)
 %toc
 %tic
-b33 = mexUnitTestMain(a1,a2,3)
+%b33 = mexUnitTestMain(a1,a2,3)
 %toc
 
 % %norm
@@ -55,3 +56,14 @@ b33 = mexUnitTestMain(a1,a2,3)
 % %c = mexInterface_sparseMv_gpu(A,b);
 % c = mexInterface_sparseMv_gpu02(A,b);
 %==================================
+
+
+%test idrs
+N = 10;
+A=sparse(1:N,1:N,1,N,N);
+b = [1:N];
+s = 1;
+tol = 1;
+maxit =1;
+x0 = [1:N];
+[x,resvec,iter] = mexInterface_idrs(A,b,s,tol,maxit,x0,N)
