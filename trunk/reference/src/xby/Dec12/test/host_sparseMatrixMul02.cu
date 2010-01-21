@@ -19,16 +19,10 @@ __host__ void set_sparse_data( t_SparseMatrix* m, void* mv ) {
 void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMatrix, t_FullMatrix * pVector){
 
 	t_SparseMatrix host_SparseMatrix,dev_SparseMatrix;
-	//t_SparseMatrix data_in1,*data_in1_host,*data_in1_gpu;//input sparse Matrix
 	t_FullMatrix host_Vector,dev_Vector,host_ResultVector,dev_ResultVector;
-	//t_FullMatrix data_in2,*data_in2_host,*data_in2_gpu;//input vector
-	//t_FullMatrix data_out,*data_out_host,*data_out_gpu;//output vector
 	size_t size_NZElement,size_Row,size_Col;
 	cudaError_t e;	
 	int sizeBlock,i;
-	//data_in1_host=&data_in1;
-	//data_in2_host=&data_in2;
-	//data_out_host=&data_out;
 	
 	sizeBlock = VECTOR_BLOCK_SIZE;
 	//=====debug==================
@@ -36,25 +30,7 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	printf("pSparseMatrix->m=%d \n",pSparseMatrix->m);
 	printf("pSparseMatrix->n=%d \n",pSparseMatrix->n);
 	//============================
-	/*
-	host_SparseMatrix.m = pSparseMatrix->m;
-	host_SparseMatrix.n = pSparseMatrix->n;
-	host_SparseMatrix.nzmax = pSparseMatrix->nzmax;
-	host_SparseMatrix.pCol = pSparseMatrix->pCol;
-	host_SparseMatrix.pNZElement = pSparseMatrix->pNZElement;
-	host_SparseMatrix.pRow = pSparseMatrix->pRow;
 
-	host_Vector.m = pVector->m;
-	host_Vector.n = pVector->n;
-	host_Vector.pElement = pVector->pElement;	
-	
-	host_ResultVector.m = pResultVector->m;
-	host_Vector.n = pResultVector->n;
-	host_ResultVector.pElement = pResultVector->pElement;
-	*/
-	//size_NZElement = sizeof(t_ve)*pSparseMatrix->nzmax;
-	//size_Row =sizeof(t_mindex)*(pSparseMatrix->m+1); //sizeof(int)*pSparseMatrix->m;
-	//size_Col = sizeof(t_mindex)*pSparseMatrix->nzmax;//sizeof(int)*(pSparseMatrix->n+1);
 	// Create an input and output data array on the GPU
 	//malloc memory for Input Sparse-Matrix
 	printf("malloc sparse Matrix \n");
@@ -88,18 +64,30 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	cudaMalloc( (void **) &(dev_ResultVector.pElement),size_RElement);
 
 	// Compute execution configuration using 128 threads per block 
+	//for sparseMatrixMul_kernel04
 	dim3 dimBlock(sizeBlock);
 	//dim3 dimGrid((sizeIn)/dimBlock.x);
 	cudaDeviceProp deviceProp;
 	cudaGetDeviceProperties(&deviceProp,0);
 	printf("number of multiProcessors: %d \n",deviceProp.multiProcessorCount);
-	int sizeGrid = 24;
+	int sizeGrid = deviceProp.multiProcessorCount;
 	if (sizeGrid > pSparseMatrix->m)sizeGrid = pSparseMatrix->m;
+	
+	//for sparseMatrixMul_kernel05
+	/*
+	int blockX = 32;
+	int blockY = 16;
+	dim3 dimBlock(blockX,blockY);
+	
+	if (sizeGrid*blockY > pSparseMatrix->m)sizeGrid = pSparseMatrix->m/blockY;
+	if ( (pSparseMatrix->m) % blockY !=0 ) sizeGrid+=1;
+	*/
+	//================================
+	
 	printf("grid size = %d\n",sizeGrid);
 	dim3 dimGrid(sizeGrid);
 	//if ( (sizeA) % sizeBlock !=0 ) dimGrid.x+=1;
-	//sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMatrix, t_FullMatrix * pVector)
-	//sparseMatrixMul<<<dimGrid,dimBlock>>>(data_out_gpu,data_in1_gpu,data_in2_gpu);
+
 	printf("calling kernel \n");
 	sparseMatrixMul<<<dimGrid,dimBlock>>>(dev_ResultVector,dev_SparseMatrix,dev_Vector);
 	
