@@ -1,10 +1,11 @@
 CFLAGS = $(PRJACUDACFLAGS)
 CC = nvcc $(CFLAGS)
+LD = nvcc $(CFLAGS)
 
 OX = $(PRJACUDAOBJEXT)
 
 showenvironment.$(PRJACUDAEXEEXT): showenvironment.$(OX)
-	$(CC) -o showenvironment.$(PRJACUDAEXEEXT)  showenvironment.$(OX) > nul
+	$(LD) -o showenvironment.$(PRJACUDAEXEEXT)  showenvironment.$(OX) > nul
 
 showenvironment.$(OX): showenvironment/showenvironment.cu
 	echo $(PRJACUDAOBJEXT)
