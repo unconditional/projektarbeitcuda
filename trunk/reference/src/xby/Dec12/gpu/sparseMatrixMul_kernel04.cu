@@ -4,7 +4,7 @@
 #include "project_comm.h"
 
 /* Kernel to square elements of the array on the GPU */
-/*
+/* 	release :sparseMatrixMul_kernel04.cu
 	input Matrix pSparseMatrix  ,input Vector pVector 
 	Vector pResultVector output vector 
 	C=A*B
@@ -21,6 +21,7 @@ __global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSpars
 	__shared__ float Cs[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim 
 	//define gridIndex, if gridDim < mA, gridIndex > 0; 
 	int gridIndex = 0;
+	int tx = threadIdx.x;
 	//int idx = gridIndex*gridDim.x + blockIdx.x*blockDim.x+threadIdx.x;
     t_ve *pMatrixElements, *pVectorElements, *pResultElements;
     unsigned int m, n;//, i, j;
@@ -70,20 +71,26 @@ __global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSpars
 		//if nB> blockDim, split repeat the
 		bBegin = pRow[gridIndex*gridDim.x+blockIdx.x];
 		bEnd = pRow[gridIndex*gridDim.x+blockIdx.x + 1];
-		for(int b = bBegin; (b < bEnd)&&((threadIdx.x+b) < bEnd); b += bStep ) {
+		//for(int b = bBegin; (b < bEnd)&&((threadIdx.x+b) < bEnd); b += bStep ) {
+		for(int b = bBegin; (b < bEnd); b += bStep ) {
 			//initialise Cs 
 			//As[threadIdx.x] = 0;
 			//Bs[threadIdx.x] = 0;// consider text memory
 			Cs[threadIdx.x] = 0;
 			__syncthreads();
 			// compute scalar product
-	
+			// for (i = 0; i < m; i++){
+			// colbegin = pRow[i];
+			// colend = pRow[i+1];
+			// for(j=colbegin;j<colend;j++)pResultElements[i] += pMatrixElements[j]*pVectorElements[pCol[j]];
+			// } 
 			if (( (gridIndex*gridDim.x+blockIdx.x)<aEnd)&&((b+threadIdx.x) < bEnd)) {
 				
 				Cs[threadIdx.x] = pMatrixElements[b + threadIdx.x] * pVectorElements[pCol[b + threadIdx.x ]];
 			}
 			__syncthreads();
-				
+			
+			/*
 			if(threadIdx.x == 0){
 				int kEnd = bEnd-b;
 				if(kEnd > VECTOR_BLOCK_SIZE)kEnd = VECTOR_BLOCK_SIZE;
@@ -92,9 +99,20 @@ __global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSpars
 			
 			}
 			__syncthreads();
+			*/
+			int offset; 
+			offset = VECTOR_BLOCK_SIZE/2;
+			while (offset > 0) {
+				if(tx < offset) {
+					Cs[tx] += Cs[tx + offset];
+				}
+				offset >>= 1;
+				__syncthreads();
+			}
+			__syncthreads();
+			if(threadIdx.x == 0)
+			blocksum += Cs[0]; //??? blocksum = Cs[0];
 			
-			//Cs[threadIdx.x] = 0;
-			//__syncthreads();	
 		}//for b
 		__syncthreads();
 
