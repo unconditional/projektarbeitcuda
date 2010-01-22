@@ -20,7 +20,7 @@ rem ********************************************************************
 
 set MATLAB=%MATLAB%
 set VS80COMNTOOLS=%VS90COMNTOOLS%
-set VSINSTALLDIR=C:\Programme\Microsoft Visual Studio 9.0
+set VSINSTALLDIR=D:\Programme\Microsoft Visual Studio 9.0
 set VCINSTALLDIR=%VSINSTALLDIR%\VC
 set PATH=%VCINSTALLDIR%\BIN\;%VCINSTALLDIR%\PlatformSDK\bin;%VSINSTALLDIR%\Common7\IDE;%VSINSTALLDIR%\SDK\v2.0\bin;%VSINSTALLDIR%\Common7\Tools;%VSINSTALLDIR%\Common7\Tools\bin;%VCINSTALLDIR%\VCPackages;C:\Programme\Microsoft SDKs\Windows\v6.0A\bin;%MATLAB_BIN%;%PATH%
 set INCLUDE=%VCINSTALLDIR%\ATLMFC\INCLUDE;%VCINSTALLDIR%\INCLUDE;%VCINSTALLDIR%\PlatformSDK\INCLUDE;%VSINSTALLDIR%\SDK\v2.0\include;%INCLUDE%
