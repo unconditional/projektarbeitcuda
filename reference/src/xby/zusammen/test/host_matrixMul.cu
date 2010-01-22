@@ -48,7 +48,11 @@ data_out_f = (t_ve *) malloc(sizeof(t_ve)*sizeC);
 	}
     for (i = 0; i < sizeA; i++)
     {
+<<<<<<< .mine
+        //printf("data_in1_f[%d] = %f, ", i, data_in1_f[i]);
+=======
        // printf("data_in1_f[%d] = %f, ", i, data_in1_f[i]);
+>>>>>>> .r110
     }
         printf("\n");
 
@@ -78,7 +82,11 @@ if ( e != cudaSuccess)
 cudaMemcpy( data_out_f, data_out_f_gpu, sizeof(float)*sizeC, cudaMemcpyDeviceToHost);
     for (i = 0; i < sizeC; i++)
     {
+<<<<<<< .mine
+        //printf("data_out_f[%d] = %f, ", i, data_out_f[i]);
+=======
     //    printf("data_out_f[%d] = %f, ", i, data_out_f[i]);
+>>>>>>> .r110
     }
      //   printf("\n");
 

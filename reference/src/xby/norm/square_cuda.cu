@@ -3,7 +3,8 @@
 /* Kernel to square elements of the array on the GPU */
 __global__ void square_elements(float* in, float* out, int N)
 {
-int idx = blockIdx.x*blockDim.x+threadIdx.x;
+//int idx = blockIdx.x*blockDim.x+threadIdx.x;
+int idx = threadIdx.x;
 if ( idx < N) out[idx]=in[idx]*in[idx];
 }
 /* Gateway function */

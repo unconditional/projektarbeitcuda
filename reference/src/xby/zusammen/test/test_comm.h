@@ -15,11 +15,11 @@
 
 #define FUNCTIONPATH1 "..\\gpu\\dotMul_cuda_gpu05.cu"
 
-#include FUNCTIONPATH1
+//#include FUNCTIONPATH1
 
 #define FUNCTIONPATH2 "..\\gpu\\norm_cuda_gpu02.cu"
 
-#include FUNCTIONPATH2
+//#include FUNCTIONPATH2
 
 #define FUNCTIONPATH3 "..\\gpu\\matrixMul_kernel03.cu"
 #include FUNCTIONPATH3
