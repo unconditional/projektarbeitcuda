@@ -1,6 +1,8 @@
 #! /bin/sh
 
-PRJACUDACFLAGS="-deviceemu -I include/common"
+DOUBLEFLAGS="-DPRJACUDADOUBLE --gpu-architecture sm_13"
+
+PRJACUDACFLAGS="-deviceemu -I include/common $DOUBLEFLAGS"
 export PRJACUDACFLAGS
 
 PRJACUDAOBJEXT=o
