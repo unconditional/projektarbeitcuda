@@ -3,7 +3,11 @@
 #include "projektcuda.h"
 #include "project_comm.h"
 //#include "mex.h"
-/* Kernel to square elements of the array on the GPU */
+/*
+	release norm_cuda_gpu02
+ Kernel to square elements of the array on the GPU
+ */
+
 
 __global__ void norm_elements(t_ve* in,t_ve* out, unsigned int N)
 {
