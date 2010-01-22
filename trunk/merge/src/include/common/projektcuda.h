@@ -17,7 +17,15 @@
 
 #define VECTOR_BLOCK_SIZE DEF_BLOCKSIZE
 
+#ifndef PRJACUDADOUBLE
 typedef float        t_ve; /* base type of Matrizes: 'float' or 'double' */
+#endif
+
+#ifdef PRJACUDADOUBLE
+typedef double        t_ve; /* base type of Matrizes: 'float' or 'double' */
+#endif
+
+
 typedef t_ve*        pt_ve;
 
 typedef int        t_mindex;
