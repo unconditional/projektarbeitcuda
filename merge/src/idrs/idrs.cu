@@ -3,8 +3,9 @@
 
 #include "projektcuda.h"
 
+
 __host__ void idrs(
-                     SparseMatrix A_h,
+                     t_SparseMatrix A_h,
                      t_ve* b_h,
                      unsigned int s,
                      t_ve  tol,
