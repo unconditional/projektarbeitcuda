@@ -4,6 +4,7 @@
 #include "projektcuda.h"
 
 
+
 extern "C" void idrs(
                      t_SparseMatrix A_h,
                      t_ve* b_h,
