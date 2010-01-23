@@ -4,6 +4,7 @@ CC = nvcc  $(CFLAGS)
 LD = nvcc $(CFLAGS)
 
 OX = $(PRJACUDAOBJEXT)
+LIBX = a
 
 all: showenvironment.$(PRJACUDAEXEEXT) idrs.$(OX) idrscli.$(OX) idrscli.$(PRJACUDAEXEEXT) libidrs.a
 
@@ -16,6 +17,9 @@ idrscli.$(OX): idrs/idrscli.cu
 showenvironment.$(PRJACUDAEXEEXT): showenvironment.$(OX)
 	$(LD) -o showenvironment.$(PRJACUDAEXEEXT)  showenvironment.$(OX) > nul
 
+
+libidrs.{LIBX}: idrs/idrs.cu
+	$(CC) -lib idrs/idrs.cu -o .{LIBX}
 
 idrs.$(OX): idrs/idrs.cu
 	$(CC) -c idrs/idrs.cu -o idrs.$(OX) > nul
