@@ -5,3 +5,6 @@ set PRJACUDACFLAGS=-I include/common %DOUBLEFLAGS%
 set BLA="set by skript"
 set PRJACUDAOBJEXT=obj
 set PRJACUDAEXEEXT=exe
+
+set PRJACUDAHOSTLD=link
+set PRJACUDALIBEXT=a

@@ -3,10 +3,10 @@ CC = nvcc  $(CFLAGS)
 #LD = nvcc $(CFLAGS)
 LD = nvcc $(CFLAGS)
 
-HOSTLD = gcc
+HOSTLD = $(PRJACUDAHOSTLD) # linker from host system (gcc on GNU, 'link' on MS visual studio,  ...
 
 OX = $(PRJACUDAOBJEXT)
-LIBX = a
+LIBX = $(PRJACUDALIBEXT)
 
 all: showenvironment.$(PRJACUDAEXEEXT) idrs.$(OX) idrscli.$(OX) idrscli.$(PRJACUDAEXEEXT) libidrs.a
 
