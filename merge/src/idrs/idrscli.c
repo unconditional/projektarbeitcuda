@@ -6,12 +6,15 @@
 
 int main()
 {
-   printf("manual IDRS driver");
+
 
    t_SparseMatrix a;
    t_ve bla;
    unsigned int blai;
 
+   printf("manual IDRS driver");
+
+/*
    idrs(
          a,
          &bla,
@@ -26,6 +29,6 @@ int main()
          &bla,
          &blai
      );
-
+*/
 }
 
