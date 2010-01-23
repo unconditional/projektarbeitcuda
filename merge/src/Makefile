@@ -13,11 +13,11 @@ LIBX = $(PRJACUDALIBEXT)
 
 all: showenvironment.$(PRJACUDAEXEEXT) idrs.$(OX) idrscli.$(OX) idrscli.$(PRJACUDAEXEEXT) libidrs.a
 
-idrscli.$(PRJACUDAEXEEXT): idrs/idrscli.c libidrs.$(LIBX) idrscli.$(OX)
+idrscli.$(PRJACUDAEXEEXT):  libidrs.$(LIBX) idrscli.$(OX)
 	$(HOSTLD) idrscli.$(OX)  -lidrs  -lcudart -L./ -o idrscli.$(PRJACUDAEXEEXT) -L/usr/local/cuda/lib
 
-idrscli.$(OX): idrs/idrscli.c
-	nvcc -Iinclude/common -I./  -c  -o idrscli.$(OX) idrs/idrscli.c > nul
+idrscli.$(OX): idrs/idrscli.cpp
+	nvcc -Iinclude/common -I./  -c  -o idrscli.$(OX) idrs/idrscli.cpp > nul
 
 showenvironment.$(PRJACUDAEXEEXT): showenvironment.$(OX)
 	$(LD) -o showenvironment.$(PRJACUDAEXEEXT)  showenvironment.$(OX) > nul
