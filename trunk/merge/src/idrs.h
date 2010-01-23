@@ -1,6 +1,6 @@
 
 
-extern  void idrs(
+extern "C" void idrs(
                      t_SparseMatrix A_h,
                      t_ve* b_h,
                      unsigned int s,
