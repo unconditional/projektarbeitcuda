@@ -3,7 +3,9 @@ CC = nvcc  $(CFLAGS)
 #LD = nvcc $(CFLAGS)
 LD = nvcc $(CFLAGS)
 
+#HOSTLD = $(PRJACUDAHOSTLD) # linker from host system (gcc on GNU, 'link' on MS visual studio,  ...
 HOSTLD = $(PRJACUDAHOSTLD) # linker from host system (gcc on GNU, 'link' on MS visual studio,  ...
+#HOSTCC = $(PRJACUDAHOSCC)
 HOSTCC = $(PRJACUDAHOSCC)
 
 OX = $(PRJACUDAOBJEXT)
@@ -15,7 +17,7 @@ idrscli.$(PRJACUDAEXEEXT): idrs/idrscli.c libidrs.$(LIBX) idrscli.$(OX)
 	$(HOSTLD) idrscli.$(OX)  -lidrs  -lcudart -L./ -o idrscli.$(PRJACUDAEXEEXT) -L/usr/local/cuda/lib
 
 idrscli.$(OX): idrs/idrscli.c
-	$(HOSTCC) -Iinclude/common -I./  -c  -o idrscli.$(OX) idrs/idrscli.c > nul
+	nvcc -Iinclude/common -I./  -c  -o idrscli.$(OX) idrs/idrscli.c > nul
 
 showenvironment.$(PRJACUDAEXEEXT): showenvironment.$(OX)
 	$(LD) -o showenvironment.$(PRJACUDAEXEEXT)  showenvironment.$(OX) > nul
