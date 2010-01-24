@@ -10,7 +10,7 @@ int main()
 
    t_SparseMatrix a;
    t_ve bla;
-   unsigned int blai;
+   t_mindex blai;
 
 
 
