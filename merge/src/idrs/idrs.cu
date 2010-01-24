@@ -11,7 +11,7 @@ __host__ size_t smat_size( int cnt_elements, int cnt_cols ) {
 }
 
 extern "C" void idrs(
-                     t_mindex N,
+
                      t_SparseMatrix A_h,
 
                      t_ve* b_h,
@@ -19,7 +19,7 @@ extern "C" void idrs(
                      t_ve  tol,
                      t_mindex maxit,
                      t_ve* x0_h,
-
+                     t_mindex N,
 
 
                      t_ve* x_h,  /* output vector */
@@ -49,7 +49,7 @@ extern "C" void idrs(
     printf("\n using %u bytes in Device memory", d_memblocksize);
 
     for ( int i = 0; i < N; i++ ) {
-       printf( "\n %u %f", i, b_h[i] );
+       printf( "\n bh %u %f", i, b_h[i] );
     }
 
 
@@ -76,7 +76,7 @@ extern "C" void idrs(
     memcpy( pRow, A_h.pRow, ( A_h.m + 1 ) *  sizeof(t_mindex) );
 
     t_ve* b = (t_ve *) &pRow[A_h.m + 1];
-    memcpy( b, b_h,  N *  sizeof(t_mindex) );
+    memcpy( b, b_h,  N *  sizeof(t_ve) );
 
     e = cudaMalloc ( &devmem , d_memblocksize );
     CUDA_UTIL_ERRORCHECK("cudaMalloc")
@@ -92,6 +92,9 @@ extern "C" void idrs(
     A_d.pNZElement = (t_ve *) (&A_d.pCol[A_d.nzmax] ) ;
     A_d.pRow       = (t_mindex *) (&A_d.pNZElement[A_d.nzmax]);
 
+    for ( int i = 0; i < N; i++ ) {
+       printf( "\n b %u %f", i, b[i] );
+    }
 
     printf("\n*** IDRS.cu - unimplemented - doing nothing  *** \n");
 
