@@ -11,7 +11,7 @@ HOSTCC = $(PRJACUDAHOSCC)
 OX = $(PRJACUDAOBJEXT)
 LIBX = $(PRJACUDALIBEXT)
 
-all: showenvironment.$(PRJACUDAEXEEXT) idrs.$(OX) idrscli.$(OX) idrscli.$(PRJACUDAEXEEXT) libidrs.a
+all: showenvironment.$(PRJACUDAEXEEXT) idrs.$(OX) idrscli.$(OX) idrscli.$(PRJACUDAEXEEXT) libidrs.$(LIBX)
 
 idrscli.$(PRJACUDAEXEEXT):  libidrs.$(LIBX) idrscli.$(OX)
 	$(HOSTLD) idrscli.$(OX)  -lidrs  -lcudart -L./ -o idrscli.$(PRJACUDAEXEEXT) -L/usr/local/cuda/lib
