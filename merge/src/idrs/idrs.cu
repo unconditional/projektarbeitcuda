@@ -54,6 +54,27 @@ extern "C" void idrs(
     hostmem =   malloc( h_memblocksize );
     if ( hostmem == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you hostmem"); exit( -1 ); }
 
+/*
+      pcol       |  t_mindex  |  .nzmax
+      pNZElement |  t_ve      |  .nzmax
+      pRow       |  t_mindex  |  N
+      b          |  t_ve      |  N
+*/
+
+    /* copy all parameter vectors to ony monoliythic block starting at hostmem */
+
+    t_mindex *pcol = (t_mindex *) hostmem;
+    memcpy( pcol, A_h.pCol, A_h.nzmax * sizeof(t_mindex) );
+
+    t_ve* pNZElement =  (t_ve *) &pcol[A_h.nzmax] ;
+    memcpy( pNZElement, A_h.pNZElement, A_h.nzmax *  sizeof(t_ve) );
+
+    t_mindex* pRow = (t_mindex *) (&pNZElement[A_h.nzmax]);
+    memcpy( pRow, A_h.pRow, ( A_h.m + 1 ) *  sizeof(t_mindex) );
+
+    t_ve* b = (t_ve *) &pRow[A_h.m + 1];
+    memcpy( b, b_h,  N *  sizeof(t_mindex) );
+
     e = cudaMalloc ( &devmem , d_memblocksize );
     CUDA_UTIL_ERRORCHECK("cudaMalloc")
 
