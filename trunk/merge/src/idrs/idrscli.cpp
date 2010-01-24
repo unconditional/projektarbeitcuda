@@ -31,8 +31,8 @@ int main()
     if ( b == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
 
    for ( int i = 0; i < N; i++ ) {
-      b[i] =  1;
-      printf( "\n org %u %f", i, b[i] );
+      b[i] =  i;
+      /* printf( "\n org %u %f", i, b[i] ); */
    }
 
     a.pRow = ( t_mindex* ) malloc( sizeof( t_mindex ) * ( a.m + 1) );
@@ -56,7 +56,7 @@ int main()
     }
 
    idrs(
-         N,
+
          a,
          b,
 
@@ -64,7 +64,7 @@ int main()
          0.123, /* tol */
          100,   /* maxit */
          xe,
-
+         N,
 
 
          &bla,

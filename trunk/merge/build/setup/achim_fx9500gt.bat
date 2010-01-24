@@ -1,8 +1,8 @@
 echo "setup for Geforce 9500 GT"
 
-set DOUBLEDEFINE="-DPRJACUDADOUBLE"
+set DOUBLEDEFINE=-DPRJACUDADOUBLE
 
-set DOUBLEFLAGS=%DOUBLEDEFIN% --gpu-architecture sm_13
+set DOUBLEFLAGS=%DOUBLEDEFINE% --gpu-architecture sm_13
 
 set PRJACUDACFLAGS=-I include/common %DOUBLEFLAGS%
 set BLA="set by skript"
