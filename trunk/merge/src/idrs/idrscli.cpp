@@ -7,7 +7,7 @@
 int main()
 {
 
-   t_mindex N               = 1000000;
+   t_mindex N               = 50;
    t_mindex sparse_NZ_elements = 10;
 
 
@@ -19,7 +19,7 @@ int main()
    t_ve*  xe;
 
    t_mindex blai;
-
+    printf( "Build configuration: sizeof(t_ve) = %u \n", sizeof(t_ve));
    printf("\n manual IDRS driver, running Matrix size %u \n", N);
 
     a.n = N;
@@ -29,6 +29,11 @@ int main()
 
     b = ( t_ve* ) malloc( sizeof( t_ve ) *  N );
     if ( b == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
+
+   for ( int i = 0; i < N; i++ ) {
+      b[i] =  1;
+      printf( "\n org %u %f", i, b[i] );
+   }
 
     a.pRow = ( t_mindex* ) malloc( sizeof( t_mindex ) * ( a.m + 1) );
     if ( a.pRow == NULL) { fprintf(stderr, "sorry, can not allocate memory for you  a.pRow"); exit( -1 ); }
@@ -54,6 +59,7 @@ int main()
          N,
          a,
          b,
+
          10,    /* s */
          0.123, /* tol */
          100,   /* maxit */

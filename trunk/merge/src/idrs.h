@@ -5,6 +5,7 @@ extern "C" void idrs(
                      t_SparseMatrix A_h,
 
                      t_ve* b_h,
+
                      t_mindex s,
                      t_ve  tol,
                      t_mindex maxit,

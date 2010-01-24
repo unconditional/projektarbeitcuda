@@ -48,6 +48,9 @@ extern "C" void idrs(
     printf("\n using %u bytes in Host   memory", h_memblocksize);
     printf("\n using %u bytes in Device memory", d_memblocksize);
 
+    for ( int i = 0; i < N; i++ ) {
+       printf( "\n %u %f", i, b_h[i] );
+    }
 
 
 
