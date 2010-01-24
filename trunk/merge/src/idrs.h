@@ -3,16 +3,16 @@
 extern "C" void idrs(
                      t_SparseMatrix A_h,
                      t_ve* b_h,
-                     unsigned int s,
+                     t_mindex s,
                      t_ve  tol,
-                     unsigned int maxit,
+                     t_mindex maxit,
                      t_ve* x0_h,
 
-                     unsigned int N,
+                     t_mindex N,
 
                      t_ve* x_h,  /* output vector */
                      t_ve* resvec_h,
-                     unsigned int* piter
+                     t_mindex* piter
                   );
 
 
