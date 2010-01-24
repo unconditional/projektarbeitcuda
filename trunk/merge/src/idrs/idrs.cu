@@ -48,10 +48,6 @@ extern "C" void idrs(
     printf("\n using %u bytes in Host   memory", h_memblocksize);
     printf("\n using %u bytes in Device memory", d_memblocksize);
 
-    for ( int i = 0; i < N; i++ ) {
-       printf( "\n bh %u %f", i, b_h[i] );
-    }
-
 
 
     hostmem =   malloc( h_memblocksize );
@@ -92,9 +88,6 @@ extern "C" void idrs(
     A_d.pNZElement = (t_ve *) (&A_d.pCol[A_d.nzmax] ) ;
     A_d.pRow       = (t_mindex *) (&A_d.pNZElement[A_d.nzmax]);
 
-    for ( int i = 0; i < N; i++ ) {
-       printf( "\n b %u %f", i, b[i] );
-    }
 
     printf("\n*** IDRS.cu - unimplemented - doing nothing  *** \n");
 
