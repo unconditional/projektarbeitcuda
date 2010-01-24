@@ -7,7 +7,7 @@
 int main()
 {
 
-   t_mindex N               = 10;
+   t_mindex N               = 1000000;
    t_mindex sparse_NZ_elements = 10;
 
 
