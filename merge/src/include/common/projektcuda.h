@@ -53,3 +53,4 @@ typedef struct SparseMatrix{
 } t_SparseMatrix;
 
 
+typedef int t_idrshandle;

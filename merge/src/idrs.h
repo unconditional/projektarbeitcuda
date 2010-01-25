@@ -1,5 +1,19 @@
 
 
+
+extern "C" void idrs_1st(
+
+                     t_SparseMatrix A_in,    /* A Matrix in buyu-sparse-format */
+                     t_ve*          b_in,    /* b as in A * b = x */
+
+                     t_mindex N,
+
+                     t_ve*          r_out,    /* the r from idrs.m line 6 : r = b - A*x; */
+
+                     t_idrshandle*  ih_out  /* handle for haloding all the device pointers between matlab calls */
+
+           );
+
 extern "C" void idrs(
 
                      t_SparseMatrix A_h,
