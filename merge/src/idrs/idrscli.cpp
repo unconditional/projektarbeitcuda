@@ -7,8 +7,8 @@
 int main()
 {
 
-   t_mindex N               = 50;
-   t_mindex sparse_NZ_elements = 50;
+   t_mindex N               = 20000;
+   t_mindex sparse_NZ_elements = 20000;
 
 
 
@@ -73,9 +73,10 @@ int main()
 
                &irdshandle
             );
-
+   if ( N < 101 ) {
    for ( int i = 0; i < N; i++ ) {
        printf( "\n  %u b %f r%f", i, b[i], r[i] );
+   }
    }
 //   idrs(
 //

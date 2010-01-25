@@ -17,7 +17,7 @@ __host__ size_t smat_size( int cnt_elements, int cnt_cols ) {
            + sizeof(t_mindex)  * (cnt_cols + 1);
 }
 
-
+/*
 __global__ void testsparseMatrixMul( t_FullMatrix pResultVector,t_SparseMatrix pSparseMatrix, t_FullMatrix b ) {
 
     t_mindex tix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -39,7 +39,7 @@ __global__ void testsparseMatrixMul( t_FullMatrix pResultVector,t_SparseMatrix p
     }
 
 }
-
+*/
 
 __host__ void set_sparse_data( t_SparseMatrix A_in, t_SparseMatrix* A_out, void* mv ) {
 
@@ -158,6 +158,8 @@ extern "C" void idrs_1st(
 
 
     printf("\n first call of idrs_1st - unimplemented \n\n " );
+
+    *ih_out = 0;
 
 }
 

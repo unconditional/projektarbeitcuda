@@ -1,4 +1,4 @@
-CFLAGS = $(PRJACUDACFLAGS)
+CFLAGS = $(PRJACUDACFLAGS) -I include
 CC = nvcc  $(CFLAGS)
 #LD = nvcc $(CFLAGS)
 LD = nvcc $(CFLAGS)
@@ -28,7 +28,7 @@ libidrs.$(LIBX): idrs.$(OX) kernelsparsemul.$(OX)
 	$(CC) -lib idrs.$(OX) kernelsparsemul.$(OX) -o libidrs.$(LIBX) >nul
 
 kernelsparsemul.$(OX): kernels/sparsematrixmulvector/sparseMatrixMul_kernel.cu
-	$(CC) -c kernels/sparsematrixmulvector/sparseMatrixMul_kernel.cu -o kernelsparsemul.$(OX)
+	$(CC) -c kernels/sparsematrixmulvector/sparseMatrixMul_kernel.cu -o kernelsparsemul.$(OX) > nul
 
 idrs.$(OX): idrs/idrs.cu
 	$(CC) -c idrs/idrs.cu -o idrs.$(OX) > nul
