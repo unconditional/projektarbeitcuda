@@ -11,6 +11,16 @@ __host__ size_t smat_size( int cnt_elements, int cnt_cols ) {
 }
 
 
+__global__ void testsparseMatrixMul( t_ve* pResultVector,t_SparseMatrix pSparseMatrix, t_ve* pVector) {
+    int i = 0;
+    t_mindex tix = blockIdx.x * blockDim.x + threadIdx.x;
+    if ( tix  < pSparseMatrix.m ) {
+        //printf ( "\n block %u thread %u tix %u N %u", blockIdx.x, threadIdx.x, tix, pSparseMatrix.m );
+        printf("\n %u %f", tix, pVector[tix] );
+    }
+}
+
+
 __host__ void set_sparse_data( t_SparseMatrix A_in, t_SparseMatrix* A_out, void* mv ) {
 
     A_out->m     = A_in.m;
@@ -42,6 +52,9 @@ extern "C" void idrs_1st(
 
     t_SparseMatrix A_d;
 
+    t_ve* d_tmpAb;
+    t_ve* d_b;
+
     void *hostmem;
     void *devmem;
 
@@ -50,6 +63,7 @@ extern "C" void idrs_1st(
                      ;
 
     d_memblocksize =  h_memblocksize
+                    + N * sizeof( t_ve )            /* d_tmpAb         */
                     + N * sizeof( t_ve )            /* x             */
                     + N * sizeof( t_ve )            /* resvec        */
                       ;
@@ -68,6 +82,7 @@ extern "C" void idrs_1st(
       pNZElement |  t_ve      |  .nzmax
       pRow       |  t_mindex  |  N
       b          |  t_ve      |  N
+      d_tmpAb    |  t_ve      |  N
 */
 
     /* copy all parameter vectors to ony monoliythic block starting at hostmem */
@@ -91,7 +106,16 @@ extern "C" void idrs_1st(
     CUDA_UTIL_ERRORCHECK("cudaMemcpyHostToDevice");
 
     set_sparse_data(  A_in, &A_d, devmem );
+    d_b     = (t_ve *) &A_d.pRow[A_in.m + 1];
+    d_tmpAb = (t_ve *) &d_b[N];
 
+
+    dim3 dimGrid ( 2 );
+    dim3 dimBlock(32);
+
+    testsparseMatrixMul<<<dimGrid,dimBlock>>>( d_tmpAb, A_d, d_b );
+    e = cudaGetLastError();
+    CUDA_UTIL_ERRORCHECK("testsparseMatrixMul");
 
     printf("\n*** IDRS.cu - unimplemented - doing nothing  *** \n");
 
@@ -126,14 +150,13 @@ extern "C" void idrs(
     void *hostmem;
     void *devmem;
 
-    t_ve* d_tmpAb;
-    t_ve* d_b;
+
     h_memblocksize =   smat_size( A_h.nzmax, A_h.m )  /* A sparse     */
                      + N * sizeof( t_ve )             /* b full       */
                      ;
 
     d_memblocksize =  h_memblocksize
-                    + N * sizeof( t_ve )            /* d_tmpAb         */
+
                     + N * sizeof( t_ve )            /* x             */
                     + N * sizeof( t_ve )            /* resvec        */
 
