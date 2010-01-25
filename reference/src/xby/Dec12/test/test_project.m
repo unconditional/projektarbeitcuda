@@ -4,9 +4,9 @@ clear all
 %nvmex -f nvmexopts_bb_double.bat mexUnitTestMain_cpu.cu -IC:\CUDA\include -LC:\CUDA\lib -lcudart
 %nvmex -f nvmexopts_bb_double.bat mexInterface_sparseMv_gpu.cu -IC:\CUDA\include -LC:\CUDA\lib -lcudart
 %nvmex -f nvmexopts_bb_double.bat mexInterface_sparseMv_gpu02.cu -IC:\CUDA\include -LC:\CUDA\lib -lcudart
-% mex mexInterface_sparseMv.c
+%mex mexInterface_sparseMv.c
 %mex mexUnitTestMain_cpu.c
-mex mexInterface_idrs.c
+%mex mexInterface_idrs.c
 
 
 %scalarMul
@@ -49,21 +49,21 @@ mex mexInterface_idrs.c
 %toc
 %==================================
 %
-% N=10;
-% A = sparse(1:N,1:N,1,N,N);
-% b = [1:N];
-% %c = mexInterface_sparseMv(A,b)
+N=5;
+A = sparse(1:N,1:N,1,N,N);
+b = [1:N];
+c = mexInterface_sparseMv(A,b);
 % %c = mexInterface_sparseMv_gpu(A,b);
 % c = mexInterface_sparseMv_gpu02(A,b);
 %==================================
 
 
 %test idrs
-N = 10;
-A=sparse(1:N,1:N,1,N,N);
-b = [1:N];
-s = 1;
-tol = 1;
-maxit =1;
-x0 = [1:N];
-[x,resvec,iter] = mexInterface_idrs(A,b,s,tol,maxit,x0,N)
+% N = 10;
+% A=sparse(1:N,1:N,1,N,N);
+% b = [1:N];
+% s = 1;
+% tol = 1;
+% maxit =1;
+% x0 = [1:N];
+% [x,resvec,iter] = mexInterface_idrs(A,b,s,tol,maxit,x0,N)

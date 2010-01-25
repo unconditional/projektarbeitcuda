@@ -27,13 +27,12 @@ __global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSpars
 	__shared__ float Cs[VECTOR_BLOCK_Y][VECTOR_BLOCK_X];//VECTOR_BLOCK_SIZE shuld equal blockDim 
 	//define gridIndex, if gridDim < mA, gridIndex > 0; 
 	int gridIndex = 0;
-	int tx,ty,bx;
+	int tx,bx;
 	//int idx = gridIndex*gridDim.x + blockIdx.x*blockDim.x+threadIdx.x;
     t_ve *pMatrixElements, *pVectorElements, *pResultElements;
     unsigned int m, n;//, i, j;
     unsigned int *pRow, *pCol;
     tx = threadIdx.x;
-	ty = threadIdx.y;
 	bx = blockIdx.x;
 	//unsigned int colbegin, colend;
     pMatrixElements = pSparseMatrix.pNZElement;
@@ -81,9 +80,32 @@ __global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSpars
 		//following is operations within one block 
 		// initialize the dot product for each row in A and vector B
 		//t_ve blocksum = 0;
+		bBegin = 0;
+		bEnd = n;
 		t_ve blocksum[VECTOR_BLOCK_Y]; 
-		blocksum[ty]= 0;
-		//if nB> blockDim, split repeat the
+		blocksum[????]= 0;
+		for(b=bBegin; b<bEnd;b+=bStep){
+			if((b+tx)<bEnd)
+			Bs[tx] = pVectorElements[b+tx];
+			for(i=0;i<VECTOR_BLOCK_Y;i++){
+				Cs[tx][i] = 0;			
+				for(k=pRow[i];k<pRow[i+1];i++){
+					if(b+tx == pCol[k]){
+						Cs[tx][i] = Bs[tx]*pMatrixElements[k];
+						break;
+					}
+				}
+				
+				
+			}
+			
+		}//for b block
+		
+		
+		
+		
+		
+		
 		bBegin = pRow[rowIdx];
 		bEnd = pRow[rowIdx + 1];
 		
