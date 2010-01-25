@@ -16,7 +16,7 @@ __global__ void testsparseMatrixMul( t_FullMatrix pResultVector,t_SparseMatrix p
     t_mindex tix = blockIdx.x * blockDim.x + threadIdx.x;
     if ( tix  < pSparseMatrix.m ) {
         //printf ( "\n block %u thread %u tix %u N %u", blockIdx.x, threadIdx.x, tix, pSparseMatrix.m );
-        printf("\n %u %f", tix, b.pElement[tix] );
+        //printf("\n %u %f", tix, b.pElement[tix] );
         pResultVector.pElement[tix] = b.pElement[tix] - 1;
     }
 }
