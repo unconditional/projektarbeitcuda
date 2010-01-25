@@ -11,13 +11,13 @@ __host__ size_t smat_size( int cnt_elements, int cnt_cols ) {
 }
 
 
-__global__ void testsparseMatrixMul( t_ve* pResultVector,t_SparseMatrix pSparseMatrix, t_ve* pVector) {
+__global__ void testsparseMatrixMul( t_FullMatrix pResultVector,t_SparseMatrix pSparseMatrix, t_FullMatrix b ) {
 
     t_mindex tix = blockIdx.x * blockDim.x + threadIdx.x;
     if ( tix  < pSparseMatrix.m ) {
         //printf ( "\n block %u thread %u tix %u N %u", blockIdx.x, threadIdx.x, tix, pSparseMatrix.m );
-        printf("\n %u %f", tix, pVector[tix] );
-        pResultVector[tix] = pVector[tix] - 1;
+        printf("\n %u %f", tix, b.pElement[tix] );
+        pResultVector.pElement[tix] = b.pElement[tix] - 1;
     }
 }
 
@@ -114,10 +114,22 @@ extern "C" void idrs_1st(
     dim3 dimGrid ( 2 );
     dim3 dimBlock(32);
 
-    testsparseMatrixMul<<<dimGrid,dimBlock>>>( d_tmpAb, A_d, d_b );
+    /* --------------------------------------------------------------------- */
+
+    t_FullMatrix mb;
+    t_FullMatrix result;
+
+    mb.m        = N;
+    mb.n        = 1;
+    mb.pElement = d_b;
+
+    result.pElement = d_tmpAb;
+
+    testsparseMatrixMul<<<dimGrid,dimBlock>>>( result, A_d, mb );
     e = cudaGetLastError();
     CUDA_UTIL_ERRORCHECK("testsparseMatrixMul");
 
+    /* --------------------------------------------------------------------- */
     e = cudaMemcpy( r_out, d_tmpAb, sizeof(t_ve) * N, cudaMemcpyDeviceToHost);
     CUDA_UTIL_ERRORCHECK("cudaMemcpyDeviceToHost");
 
