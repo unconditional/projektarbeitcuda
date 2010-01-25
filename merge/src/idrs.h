@@ -5,6 +5,7 @@ extern "C" void idrs_1st(
 
                      t_SparseMatrix A_in,    /* A Matrix in buyu-sparse-format */
                      t_ve*          b_in,    /* b as in A * b = x */
+                     t_ve*          xe_in,
 
                      t_mindex N,
 

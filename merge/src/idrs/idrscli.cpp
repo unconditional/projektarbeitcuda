@@ -7,8 +7,8 @@
 int main()
 {
 
-   t_mindex N               = 20000;
-   t_mindex sparse_NZ_elements = 20000;
+   t_mindex N               = 30;
+   t_mindex sparse_NZ_elements = 30;
 
 
 
@@ -32,6 +32,8 @@ int main()
     a.m = N;
     a.nzmax = sparse_NZ_elements;
 
+    xe = ( t_ve* ) malloc( sizeof( t_ve ) *  N );
+    if (  xe == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you xe"); exit( -1 ); }
 
     b = ( t_ve* ) malloc( sizeof( t_ve ) *  N );
     if ( b == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
@@ -41,6 +43,7 @@ int main()
 
    for ( int i = 0; i < N; i++ ) {
       b[i] =  i * 3;
+      xe[i] = 14.9;
       /* printf( "\n org %u %f", i, b[i] ); */
    }
 
@@ -54,7 +57,7 @@ int main()
     if ( a.pNZElement == NULL) { fprintf(stderr, "sorry, can not allocate memory for you  a.pNZElement"); exit( -1 ); }
 
     for ( t_mindex i = 0; i < a.nzmax; i++ ) {
-        a.pNZElement[i] = 14.9;
+        a.pNZElement[i] = 1;
     }
 
     for ( t_mindex i = 0; i < a.nzmax; i++ ) {
@@ -67,6 +70,7 @@ int main()
     idrs_1st(
                a,
                b,
+               xe,
                N,
                r,
 

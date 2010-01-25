@@ -10,6 +10,12 @@ extern "C" size_t idrs_sizetve() {
   return sizeof(t_ve);
 }
 
+__global__ void sub_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_mindex N)
+{
+    t_mindex i = threadIdx.y * blockDim.x + threadIdx.x;
+    if ( i < N )
+        out[i] = in1[i] - in2[i];
+}
 
 __host__ size_t smat_size( int cnt_elements, int cnt_cols ) {
 
@@ -57,7 +63,7 @@ extern "C" void idrs_1st(
 
                      t_SparseMatrix A_in,    /* A Matrix in buyu-sparse-format */
                      t_ve*          b_in,    /* b as in A * b = x */
-
+                     t_ve*          xe_in,
                      t_mindex N,
 
                      t_ve*          r_out,    /* the r from idrs.m line 6 : r = b - A*x; */
@@ -74,18 +80,24 @@ extern "C" void idrs_1st(
 
     t_ve* d_tmpAb;
     t_ve* d_b;
+    t_ve* d_xe;
+    t_ve* d_r;
+    t_ve* xe;
 
     void *hostmem;
     void *devmem;
 
     h_memblocksize =   smat_size( A_in.nzmax, A_in.m )  /* A sparse     */
-                     + N * sizeof( t_ve )             /* b full       */
+                     + N * sizeof( t_ve )               /* b full       */
+                     + N * sizeof( t_ve )               /* xe        */
                      ;
 
     d_memblocksize =  h_memblocksize
                     + N * sizeof( t_ve )            /* d_tmpAb         */
-                    + N * sizeof( t_ve )            /* x             */
-                    + N * sizeof( t_ve )            /* resvec        */
+                    + N * sizeof( t_ve )            /* d_r             */
+                    + N * sizeof( t_ve )            /* x               */
+                    + N * sizeof( t_ve )            /* resvec          */
+
                       ;
 
     printf("\n using N = %u (full vector size )", N );
@@ -102,7 +114,10 @@ extern "C" void idrs_1st(
       pNZElement |  t_ve      |  .nzmax
       pRow       |  t_mindex  |  N
       b          |  t_ve      |  N
+      d_xe       |  t_ve      |  N
       d_tmpAb    |  t_ve      |  N
+      d_r        |  t_ve      |  N
+
 */
 
     /* copy all parameter vectors to ony monoliythic block starting at hostmem */
@@ -119,6 +134,9 @@ extern "C" void idrs_1st(
     t_ve* b = (t_ve *) &pRow[A_in.m + 1];
     memcpy( b, b_in,  N *  sizeof(t_ve) );
 
+    xe = (t_ve *) &b[N];
+    memcpy( xe, xe_in,  N *  sizeof(t_ve) );
+
     e = cudaMalloc ( &devmem , d_memblocksize );
     CUDA_UTIL_ERRORCHECK("cudaMalloc")
 
@@ -127,31 +145,36 @@ extern "C" void idrs_1st(
 
     set_sparse_data(  A_in, &A_d, devmem );
     d_b     = (t_ve *) &A_d.pRow[A_in.m + 1];
-    d_tmpAb = (t_ve *) &d_b[N];
+    d_xe    = (t_ve *) &d_b[N];
 
+    d_tmpAb = (t_ve *) &d_xe[N];
+    d_r     = (t_ve *) &d_tmpAb[N];
 
     dim3 dimGrid ( 10 );
     dim3 dimBlock(512);
 
     /* --------------------------------------------------------------------- */
 
-    t_FullMatrix mb;
+    t_FullMatrix mxe;
     t_FullMatrix result;
 
-    mb.m        = N;
-    mb.n        = 1;
-    mb.pElement = d_b;
+    mxe.m        = N;
+    mxe.n        = 1;
+    mxe.pElement = d_xe;
 
     result.pElement = d_tmpAb;
     result.m    = N ;
     result.n    = 1;
     //testsparseMatrixMul<<<dimGrid,dimBlock>>>( result, A_d, mb );
-    sparseMatrixMul<<<dimGrid,dimBlock>>>( result, A_d, mb );
+    sparseMatrixMul<<<dimGrid,dimBlock>>>( result, A_d, mxe );
     e = cudaGetLastError();
     CUDA_UTIL_ERRORCHECK("testsparseMatrixMul");
 
+
+//   add_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_mindex N)
+    sub_arrays_gpu<<<dimGrid,dimBlock>>>( d_b, d_tmpAb, d_r, N);
     /* --------------------------------------------------------------------- */
-    e = cudaMemcpy( r_out, d_tmpAb, sizeof(t_ve) * N, cudaMemcpyDeviceToHost);
+    e = cudaMemcpy( r_out, d_r, sizeof(t_ve) * N, cudaMemcpyDeviceToHost);
     CUDA_UTIL_ERRORCHECK("cudaMemcpyDeviceToHost");
 
     printf("\n*** IDRS.cu - unimplemented - doing nothing  *** \n");
