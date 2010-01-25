@@ -1,5 +1,5 @@
 
-
+extern "C" size_t idrs_sizetve();
 
 extern "C" void idrs_1st(
 

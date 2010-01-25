@@ -1,4 +1,9 @@
 
+
+
+#ifndef __PROJECTCUDAHEADER__
+#define __PROJECTCUDAHEADER__
+
 #define ab( r, s ) (r -1 ) * ( N + 1 ) + s -1
 
 #define a( r, s ) (r -1 ) * N  + s -1
@@ -28,7 +33,7 @@ typedef double        t_ve; /* base type of Matrizes: 'float' or 'double' */
 
 typedef t_ve*        pt_ve;
 
-typedef int        t_mindex;
+typedef unsigned int        t_mindex;
 
 
 typedef struct Matrix{
@@ -54,3 +59,5 @@ typedef struct SparseMatrix{
 
 
 typedef int t_idrshandle;
+
+#endif

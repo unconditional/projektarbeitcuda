@@ -3,6 +3,13 @@
 
 #include "projektcuda.h"
 
+#include "kernels/sparseMatrixMul_kernel.h"
+
+
+extern "C" size_t idrs_sizetve() {
+  return sizeof(t_ve);
+}
+
 
 __host__ size_t smat_size( int cnt_elements, int cnt_cols ) {
 
@@ -19,6 +26,18 @@ __global__ void testsparseMatrixMul( t_FullMatrix pResultVector,t_SparseMatrix p
         //printf("\n %u %f", tix, b.pElement[tix] );
         pResultVector.pElement[tix] = b.pElement[tix] - 1;
     }
+    if ( tix == 0 ) {
+        for ( t_mindex i = 0; i < pSparseMatrix.m + 1 ; i++ ) {
+             printf("\n pRow[%u] =  %u", i, pSparseMatrix.pRow[i] );
+        }
+        for ( t_mindex i = 0; i < pSparseMatrix.nzmax ; i++ ) {
+            printf("\n pNZElement[%u] =  %f", i, pSparseMatrix.pNZElement[i] );
+        }
+        for ( t_mindex i = 0; i < pSparseMatrix.nzmax ; i++ ) {
+            printf("\n pCol[%u] =  %u", i, pSparseMatrix.pCol[i] );
+        }
+    }
+
 }
 
 
@@ -111,8 +130,8 @@ extern "C" void idrs_1st(
     d_tmpAb = (t_ve *) &d_b[N];
 
 
-    dim3 dimGrid ( 2 );
-    dim3 dimBlock(32);
+    dim3 dimGrid ( 10 );
+    dim3 dimBlock(512);
 
     /* --------------------------------------------------------------------- */
 
@@ -124,8 +143,10 @@ extern "C" void idrs_1st(
     mb.pElement = d_b;
 
     result.pElement = d_tmpAb;
-
-    testsparseMatrixMul<<<dimGrid,dimBlock>>>( result, A_d, mb );
+    result.m    = N ;
+    result.n    = 1;
+    //testsparseMatrixMul<<<dimGrid,dimBlock>>>( result, A_d, mb );
+    sparseMatrixMul<<<dimGrid,dimBlock>>>( result, A_d, mb );
     e = cudaGetLastError();
     CUDA_UTIL_ERRORCHECK("testsparseMatrixMul");
 
@@ -140,97 +161,4 @@ extern "C" void idrs_1st(
 
 }
 
-
-extern "C" void idrs(
-
-                     t_SparseMatrix A_h,
-
-                     t_ve* b_h,
-                     t_mindex s,
-                     t_ve  tol,
-                     t_mindex maxit,
-                     t_ve* x0_h,
-                     t_mindex N,
-
-
-                     t_ve* x_h,  /* output vector */
-                     t_ve* resvec_h,
-                     t_mindex* piter
-                  ) {
-    cudaError_t e;
-    size_t h_memblocksize;
-    size_t d_memblocksize;
-
-    t_SparseMatrix A_d;
-
-    void *hostmem;
-    void *devmem;
-
-
-    h_memblocksize =   smat_size( A_h.nzmax, A_h.m )  /* A sparse     */
-                     + N * sizeof( t_ve )             /* b full       */
-                     ;
-
-    d_memblocksize =  h_memblocksize
-
-                    + N * sizeof( t_ve )            /* x             */
-                    + N * sizeof( t_ve )            /* resvec        */
-
-                      ;
-
-    printf("\n using N = %u (full vector size )", N );
-    printf("\n using %u bytes in Host   memory", h_memblocksize);
-    printf("\n using %u bytes in Device memory", d_memblocksize);
-
-
-
-    hostmem =   malloc( h_memblocksize );
-    if ( hostmem == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you hostmem"); exit( -1 ); }
-
-/*
-      pcol       |  t_mindex  |  .nzmax
-      pNZElement |  t_ve      |  .nzmax
-      pRow       |  t_mindex  |  N
-      b          |  t_ve      |  N
-*/
-
-    /* copy all parameter vectors to ony monoliythic block starting at hostmem */
-
-    t_mindex *pcol = (t_mindex *) hostmem;
-    memcpy( pcol, A_h.pCol, A_h.nzmax * sizeof(t_mindex) );
-
-    t_ve* pNZElement =  (t_ve *) &pcol[A_h.nzmax] ;
-    memcpy( pNZElement, A_h.pNZElement, A_h.nzmax *  sizeof(t_ve) );
-
-    t_mindex* pRow = (t_mindex *) (&pNZElement[A_h.nzmax]);
-    memcpy( pRow, A_h.pRow, ( A_h.m + 1 ) *  sizeof(t_mindex) );
-
-    t_ve* b = (t_ve *) &pRow[A_h.m + 1];
-    memcpy( b, b_h,  N *  sizeof(t_ve) );
-
-    e = cudaMalloc ( &devmem , d_memblocksize );
-    CUDA_UTIL_ERRORCHECK("cudaMalloc")
-
-    e = cudaMemcpy( devmem, hostmem, h_memblocksize , cudaMemcpyHostToDevice);
-    CUDA_UTIL_ERRORCHECK("cudaMemcpyHostToDevice");
-
-    A_d.m = A_h.m;
-    A_d.n = A_h.n;
-    A_d.nzmax = A_h.nzmax;
-
-
-
-    A_d.pCol       = (t_mindex *) devmem;
-    A_d.pNZElement = (t_ve *) (&A_d.pCol[A_d.nzmax] ) ;
-    A_d.pRow       = (t_mindex *) (&A_d.pNZElement[A_d.nzmax]);
-
-
-    printf("\n*** IDRS.cu - unimplemented - doing nothing  *** \n");
-
-
-    e = cudaFree(devmem);
-    CUDA_UTIL_ERRORCHECK("cudaFree")
-    free( hostmem );
-
-}
 
