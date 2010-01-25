@@ -34,7 +34,7 @@ int main()
     if ( b == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
 
    for ( int i = 0; i < N; i++ ) {
-      b[i] =  i;
+      b[i] =  i * 3;
       /* printf( "\n org %u %f", i, b[i] ); */
    }
 
