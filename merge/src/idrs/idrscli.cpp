@@ -33,6 +33,9 @@ int main()
     b = ( t_ve* ) malloc( sizeof( t_ve ) *  N );
     if ( b == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
 
+    r = ( t_ve* ) malloc( sizeof( t_ve ) *  N );
+    if ( r == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
+
    for ( int i = 0; i < N; i++ ) {
       b[i] =  i * 3;
       /* printf( "\n org %u %f", i, b[i] ); */
@@ -67,7 +70,9 @@ int main()
                &irdshandle
             );
 
-
+   for ( int i = 0; i < N; i++ ) {
+       printf( "\n  %u b %f r%f", i, b[i], r[i] );
+   }
 //   idrs(
 //
 //         a,

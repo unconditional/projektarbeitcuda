@@ -12,11 +12,12 @@ __host__ size_t smat_size( int cnt_elements, int cnt_cols ) {
 
 
 __global__ void testsparseMatrixMul( t_ve* pResultVector,t_SparseMatrix pSparseMatrix, t_ve* pVector) {
-    int i = 0;
+
     t_mindex tix = blockIdx.x * blockDim.x + threadIdx.x;
     if ( tix  < pSparseMatrix.m ) {
         //printf ( "\n block %u thread %u tix %u N %u", blockIdx.x, threadIdx.x, tix, pSparseMatrix.m );
         printf("\n %u %f", tix, pVector[tix] );
+        pResultVector[tix] = pVector[tix] - 1;
     }
 }
 
@@ -116,6 +117,9 @@ extern "C" void idrs_1st(
     testsparseMatrixMul<<<dimGrid,dimBlock>>>( d_tmpAb, A_d, d_b );
     e = cudaGetLastError();
     CUDA_UTIL_ERRORCHECK("testsparseMatrixMul");
+
+    e = cudaMemcpy( r_out, d_tmpAb, sizeof(t_ve) * N, cudaMemcpyDeviceToHost);
+    CUDA_UTIL_ERRORCHECK("cudaMemcpyDeviceToHost");
 
     printf("\n*** IDRS.cu - unimplemented - doing nothing  *** \n");
 
