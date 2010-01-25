@@ -6,6 +6,9 @@
 #define IsNonZero(d) ((d)!=0.0)
 #endif
 //typedef NULL 0;
+#define BASIC_DEBUG 1
+#define EXTRA_DEBUG 2
+#define SUPER_DEBUG 4
 typedef float t_ve;
 typedef unsigned int mwSize;
 typedef int mwIndex;
@@ -64,7 +67,9 @@ void calMV(t_SparseMatrix *pSparseMatrix, t_FullMatrix * pVector,t_FullMatrix * 
     pRow = pSparseMatrix->pRow;
     pCol = pSparseMatrix->pCol;
     //cal
+#if(DEBUG & BASIC_DEBUG)    
     printf("in calMV \n");
+#endif
     for (i = 0; i < m; i++){
         colbegin = pRow[i];
         colend = pRow[i+1];
@@ -189,17 +194,18 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     jcs = mxGetJc(plhs[0]);
     
     */
-            
+    #ifdef DEBUG  
         printf("printf Sparse matrix \n");
         for(i=0; i < pSparseMatrix->nzmax; i++){     
             printf("%f,k=%d ",pSparseMatrix->pNZElement[i],i);
             printf(" \n");
         }
-        // printf("printf Vector \n");
-        // for(i=0; i < pVector->n*pVector->m; i++){     
-            // printf("%f,i=%d ",pVector->pElement[i],i);
-            // printf("\n");
-        // }
+         printf("printf Vector \n");
+         for(i=0; i < pVector->n*pVector->m; i++){     
+             printf("%f,i=%d ",pVector->pElement[i],i);
+             printf("\n");
+         }
+    #endif
         printf("printf Result Vector \n");
        for(i=0; i < pResultVector->n*pResultVector->m; i++){     
             printf("%f,i=%d ",pResultVector->pElement[i],i);
