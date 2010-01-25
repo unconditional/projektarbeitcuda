@@ -15,8 +15,11 @@ int main()
    t_SparseMatrix a;
    t_ve bla;
 
+   t_ve*  r;
    t_ve*  b;
    t_ve*  xe;
+
+   t_idrshandle irdshandle;
 
    t_mindex blai;
     printf( "Build configuration: sizeof(t_ve) = %u \n", sizeof(t_ve));
@@ -54,23 +57,33 @@ int main()
     for ( t_mindex i = 0; i < a.m; i++ )  {
        a.pRow[i] = i;
     }
-
-   idrs(
-
-         a,
-         b,
-
-         10,    /* s */
-         0.123, /* tol */
-         100,   /* maxit */
-         xe,
-         N,
+    idrs_1st(
+               a,
+               b,
+               N,
+               r,
 
 
-         &bla,
-         &bla,
-         &blai
-     );
+               &irdshandle
+            );
+
+
+//   idrs(
+//
+//         a,
+//         b,
+
+//         10,    /* s */
+//         0.123, /* tol */
+//         100,   /* maxit */
+//         xe,
+//         N,
+
+
+//         &bla,
+//         &bla,
+//         &blai
+//     );
 
 }
 
