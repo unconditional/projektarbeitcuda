@@ -8,7 +8,7 @@ int main()
 {
 
    t_mindex N               = 50;
-   t_mindex sparse_NZ_elements = 10;
+   t_mindex sparse_NZ_elements = 50;
 
 
 
@@ -22,7 +22,10 @@ int main()
    t_idrshandle irdshandle;
 
    t_mindex blai;
-    printf( "Build configuration: sizeof(t_ve) = %u \n", sizeof(t_ve));
+   printf( "\n Build configuration host Complier: sizeof(t_ve) = %u \n", sizeof(t_ve));
+   printf( "\n Build configuration libidrs: sizeof(t_ve) = %u \n"      , idrs_sizetve());
+
+
    printf("\n manual IDRS driver, running Matrix size %u \n", N);
 
     a.n = N;
@@ -57,9 +60,10 @@ int main()
     for ( t_mindex i = 0; i < a.nzmax; i++ ) {
         a.pCol[i] = i;
     }
-    for ( t_mindex i = 0; i < a.m; i++ )  {
+    for ( t_mindex i = 0; i < a.m ; i++ )  {
        a.pRow[i] = i;
     }
+    a.pRow[a.m] = a.m;
     idrs_1st(
                a,
                b,

@@ -24,8 +24,11 @@ showenvironment.$(PRJACUDAEXEEXT): showenvironment.$(OX)
 	$(LD) -o showenvironment.$(PRJACUDAEXEEXT)  showenvironment.$(OX) > nul
 
 
-libidrs.$(LIBX): idrs.$(OX)
-	$(CC) -lib idrs.$(OX) -o libidrs.$(LIBX) >nul
+libidrs.$(LIBX): idrs.$(OX) kernelsparsemul.$(OX)
+	$(CC) -lib idrs.$(OX) kernelsparsemul.$(OX) -o libidrs.$(LIBX) >nul
+
+kernelsparsemul.$(OX): kernels/sparsematrixmulvector/sparseMatrixMul_kernel.cu
+	$(CC) -c kernels/sparsematrixmulvector/sparseMatrixMul_kernel.cu -o kernelsparsemul.$(OX)
 
 idrs.$(OX): idrs/idrs.cu
 	$(CC) -c idrs/idrs.cu -o idrs.$(OX) > nul
