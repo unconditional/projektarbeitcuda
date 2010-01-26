@@ -6,6 +6,18 @@
 #include "kernels/sparseMatrixMul_kernel.h"
 
 
+typedef struct idrs_context {
+    void*          devmem1stcall;
+    t_SparseMatrix A;
+    t_ve*          b;
+    t_ve*          r;
+    t_ve*          v;
+
+} t_idrs_context;
+
+
+static t_idrs_context ctxholder[4];
+
 extern "C" size_t idrs_sizetve() {
   return sizeof(t_ve);
 }
@@ -34,7 +46,59 @@ extern "C" void idrs2nd(
     t_ve* resvec,
    unsigned int* piter
 ) {
+    cudaError_t e;
+    t_idrshandle ctx;
+
+
+    t_FullMatrix mv;
+    t_FullMatrix mr;
+
+    int cnt_multiprozessors;
+    int deviceCount;
+    cudaGetDeviceCount(&deviceCount);
+
+    if (deviceCount == 0)
+        printf("There is no device supporting CUDA\n");
+
+    int dev;
+    for (dev = 0; dev < deviceCount; ++dev) {
+        cudaDeviceProp deviceProp;
+        cudaGetDeviceProperties(&deviceProp, dev);
+        printf("  Number of multiprocessors:                     %d\n", deviceProp.multiProcessorCount);
+        cnt_multiprozessors = deviceProp.multiProcessorCount;
+    }
+
+    printf("\n 2nd context handle %u", ih_in );
     printf("do nothing");
+
+    ctx = ih_in;
+
+    t_SparseMatrix A         = ctxholder[ctx].A ;
+
+    mr.m        = A.m;
+    mr.n        = 1;
+    mr.pElement = ctxholder[ctx].r;
+
+    mv.m        = A.m;
+    mv.n        = 1;
+    mv.pElement = ctxholder[ctx].v;
+
+    dim3 dimGrid ( cnt_multiprozessors );
+    dim3 dimBlock(512);
+
+    for ( int k = 1; k <= s; k++ ) {
+        /* idrs.m line 23 */
+        sparseMatrixMul<<<dimGrid,dimBlock>>>( mv, A, mr );
+        e = cudaGetLastError();
+        CUDA_UTIL_ERRORCHECK("testsparseMatrixMul");
+        e = cudaStreamSynchronize(0);
+        CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
+    }
+
+
+
+    e = cudaFree( ctxholder[ctx].devmem1stcall );
+    CUDA_UTIL_ERRORCHECK("cudaFree ctxholder[ctx].devmem1stcall ");
 }
 
 
@@ -87,7 +151,9 @@ extern "C" void idrs_1st(
 
            ) {
 
-    int cnt_multiprozessors;
+
+
+    t_idrshandle ctx;
 
     cudaError_t e;
     size_t h_memblocksize;
@@ -104,6 +170,9 @@ extern "C" void idrs_1st(
     void *hostmem;
     void *devmem;
 
+    ctx = 0;
+
+    int cnt_multiprozessors;
     int deviceCount;
     cudaGetDeviceCount(&deviceCount);
 
@@ -175,6 +244,8 @@ extern "C" void idrs_1st(
     e = cudaMemcpy( devmem, hostmem, h_memblocksize , cudaMemcpyHostToDevice);
     CUDA_UTIL_ERRORCHECK("cudaMemcpyHostToDevice");
 
+    free(hostmem);
+
     set_sparse_data(  A_in, &A_d, devmem );
     d_b     = (t_ve *) &A_d.pRow[A_in.m + 1];
     d_xe    = (t_ve *) &d_b[N];
@@ -206,16 +277,19 @@ extern "C" void idrs_1st(
 
 //   add_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_mindex N)
     sub_arrays_gpu<<<dimGridsub,dimBlock>>>( d_b, d_tmpAb, d_r, N);
+    CUDA_UTIL_ERRORCHECK("sub_arrays_gpu");
     /* --------------------------------------------------------------------- */
     e = cudaMemcpy( r_out, d_r, sizeof(t_ve) * N, cudaMemcpyDeviceToHost);
     CUDA_UTIL_ERRORCHECK("cudaMemcpyDeviceToHost");
 
-    printf("\n*** IDRS.cu - unimplemented - doing nothing  *** \n");
 
+    ctxholder[ctx].devmem1stcall = devmem;
+    ctxholder[ctx].A             = A_d;
+    ctxholder[ctx].b             = d_b;
+    ctxholder[ctx].r             = d_r;
+    ctxholder[ctx].v             = d_tmpAb; /* memory reusage */
 
-    printf("\n first call of idrs_1st - unimplemented \n\n " );
-
-    *ih_out = 0;
+    *ih_out = ctx;  /* context handle for later use in later calls */
 
 }
 
