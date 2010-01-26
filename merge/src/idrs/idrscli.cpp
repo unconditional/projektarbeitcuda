@@ -4,11 +4,16 @@
 #include "projektcuda.h"
 #include "idrs.h"
 
-int main()
+int main( int argc, char *argv[] )
 {
 
-   t_mindex N               = 30;
-   t_mindex sparse_NZ_elements = 30;
+   int nparam = 30;
+   if ( argc > 1 ) {
+      nparam = atoi( argv[1] );
+   }
+
+   t_mindex N               = nparam;
+   t_mindex sparse_NZ_elements = nparam;
 
 
 
