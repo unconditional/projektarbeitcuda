@@ -28,6 +28,12 @@ int main( int argc, char *argv[] )
    t_ve*  b;
    t_ve*  xe;
 
+   t_ve*  x;
+   t_ve*  resvec;
+   t_FullMatrix P;
+
+   unsigned int interations_needed;
+
    t_idrshandle irdshandle;
 
    t_mindex blai;
@@ -79,16 +85,22 @@ int main( int argc, char *argv[] )
 
     starttime = time(NULL);
 
-    idrs_1st(
-               a,
-               b,
-               xe,
-               N,
-               r,
+    idrs_1st( a, b, xe, N, r,  &irdshandle );
+
+    /* in Matlab P is calculated */
 
 
-               &irdshandle
-            );
+idrs2nd(
+    P,
+    0.1,  /* tol */
+    20,   /* s  */
+    500,
+    irdshandle, /* Context Handle we got from idrs_1st */
+    x,
+    resvec,
+    &interations_needed
+);
+
 
    endtime = time(NULL);
    printf("\n runtime time(): %u seconds \n ", endtime - starttime );
@@ -98,22 +110,7 @@ int main( int argc, char *argv[] )
        printf( "\n  %u b %f r%f", i, b[i], r[i] );
    }
    }
-//   idrs(
-//
-//         a,
-//         b,
 
-//         10,    /* s */
-//         0.123, /* tol */
-//         100,   /* maxit */
-//         xe,
-//         N,
-
-
-//         &bla,
-//         &bla,
-//         &blai
-//     );
 
 }
 

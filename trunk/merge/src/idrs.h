@@ -19,14 +19,14 @@ extern "C" void idrs_1st(
 
 
 extern "C" void idrs2nd(
-    t_FullMatrix P,
-    t_ve tol,
+    t_FullMatrix P_in,
+    t_ve         tol,
     unsigned int s,
     unsigned int maxit,
     t_idrshandle ih_in, /* Context Handle we got from idrs_1st */
-    t_ve* x,
-    t_ve* resvec,
-   unsigned int* piter
+    t_ve*        x_out,
+    t_ve*        resvec_out,
+    unsigned int* piter
 );
 
 
