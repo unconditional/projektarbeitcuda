@@ -4,15 +4,19 @@
 #include "projektcuda.h"
 #include "idrs.h"
 
+#include <time.h>
+
 int main( int argc, char *argv[] )
 {
+   time_t starttime;
+   time_t endtime;
 
    int nparam = 30;
    if ( argc > 1 ) {
       nparam = atoi( argv[1] );
    }
 
-   t_mindex N               = nparam;
+   t_mindex N                  = nparam;
    t_mindex sparse_NZ_elements = nparam;
 
 
@@ -72,6 +76,9 @@ int main( int argc, char *argv[] )
        a.pRow[i] = i;
     }
     a.pRow[a.m] = a.m;
+
+    starttime = time(NULL);
+
     idrs_1st(
                a,
                b,
@@ -82,6 +89,10 @@ int main( int argc, char *argv[] )
 
                &irdshandle
             );
+
+   endtime = time(NULL);
+   printf("\n runtime time(): %u seconds \n ", endtime - starttime );
+
    if ( N < 101 ) {
    for ( int i = 0; i < N; i++ ) {
        printf( "\n  %u b %f r%f", i, b[i], r[i] );
