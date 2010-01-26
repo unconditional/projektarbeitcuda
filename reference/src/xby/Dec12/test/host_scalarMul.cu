@@ -175,7 +175,7 @@ int test_scalarMul()
 */
 
     free(pIn1);
-    free(pIn2);
+    free(pIn2);                                                                                                      
     free(pOut);
 	}
     return 0;
