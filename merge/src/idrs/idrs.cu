@@ -23,6 +23,21 @@ __host__ size_t smat_size( int cnt_elements, int cnt_cols ) {
            + sizeof(t_mindex)  * (cnt_cols + 1);
 }
 
+
+extern "C" void idrs2nd(
+    t_FullMatrix P,
+    t_ve tol,
+    unsigned int s,
+    unsigned int maxit,
+    t_idrshandle ih_in, /* Context Handle we got from idrs_1st */
+    t_ve* x,
+    t_ve* resvec,
+   unsigned int* piter
+) {
+    printf("do nothing");
+}
+
+
 /*
 __global__ void testsparseMatrixMul( t_FullMatrix pResultVector,t_SparseMatrix pSparseMatrix, t_FullMatrix b ) {
 
