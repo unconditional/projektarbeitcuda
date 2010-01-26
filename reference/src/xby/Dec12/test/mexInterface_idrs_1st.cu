@@ -52,7 +52,7 @@ int smat_size( int count_nzmax, int cunt_rows ) {
 //[x,resvec,iter]=mexInterface_idrs(A,b,s,tol,maxit,x0);
 void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
-	int inputIdx;
+	int inputIdx,outputIdx;
 	t_SparseMatrix A_in;
 	t_ve *b_in,tol, *xe_in, *r_out;
 	t_idrshandle*  ih_out;
@@ -139,23 +139,27 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
 	//call idrs interface 
 	//idrs_1st(A_in, b_in, xe_in, N, r_out, ih_out);
 	//=======================================================================
-	//output r_out, resvec,piter in matlab
-    plhs[0] = mxCreateDoubleMatrix(N,1,mxREAL);
-	pr = mxGetPr(plhs[0]);
+	//output r_out,t_idrshandle in matlab
+	outputIdx = 0; //r_out
+    plhs[outputIdx] = mxCreateDoubleMatrix(N,1,mxREAL);
+	pr = mxGetPr(plhs[outputIdx]);
 	for(i = 0; i < N; i++){
 		pr[i] = (double)r_out[i];
 	}
 	//output t_idrshandle
-	
-   //????????
-	//output iter of scalar value
-
+	outputIdx = 1; //t_idrshandle
+	plhs[outputIdx] = mxCreateNumericMatrix(1,1,mxUINT32_CLASS,mxREAL);
+	pr = mxGetPr(plhs[outputIdx]);
+	for(i = 0; i < 1; i++){
+		pr[i] = (int)t_idrshandle[i];
+	}
 	//=======================================================================
+	mxFree(devicemem);
 	mxFree(b_in); 
 	mxFree(xe_in); 
 	mxFree(r_out);
-	mxFree(t_idrshandle);??????
-	mxFree(devicemem);???????
+	mxFree(ih_out);
+	
 	
 	
 }
