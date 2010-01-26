@@ -15,27 +15,16 @@ extern "C" void idrs_1st(
 
            );
 
-extern "C" void idrs(
 
-                     t_SparseMatrix A_h,
-
-                     t_ve* b_h,
-
-                     t_mindex s,
-                     t_ve  tol,
-                     t_mindex maxit,
-                     t_ve* x0_h,
-                     t_mindex N,
-
-
-                     t_ve* x_h,  /* output vector */
-                     t_ve* resvec_h,
-                     t_mindex* piter
-                  );
-
-
-
-
-
+extern "C" void idrs2nd(
+    t_FullMatrix P,
+    t_ve tol,
+    unsigned int s,
+    unsigned int maxit,
+    t_idrshandle ih_in, /* Context Handle we got from idrs_1st */
+    t_ve* x,
+    t_ve* resvec,
+   unsigned int* piter
+);
 
 
