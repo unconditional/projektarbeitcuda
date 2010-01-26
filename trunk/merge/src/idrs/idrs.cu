@@ -183,6 +183,7 @@ extern "C" void idrs_1st(
     d_r     = (t_ve *) &d_tmpAb[N];
 
     dim3 dimGrid ( cnt_multiprozessors );
+    dim3 dimGridsub( N / 512 + 1 );
     dim3 dimBlock(512);
 
     /* --------------------------------------------------------------------- */
@@ -204,7 +205,7 @@ extern "C" void idrs_1st(
 
 
 //   add_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_mindex N)
-    sub_arrays_gpu<<<dimGrid,dimBlock>>>( d_b, d_tmpAb, d_r, N);
+    sub_arrays_gpu<<<dimGridsub,dimBlock>>>( d_b, d_tmpAb, d_r, N);
     /* --------------------------------------------------------------------- */
     e = cudaMemcpy( r_out, d_r, sizeof(t_ve) * N, cudaMemcpyDeviceToHost);
     CUDA_UTIL_ERRORCHECK("cudaMemcpyDeviceToHost");
