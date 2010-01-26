@@ -65,6 +65,7 @@ extern "C" void idrs2nd(
     t_ve* om1;
     t_ve* om2;
 
+
     if (deviceCount == 0)
         printf("There is no device supporting CUDA\n");
 
@@ -82,6 +83,20 @@ extern "C" void idrs2nd(
     ctx = ih_in;
 
     t_SparseMatrix A         = ctxholder[ctx].A ;
+
+    t_mindex N = A.m;
+
+    size_t h_memblocksize =   N * sizeof( t_ve )            /* om1             */
+                            + N * sizeof( t_ve )            /* om2             */
+                            ;
+
+    void* hostmem =   malloc( h_memblocksize );
+    if ( hostmem == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you hostmem"); exit( -1 ); }
+
+    t_ve*  h_om1 = (t_ve*) hostmem;
+    t_ve*  h_om2 = &h_om1[N];
+
+
 
     mr.m        = A.m;
     mr.n        = 1;
@@ -112,6 +127,17 @@ extern "C" void idrs2nd(
         kernel_dotmul<<<dimGridsub,dimBlock>>>( mv.pElement, mv.pElement, om2 ) ;
         e = cudaGetLastError();
         CUDA_UTIL_ERRORCHECK("device_dotMul");
+
+        e = cudaMemcpy( h_om1, om1, sizeof(t_ve) * N * 2, cudaMemcpyDeviceToHost);
+        CUDA_UTIL_ERRORCHECK("cudaMemcpy( h_om1, om1, sizeof(t_ve) * N * 2, cudaMemcpyDeviceToHost)");
+
+        t_ve  som1 = 0;
+        t_ve  som2 = 0;
+        for ( t_mindex blockidx = 0; blockidx < A.m / 512 + 1; blockidx++ ) {
+            som1 += h_om1[blockidx];
+            som2 += h_om2[blockidx];
+        }
+        printf("\n iteration %u,    1 %f   2 %f",k , som1, som2 );
 
         e = cudaStreamSynchronize(0);
         CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
