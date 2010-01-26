@@ -87,6 +87,8 @@ extern "C" void idrs_1st(
 
            ) {
 
+    int cnt_multiprozessors;
+
     cudaError_t e;
     size_t h_memblocksize;
     size_t d_memblocksize;
@@ -101,6 +103,21 @@ extern "C" void idrs_1st(
 
     void *hostmem;
     void *devmem;
+
+    int deviceCount;
+    cudaGetDeviceCount(&deviceCount);
+
+    if (deviceCount == 0)
+        printf("There is no device supporting CUDA\n");
+
+    int dev;
+    for (dev = 0; dev < deviceCount; ++dev) {
+        cudaDeviceProp deviceProp;
+        cudaGetDeviceProperties(&deviceProp, dev);
+        printf("  Number of multiprocessors:                     %d\n", deviceProp.multiProcessorCount);
+        cnt_multiprozessors = deviceProp.multiProcessorCount;
+    }
+
 
     h_memblocksize =   smat_size( A_in.nzmax, A_in.m )  /* A sparse     */
                      + N * sizeof( t_ve )               /* b full       */
@@ -165,7 +182,7 @@ extern "C" void idrs_1st(
     d_tmpAb = (t_ve *) &d_xe[N];
     d_r     = (t_ve *) &d_tmpAb[N];
 
-    dim3 dimGrid ( 10 );
+    dim3 dimGrid ( cnt_multiprozessors );
     dim3 dimBlock(512);
 
     /* --------------------------------------------------------------------- */
