@@ -4,6 +4,7 @@
 #include "projektcuda.h"
 
 #include "kernels/sparseMatrixMul_kernel.h"
+#include "kernels/dotMul_cuda_gpu.h"
 
 
 typedef struct idrs_context {
@@ -13,6 +14,9 @@ typedef struct idrs_context {
     t_ve*          r;
     t_ve*          v;
 
+    t_ve*          om1;
+    t_ve*          om2;
+
 } t_idrs_context;
 
 
@@ -21,6 +25,7 @@ static t_idrs_context ctxholder[4];
 extern "C" size_t idrs_sizetve() {
   return sizeof(t_ve);
 }
+
 
 __global__ void sub_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_mindex N)
 {
@@ -57,6 +62,9 @@ extern "C" void idrs2nd(
     int deviceCount;
     cudaGetDeviceCount(&deviceCount);
 
+    t_ve* om1;
+    t_ve* om2;
+
     if (deviceCount == 0)
         printf("There is no device supporting CUDA\n");
 
@@ -83,14 +91,28 @@ extern "C" void idrs2nd(
     mv.n        = 1;
     mv.pElement = ctxholder[ctx].v;
 
+    om1 = ctxholder[ctx].om1;
+    om2 = ctxholder[ctx].om2;
+
     dim3 dimGrid ( cnt_multiprozessors );
     dim3 dimBlock(512);
+    dim3 dimGridsub( A.m / 512 + 1 );
 
     for ( int k = 1; k <= s; k++ ) {
         /* idrs.m line 23 */
         sparseMatrixMul<<<dimGrid,dimBlock>>>( mv, A, mr );
         e = cudaGetLastError();
         CUDA_UTIL_ERRORCHECK("testsparseMatrixMul");
+
+        kernel_dotmul<<<dimGridsub,dimBlock>>>( mv.pElement, mr.pElement, om1 ) ;
+        e = cudaGetLastError();
+        CUDA_UTIL_ERRORCHECK("device_dotMul");
+
+
+        kernel_dotmul<<<dimGridsub,dimBlock>>>( mv.pElement, mv.pElement, om2 ) ;
+        e = cudaGetLastError();
+        CUDA_UTIL_ERRORCHECK("device_dotMul");
+
         e = cudaStreamSynchronize(0);
         CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
     }
@@ -194,8 +216,10 @@ extern "C" void idrs_1st(
                      ;
 
     d_memblocksize =  h_memblocksize
-                    + N * sizeof( t_ve )            /* d_tmpAb         */
-                    + N * sizeof( t_ve )            /* d_r             */
+                    + (N + 512) * sizeof( t_ve )            /* d_tmpAb         */
+                    + (N + 512) * sizeof( t_ve )            /* d_r             */
+                    + N * sizeof( t_ve )            /* om1             */
+                    + N * sizeof( t_ve )            /* om2             */
                     + N * sizeof( t_ve )            /* x               */
                     + N * sizeof( t_ve )            /* resvec          */
 
@@ -218,6 +242,8 @@ extern "C" void idrs_1st(
       d_xe       |  t_ve      |  N
       d_tmpAb    |  t_ve      |  N
       d_r        |  t_ve      |  N
+      d_om1      |  t_ve      |  N
+      d_om2      |  t_ve      |  N
 
 */
 
@@ -251,7 +277,10 @@ extern "C" void idrs_1st(
     d_xe    = (t_ve *) &d_b[N];
 
     d_tmpAb = (t_ve *) &d_xe[N];
-    d_r     = (t_ve *) &d_tmpAb[N];
+    d_r     = (t_ve *) &d_tmpAb[ N + 512 ];
+
+    ctxholder[ctx].om1 = (t_ve *) &d_r[N + 512 ];
+    ctxholder[ctx].om2 = (t_ve *) &ctxholder[ctx].om1[N];
 
     dim3 dimGrid ( cnt_multiprozessors );
     dim3 dimGridsub( N / 512 + 1 );
