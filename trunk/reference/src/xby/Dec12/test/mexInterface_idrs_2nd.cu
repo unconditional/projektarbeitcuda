@@ -1,5 +1,5 @@
 /* matlab interface for 
-__host__ void idrs2nd(
+__host__ void idrs(
                      SparseMatrix A, // size NxN
                      t_ve* b, // size N
                      unsigned int s,
@@ -13,9 +13,10 @@ __host__ void idrs2nd(
                      t_ve* resvec, // output vector of size ??????
                      unsigned int* piter //output int point 
                   );
-	idrs2(
+	idrs2nd(
 			t_fullMatrix P,
 			t_ve tol,
+			unsigned int s,
 			unsigned int maxit,
 			t_idrshandle  ih_in,
 			
@@ -28,21 +29,7 @@ __host__ void idrs2nd(
 
 #include <math.h> 
 #include "mex.h"
-
-typedef unsigned int t_mindex;
-typedef float t_ve;
-
-typedef struct SparseMatrix{
-    t_mindex m;
-    t_mindex n;
-    t_mindex nzmax;
-	//size m+1
-    t_mindex *pRow;
-    //size nzmax
-	t_mindex *pCol;
-	//size : nzmax
-    t_ve* pNZElement;
-} t_SparseMatrix;
+#include "..\\gpu\\projektcuda.h"
 
 int smat_size( int count_nzmax, int cunt_rows ) {
 
@@ -77,6 +64,11 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     int size_resvec;
 	int msize ;
 	//void *devicemem;
+	if( nrhs < 5 ) {
+		printf("not enough input argument!\n");
+		printf("[x,resvec,iter]=mexInterface_idrs_2nd(P, tol, s, maxit, ih_in);\n");
+		return;
+	}
     //=======read input===============================================================
 	//read Matrix P
 	printf("read  Matrix P!\n");
@@ -101,8 +93,15 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     pi = mxGetPi(prhs[inputIdx]);
 	tol = (unsigned int)pr[0];
 	 
-	//read maxit
+	//read s
 	inputIdx = 2;
+	m  = mxGetM(prhs[inputIdx]);
+    n  = mxGetN(prhs[inputIdx]);
+    pr = mxGetPr(prhs[inputIdx]);
+    pi = mxGetPi(prhs[inputIdx]);
+	s = (unsigned int)pr[0];
+	//read maxit
+	inputIdx = 3;
 	m  = mxGetM(prhs[inputIdx]);
     n  = mxGetN(prhs[inputIdx]);
     pr = mxGetPr(prhs[inputIdx]);
@@ -110,7 +109,7 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
 	maxit = (unsigned int)pr[0];
 	
 	//read ih_in
-	inputIdx = 3;
+	inputIdx = 4;
 	m  = mxGetM(prhs[inputIdx]);
     n  = mxGetN(prhs[inputIdx]);
     pr = mxGetPr(prhs[inputIdx]);
@@ -128,7 +127,7 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
 	//=======================================================================
 	//call idrs interface 
 	
-	idrs2(P, tol, maxit,ih_in, t_ve* x, resvec, piter );
+	//idrs2(P, tol, s, maxit,ih_in, t_ve* x, resvec, piter );
 	
 	//=======================================================================
 	//output x, resvec,piter in matlab

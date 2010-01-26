@@ -18,21 +18,7 @@ extern "C" void idrs_1st(
 
 #include <math.h> 
 #include "mex.h"
-
-typedef unsigned int t_mindex;
-typedef float t_ve;
-
-typedef struct SparseMatrix{
-    t_mindex m;
-    t_mindex n;
-    t_mindex nzmax;
-	//size m+1
-    t_mindex *pRow;
-    //size nzmax
-	t_mindex *pCol;
-	//size : nzmax
-    t_ve* pNZElement;
-} t_SparseMatrix;
+#include "..\\gpu\\projektcuda.h"
 
 int smat_size( int count_nzmax, int cunt_rows ) {
 
@@ -66,6 +52,13 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     int size_resvec;
 	int msize ;
 	void *devicemem;
+	
+	if( nrhs < 4 ) {
+		printf("not enough input argument!\n");
+		printf("[r_out,ih_out]=mexInterface_idrs_1st(A_in, b_in, xe_in, N);\n");
+		return;
+	}
+	
     //=======read input===============================================================
 	//read spaser Matrix A_in
 	printf("read spaser Matrix A!\n");
