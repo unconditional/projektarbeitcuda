@@ -13,6 +13,7 @@ typedef struct idrs_context {
     t_ve*          b;
     t_ve*          r;
     t_ve*          v;
+    t_ve*          x;
 
     t_ve*          om1;
     t_ve*          om2;
@@ -27,11 +28,26 @@ extern "C" size_t idrs_sizetve() {
 }
 
 
+__global__ void kernel_vec_mul_skalar( t_ve *invec, t_ve scalar, t_ve *out, t_mindex N )
+{
+    t_mindex i = threadIdx.y * blockDim.x + threadIdx.x;
+    if ( i < N )
+        out[i] = invec[i] * scalar;
+}
+
+
 __global__ void sub_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_mindex N)
 {
     t_mindex i = threadIdx.y * blockDim.x + threadIdx.x;
     if ( i < N )
         out[i] = in1[i] - in2[i];
+}
+
+__global__ void add_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_mindex N)
+{
+    t_mindex i = threadIdx.y * blockDim.x + threadIdx.x;
+    if ( i < N )
+        out[i] = in1[i] + in2[i];
 }
 
 __host__ size_t smat_size( int cnt_elements, int cnt_cols ) {
@@ -64,7 +80,7 @@ extern "C" void idrs2nd(
 
     t_ve* om1;
     t_ve* om2;
-
+    void* devmem;
 
     if (deviceCount == 0)
         printf("There is no device supporting CUDA\n");
@@ -90,6 +106,24 @@ extern "C" void idrs2nd(
                             + N * sizeof( t_ve )            /* om2             */
                             ;
 
+    size_t d_memblocksize =  (N *s ) * sizeof( t_ve )         /* dR   */
+                           + (N *s ) * sizeof( t_ve )         /* dX   */
+                           + (N ) * sizeof( t_ve )            /* dR_k   */
+                           + (N ) * sizeof( t_ve )            /* dX_k   */
+//                           + (N ) * sizeof( t_ve )            /* x   */
+                      ;
+
+    e = cudaMalloc ( &devmem , d_memblocksize );
+    CUDA_UTIL_ERRORCHECK("cudaMalloc");
+
+    printf("\n additional using %u bytes in Device memory", d_memblocksize);
+
+    t_ve* dR   = (t_ve*) devmem ;
+    t_ve* dX   = &dR[ N * s ];
+    t_ve* dR_k = &dX[ N * s ];
+    t_ve* dX_k = &dR_k[ N  ];
+    x          = ctxholder[ctx].x;
+
     void* hostmem =   malloc( h_memblocksize );
     if ( hostmem == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you hostmem"); exit( -1 ); }
 
@@ -113,6 +147,7 @@ extern "C" void idrs2nd(
     dim3 dimBlock(512);
     dim3 dimGridsub( A.m / 512 + 1 );
 
+
     for ( int k = 1; k <= s; k++ ) {
         /* idrs.m line 23 */
         sparseMatrixMul<<<dimGrid,dimBlock>>>( mv, A, mr );
@@ -125,6 +160,7 @@ extern "C" void idrs2nd(
 
 
         kernel_dotmul<<<dimGridsub,dimBlock>>>( mv.pElement, mv.pElement, om2 ) ;
+        //kernel_dotmul<<<dimGridsub,dimBlock>>>( ctxholder[ctx].b, ctxholder[ctx].b, om2 ) ;
         e = cudaGetLastError();
         CUDA_UTIL_ERRORCHECK("device_dotMul");
 
@@ -137,7 +173,24 @@ extern "C" void idrs2nd(
             som1 += h_om1[blockidx];
             som2 += h_om2[blockidx];
         }
-        printf("\n iteration %u,    1 %f   2 %f",k , som1, som2 );
+        t_ve som = som1 / som2;
+        kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mr.pElement,   som , dX_k, N );
+        e = cudaGetLastError();
+        CUDA_UTIL_ERRORCHECK("kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mr.pElement,   som , dX_k, N )");
+
+        kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mv.pElement, - som , dR_k, N );
+        e = cudaGetLastError();
+        CUDA_UTIL_ERRORCHECK("kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mv.pElement, - som , dR_k, N )");
+
+        add_arrays_gpu<<<dimGridsub,dimBlock>>>( x, dX_k, x, N );
+        e = cudaGetLastError();
+        CUDA_UTIL_ERRORCHECK("add_arrays_gpu<<<dimGridsub,dimBlock>>>( x, dX_k, x, N )");
+
+        add_arrays_gpu<<<dimGridsub,dimBlock>>>( mr.pElement, dR_k, mr.pElement, N );
+        e = cudaGetLastError();
+        CUDA_UTIL_ERRORCHECK("add_arrays_gpu<<<dimGridsub,dimBlock>>>( mr.pElement, dR_k, mr.pElement, N );");
+
+        printf("\n iteration %u,    1 %f   2 %f", k , som1, som2 );
 
         e = cudaStreamSynchronize(0);
         CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
@@ -343,6 +396,7 @@ extern "C" void idrs_1st(
     ctxholder[ctx].b             = d_b;
     ctxholder[ctx].r             = d_r;
     ctxholder[ctx].v             = d_tmpAb; /* memory reusage */
+    ctxholder[ctx].x             = d_xe;
 
     *ih_out = ctx;  /* context handle for later use in later calls */
 
