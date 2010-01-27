@@ -20,10 +20,13 @@ int main( int argc, char *argv[] )
    t_mindex N                  = nparam;
    t_mindex sparse_NZ_elements = nparam;
 
-
+   t_mindex s = 6;
 
    t_SparseMatrix a;
    t_SparseMatrix a2;
+
+
+
    t_ve bla;
 
    t_ve*  r;
@@ -48,6 +51,14 @@ int main( int argc, char *argv[] )
     a.n = N;
     a.m = N;
     a.nzmax = sparse_NZ_elements;
+
+    P.m        = s;
+    P.n        = N;
+    P.pElement = ( t_ve* ) malloc( sizeof( t_ve ) *  N * s );
+    if (  P.pElement == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you P.pElement"); exit( -1 ); }
+
+    resvec = ( t_ve* ) malloc( sizeof( t_ve ) *  N );
+    if (  resvec == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you xe"); exit( -1 ); }
 
     xe = ( t_ve* ) malloc( sizeof( t_ve ) *  N );
     if (  xe == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you xe"); exit( -1 ); }
@@ -100,7 +111,7 @@ int main( int argc, char *argv[] )
 idrs2nd(
     P,
     0.1,  /* tol */
-    6,   /* s - as discussed with Bastian on 2010-01-27 */
+    s,   /* s - as discussed with Bastian on 2010-01-27 */
     500,
     irdshandle, /* Context Handle we got from idrs_1st */
     x,
@@ -114,10 +125,13 @@ idrs2nd(
 
    if ( N < 101 ) {
    for ( int i = 0; i < N; i++ ) {
-       printf( "\n  %u b %f r %f", i, b[i], r[i] );
+       printf( "\n   b[%u]=%f r %f  ", i, b[i], r[i] );
    }
    }
 
+   for ( int i = 0; i < s; i++ ) {
+       printf( "\n    resvec[%u] %f",i,  resvec[i] );
+   }
 
 }
 

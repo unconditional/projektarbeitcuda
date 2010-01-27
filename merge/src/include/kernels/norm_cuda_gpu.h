@@ -7,7 +7,7 @@ dotMul_cuda_gpu.h
 
 #include "projektcuda.h"
 
-__global__ void norm_elements(t_ve* in, t_ve* out, unsigned int N);
+__global__ void kernel_norm(t_ve* in, t_ve* out );
 
 
 #endif
