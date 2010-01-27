@@ -3,6 +3,7 @@
 
 #include "projektcuda.h"
 #include "idrs.h"
+#include "mxhelper.h"
 
 #include <time.h>
 
@@ -82,6 +83,10 @@ int main( int argc, char *argv[] )
        a.pRow[i] = i;
     }
     a.pRow[a.m] = a.m;
+
+
+    debug_dump_sparse( a );
+
 
     starttime = time(NULL);
 
