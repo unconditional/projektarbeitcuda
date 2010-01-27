@@ -59,7 +59,7 @@ __host__ size_t smat_size( int cnt_elements, int cnt_cols ) {
 
 
 extern "C" void idrs2nd(
-    t_FullMatrix P,
+    t_FullMatrix P_in,
     t_ve tol,
     unsigned int s,
     unsigned int maxit,
@@ -112,8 +112,9 @@ extern "C" void idrs2nd(
                             + N * sizeof( t_ve )            /* h_norm    */
                             ;
 
-    size_t d_memblocksize = (N*s )        * sizeof( t_ve )             /* P      */
-                           + ( N + 512 )  * sizeof( t_ve )    /* v      */
+    size_t d_memblocksize =  (N*s )       * sizeof( t_ve )           /* P      */
+                           + (s *s)       * sizeof( t_ve )           /* M      */
+                           + ( N + 512 )  * sizeof( t_ve )            /* v      */
                            + (N*s )       * sizeof( t_ve )            /* dR     */
                            + (N*s )       * sizeof( t_ve )            /* dX     */
                            + (N )         * sizeof( t_ve )            /* dR_k   */
@@ -130,8 +131,9 @@ extern "C" void idrs2nd(
 
     printf("\n additional using %u bytes in Device memory", d_memblocksize);
 
-    t_ve* d_P    = (t_ve*) devmem ;
-    v            = &d_P[ N * s ];
+    t_ve* P      = (t_ve*) devmem ;
+    t_ve* M            = &P[ N * s ];
+    v            = &M[ s * s ];
     t_ve* dR     = &v[N + 512 ];
     t_ve* dX     = &dR[ N * s ];
     t_ve* dR_k   = &dX[ N * s ];
