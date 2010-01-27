@@ -106,9 +106,10 @@ extern "C" void idrs2nd(
 
     size_t h_memblocksize =   N * sizeof( t_ve )            /* om1             */
                             + N * sizeof( t_ve )            /* om2             */
+                            + N * sizeof( t_ve )            /* debugbuffer1    */
                             ;
 
-    size_t d_memblocksize =   N      * sizeof( t_ve )         /* v   */
+    size_t d_memblocksize =  ( N + 512 )     * sizeof( t_ve )         /* v   */
                            + (N *s ) * sizeof( t_ve )         /* dR   */
                            + (N *s ) * sizeof( t_ve )         /* dX   */
                            + (N )    * sizeof( t_ve )         /* dR_k   */
@@ -119,10 +120,13 @@ extern "C" void idrs2nd(
     e = cudaMalloc ( &devmem , d_memblocksize );
     CUDA_UTIL_ERRORCHECK("cudaMalloc");
 
+    e = cudaMemset (devmem, 0, d_memblocksize );
+    CUDA_UTIL_ERRORCHECK("cudaMalloc");
+
     printf("\n additional using %u bytes in Device memory", d_memblocksize);
 
     v          = (t_ve*) devmem ;
-    t_ve* dR   = &v[N];
+    t_ve* dR   = &v[N + 512 ];
     t_ve* dX   = &dR[ N * s ];
     t_ve* dR_k = &dX[ N * s ];
     t_ve* dX_k = &dR_k[ N  ];
@@ -131,8 +135,9 @@ extern "C" void idrs2nd(
     void* hostmem =   malloc( h_memblocksize );
     if ( hostmem == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you hostmem"); exit( -1 ); }
 
-    t_ve*  h_om1 = (t_ve*) hostmem;
-    t_ve*  h_om2 = &h_om1[N];
+    t_ve*  h_om1        = (t_ve*) hostmem;
+    t_ve*  h_om2        = &h_om1[N];
+    t_ve*  debugbuffer1 = &h_om2[N];
 
 
 
@@ -158,15 +163,42 @@ extern "C" void idrs2nd(
         e = cudaGetLastError();
         CUDA_UTIL_ERRORCHECK("testsparseMatrixMul");
 
+
+        e = cudaStreamSynchronize(0);
+        CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
+
+        if ( N < 200 ) {
+            e = cudaMemcpy( debugbuffer1, mv.pElement, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
+            CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
+            if ( k == 1 ) {
+               for ( t_mindex i = 0; i < N; i++ )
+               printf("\n k = 1, mv.pElement[%u] = %f", i, debugbuffer1[i]);
+            }
+        }
+
         kernel_dotmul<<<dimGridsub,dimBlock>>>( mv.pElement, mr.pElement, om1 ) ;
         e = cudaGetLastError();
         CUDA_UTIL_ERRORCHECK("device_dotMul");
 
+        e = cudaStreamSynchronize(0);
+        CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
+
+        if ( N < 200 ) {
+            e = cudaMemcpy( debugbuffer1, om1, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
+            CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
+            if ( k == 1 ) {
+               for ( t_mindex i = 0; i < N; i++ )
+               printf("\n k = 1, om1[%u] = %f", i, debugbuffer1[i]);
+            }
+        }
 
         kernel_dotmul<<<dimGridsub,dimBlock>>>( mv.pElement, mv.pElement, om2 ) ;
         //kernel_dotmul<<<dimGridsub,dimBlock>>>( ctxholder[ctx].b, ctxholder[ctx].b, om2 ) ;
         e = cudaGetLastError();
         CUDA_UTIL_ERRORCHECK("device_dotMul");
+
+        e = cudaStreamSynchronize(0);
+        CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
 
         e = cudaMemcpy( h_om1, om1, sizeof(t_ve) * N * 2, cudaMemcpyDeviceToHost);
         CUDA_UTIL_ERRORCHECK("cudaMemcpy( h_om1, om1, sizeof(t_ve) * N * 2, cudaMemcpyDeviceToHost)");
@@ -178,6 +210,10 @@ extern "C" void idrs2nd(
             som2 += h_om2[blockidx];
         }
         t_ve som = som1 / som2;
+
+
+
+
         kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mr.pElement,   som , dX_k, N );
         e = cudaGetLastError();
         CUDA_UTIL_ERRORCHECK("kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mr.pElement,   som , dX_k, N )");
@@ -185,6 +221,10 @@ extern "C" void idrs2nd(
         kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mv.pElement, - som , dR_k, N );
         e = cudaGetLastError();
         CUDA_UTIL_ERRORCHECK("kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mv.pElement, - som , dR_k, N )");
+
+
+        e = cudaStreamSynchronize(0);
+        CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
 
         add_arrays_gpu<<<dimGridsub,dimBlock>>>( x, dX_k, x, N );
         e = cudaGetLastError();
@@ -350,6 +390,9 @@ extern "C" void idrs_1st(
     e = cudaMalloc ( &devmem , d_memblocksize );
     CUDA_UTIL_ERRORCHECK("cudaMalloc")
 
+    e = cudaMemset (devmem, 0, d_memblocksize );
+    CUDA_UTIL_ERRORCHECK("cudaMemset");
+
     e = cudaMemcpy( devmem, hostmem, h_memblocksize , cudaMemcpyHostToDevice);
     CUDA_UTIL_ERRORCHECK("cudaMemcpyHostToDevice");
 
@@ -389,7 +432,7 @@ extern "C" void idrs_1st(
 
 //   add_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_mindex N)
     sub_arrays_gpu<<<dimGridsub,dimBlock>>>( d_b, d_tmpAb, d_r, N);
-
+    e = cudaGetLastError();
     CUDA_UTIL_ERRORCHECK("sub_arrays_gpu");
     /* --------------------------------------------------------------------- */
     e = cudaMemcpy( r_out, d_r, sizeof(t_ve) * N, cudaMemcpyDeviceToHost);
