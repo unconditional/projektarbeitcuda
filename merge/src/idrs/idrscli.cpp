@@ -59,8 +59,8 @@ int main( int argc, char *argv[] )
     if ( r == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
 
    for ( int i = 0; i < N; i++ ) {
-      b[i] =  100;
-      xe[i] = i;
+      b[i] =  1;
+      xe[i] = 2;
       /* printf( "\n org %u %f", i, b[i] ); */
    }
 
@@ -85,14 +85,14 @@ int main( int argc, char *argv[] )
     }
     a.pRow[a.m] = a.m;
 
-    genmtx_t1( &a2, 5 );
+    genmtx_t1( &a2, nparam );
 
     debug_dump_sparse( a2 );
 
 
     starttime = time(NULL);
 
-    idrs_1st( a, b, xe, N, r,  &irdshandle );
+    idrs_1st( a2, b, xe, N, r,  &irdshandle );
 
     /* in Matlab P is calculated */
 
