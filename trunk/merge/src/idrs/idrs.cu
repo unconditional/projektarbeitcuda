@@ -41,6 +41,7 @@ __global__ void sub_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_mindex N)
     t_mindex i = threadIdx.y * blockDim.x + threadIdx.x;
     if ( i < N )
         out[i] = in1[i] - in2[i];
+
 }
 
 __global__ void add_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_mindex N)
@@ -80,6 +81,7 @@ extern "C" void idrs2nd(
 
     t_ve* om1;
     t_ve* om2;
+    t_ve* v;
     void* devmem;
 
     if (deviceCount == 0)
@@ -106,10 +108,11 @@ extern "C" void idrs2nd(
                             + N * sizeof( t_ve )            /* om2             */
                             ;
 
-    size_t d_memblocksize =  (N *s ) * sizeof( t_ve )         /* dR   */
+    size_t d_memblocksize =   N      * sizeof( t_ve )         /* v   */
+                           + (N *s ) * sizeof( t_ve )         /* dR   */
                            + (N *s ) * sizeof( t_ve )         /* dX   */
-                           + (N ) * sizeof( t_ve )            /* dR_k   */
-                           + (N ) * sizeof( t_ve )            /* dX_k   */
+                           + (N )    * sizeof( t_ve )         /* dR_k   */
+                           + (N )    * sizeof( t_ve )         /* dX_k   */
 //                           + (N ) * sizeof( t_ve )            /* x   */
                       ;
 
@@ -118,7 +121,8 @@ extern "C" void idrs2nd(
 
     printf("\n additional using %u bytes in Device memory", d_memblocksize);
 
-    t_ve* dR   = (t_ve*) devmem ;
+    v          = (t_ve*) devmem ;
+    t_ve* dR   = &v[N];
     t_ve* dX   = &dR[ N * s ];
     t_ve* dR_k = &dX[ N * s ];
     t_ve* dX_k = &dR_k[ N  ];
@@ -138,7 +142,7 @@ extern "C" void idrs2nd(
 
     mv.m        = A.m;
     mv.n        = 1;
-    mv.pElement = ctxholder[ctx].v;
+    mv.pElement = v ;
 
     om1 = ctxholder[ctx].om1;
     om2 = ctxholder[ctx].om2;
@@ -385,6 +389,7 @@ extern "C" void idrs_1st(
 
 //   add_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_mindex N)
     sub_arrays_gpu<<<dimGridsub,dimBlock>>>( d_b, d_tmpAb, d_r, N);
+
     CUDA_UTIL_ERRORCHECK("sub_arrays_gpu");
     /* --------------------------------------------------------------------- */
     e = cudaMemcpy( r_out, d_r, sizeof(t_ve) * N, cudaMemcpyDeviceToHost);

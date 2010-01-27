@@ -27,6 +27,7 @@
 void genmtx_t1(  t_SparseMatrix* sm_in, t_mindex N  ) {
 
     sm_in->m = N;
+    sm_in->n = N;
 
     t_mindex cnt_elements = 3 * N - 2;
     sm_in->nzmax = cnt_elements;
@@ -47,7 +48,7 @@ void genmtx_t1(  t_SparseMatrix* sm_in, t_mindex N  ) {
 
 
         /* main diag */
-        sm_in->pNZElement[i] = 2;
+        sm_in->pNZElement[i] = -1;
         sm_in->pCol[i]   = i;
         i++;
 
