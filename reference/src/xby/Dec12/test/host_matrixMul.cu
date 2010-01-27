@@ -65,7 +65,9 @@ void host_matrixMul(double* pC, double* pA,double *pB, int mA, int nB)
 	// Compute execution configuration using 128 threads per block 
 	dim3 dimBlock(sizeBlock);
 	//dim3 dimGrid((sizeIn)/dimBlock.x);
-	dim3 dimGrid(mA);
+	int gridSize = 24;
+	if(gridSize > mA) gridSize = mA;
+	dim3 dimGrid(gridSize);
 	//if ( (sizeA) % sizeBlock !=0 ) dimGrid.x+=1;
  		
 

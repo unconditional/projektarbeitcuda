@@ -28,12 +28,14 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 	int bStep = VECTOR_BLOCK_SIZE; // blockDim.x
 	int aEnd = mA;
 	int bEnd = nB;
+	int tx;
+	tx = threadIdx.x;
 
 		//initialise Cs 
-		Cs[threadIdx.x] = 0;
+		Cs[tx] = 0;
 		__syncthreads();
 		//initialize output vector for each block
-	if(threadIdx.x==0){
+	if(tx==0){
 		C[gridIndex*gridDim.x+blockIdx.x]=0;
 	}
 		__syncthreads();
@@ -50,18 +52,20 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 		// initialize the dot product for each row in A and vector B
 		t_ve blocksum = 0;
 		//if nB> blockDim, split repeat the
-		for(int b = bBegin; (b < bEnd)&&((threadIdx.x+b) < bEnd); b += bStep ) {
-			//initialise Cs 
-			Cs[threadIdx.x] = 0;
+		//for(int b = bBegin; (b < bEnd)&&((threadIdx.x+b) < bEnd); b += bStep ) {
+		for(int b = bBegin; b < bEnd; b += bStep ) {
+				
+		//initialise Cs 
+			Cs[tx] = 0;
 			__syncthreads();
 			// compute scalar product
-			if (( (gridIndex*gridDim.x+blockIdx.x)<aEnd)&&((b+threadIdx.x) < bEnd)) {
+			if (( (gridIndex*gridDim.x+blockIdx.x)<aEnd)&&((b+tx) < bEnd)) {
 				//Cs[threadIdx.x] = A[a + blockIdx.x ][b + threadIdx.x] * B[b + threadIdx.x ];
-				Cs[threadIdx.x] = A[(a + blockIdx.x)* nB+b + threadIdx.x] * B[b + threadIdx.x ];
+				Cs[threadIdx.x] = A[(a + blockIdx.x)* nB+b + tx] * B[b + tx ];
 			}
 			__syncthreads();
-				
-			if(threadIdx.x == 0){
+			
+			if(tx == 0){
 				//30.Nov.2009 fixeded for Cs summe
 				int kEnd = bEnd-b;
 				if(kEnd > VECTOR_BLOCK_SIZE)kEnd = VECTOR_BLOCK_SIZE;
@@ -71,12 +75,23 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 				blocksum += Cs[0];
 			}
 			__syncthreads();
+			/*
+			int offset; 
+			offset = VECTOR_BLOCK_SIZE/2;
+			while (offset > 0) {
+				if(tx < offset) {
+					Cs[tx] += Cs[tx + offset];
+				}
+				offset >>= 1;
+				__syncthreads();
+			}
+			__syncthreads();
+			if(threadIdx.x == 0)
+			blocksum += Cs[0]; //??? blocksum = Cs[0];
 			
-			//Cs[threadIdx.x] = 0;
-			//__syncthreads();	
 		}//for b
 		__syncthreads();
-
+		*/
 		if(threadIdx.x == 0) C[gridIndex*gridDim.x+blockIdx.x] = blocksum;
 		__syncthreads();
 		// summe all block, need test for mA bigger than one Grid
