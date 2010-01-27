@@ -149,7 +149,7 @@ extern "C" void idrs2nd(
     t_ve*  debugbuffer1 = &h_om2[N];
     t_ve*  h_norm        = &debugbuffer1[N];
 
-
+    t_ve norm;
 
     mr.m        = A.m;
     mr.n        = 1;
@@ -259,7 +259,8 @@ extern "C" void idrs2nd(
         for ( t_mindex i = 0; i < N / 512 + 1 ; i++ ) {
              snorm +=  h_norm[i];
         }
-        resvec[ resveci++ ]  = sqrt( snorm );
+        norm = snorm;
+        resvec[ resveci++ ]  = sqrt( norm );
 
 
 
@@ -271,6 +272,19 @@ extern "C" void idrs2nd(
     }
 
 
+    t_mindex iter   = s; /* iter.m line 31 */
+    t_mindex oldest = 1; /* iter.m line 32 */
+
+    while (  (norm > tol ) && ( iter < maxit )  ) {
+        for ( t_mindex k = 0; k <= s; k++ ) {
+           iter++;
+        }
+
+    }
+    *piter = iter;
+
+    e = cudaFree( devmem );
+    CUDA_UTIL_ERRORCHECK("e = cudaFree( devmem );");
 
     e = cudaFree( ctxholder[ctx].devmem1stcall );
     CUDA_UTIL_ERRORCHECK("cudaFree ctxholder[ctx].devmem1stcall ");
