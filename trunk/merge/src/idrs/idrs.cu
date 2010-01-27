@@ -132,7 +132,7 @@ extern "C" void idrs2nd(
     printf("\n additional using %u bytes in Device memory", d_memblocksize);
 
     t_ve* P      = (t_ve*) devmem ;
-    t_ve* M            = &P[ N * s ];
+    t_ve* M      = &P[ N * s ];
     v            = &M[ s * s ];
     t_ve* dR     = &v[N + 512 ];
     t_ve* dX     = &dR[ N * s ];
