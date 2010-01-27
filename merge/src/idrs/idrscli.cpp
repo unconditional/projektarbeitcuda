@@ -59,8 +59,8 @@ int main( int argc, char *argv[] )
     if ( r == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
 
    for ( int i = 0; i < N; i++ ) {
-      b[i] =  1;
-      xe[i] = 2;
+      b[i] =  i;
+      xe[i] = 2 * i;
       /* printf( "\n org %u %f", i, b[i] ); */
    }
 
@@ -100,7 +100,7 @@ int main( int argc, char *argv[] )
 idrs2nd(
     P,
     0.1,  /* tol */
-    20,   /* s  */
+    6,   /* s - as discussed with Bastian on 2010-01-27 */
     500,
     irdshandle, /* Context Handle we got from idrs_1st */
     x,
@@ -114,7 +114,7 @@ idrs2nd(
 
    if ( N < 101 ) {
    for ( int i = 0; i < N; i++ ) {
-       printf( "\n  %u b %f r%f", i, b[i], r[i] );
+       printf( "\n  %u b %f r %f", i, b[i], r[i] );
    }
    }
 

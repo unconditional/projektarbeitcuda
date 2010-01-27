@@ -27,11 +27,11 @@ showenvironment.$(PRJACUDAEXEEXT): showenvironment.$(OX)
 libidrs.$(LIBX): idrs.$(OX) kernelsparsemul.$(OX) kerneldotmul.$(OX) mxhelper.$(OX)
 	$(CC) -lib idrs.$(OX) kernelsparsemul.$(OX) kerneldotmul.$(OX) mxhelper.$(OX) -o libidrs.$(LIBX) >nul
 
-kerneldotmul.$(OX):
+kerneldotmul.$(OX): kernels/dotmul/dotMul_cuda_gpu.cu
 	$(CC) -c kernels/dotmul/dotMul_cuda_gpu.cu -o kerneldotmul.$(OX) > nul
 
 mxhelper.$(OX): matrixhelper/mxhelper.cpp
-	$(CC) -c matrixhelper/mxhelper.cpp -o mxhelper.$(OX)
+	$(CC) -c matrixhelper/mxhelper.cpp -o mxhelper.$(OX) > nul
 
 kernelsparsemul.$(OX): kernels/sparsematrixmulvector/sparseMatrixMul_kernel.cu
 	$(CC) -c kernels/sparsematrixmulvector/sparseMatrixMul_kernel.cu -o kernelsparsemul.$(OX) > nul
