@@ -1,7 +1,7 @@
 /* matlab interface for 
 
 	idrs2nd(
-			t_fullMatrix P,
+			t_FullMatrix P,
 			t_ve tol,
 			unsigned int s,
 			unsigned int maxit,
@@ -11,6 +11,8 @@
             t_ve* resvec, // output vector of size ??????
             unsigned int* piter //output int point 
 	)
+
+);
 */
 
 #include <math.h> 
