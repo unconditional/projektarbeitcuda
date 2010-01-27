@@ -57,8 +57,8 @@ int main( int argc, char *argv[] )
     if ( r == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
 
    for ( int i = 0; i < N; i++ ) {
-      b[i] =  i * 3;
-      xe[i] = 14.9;
+      b[i] =  100;
+      xe[i] = i;
       /* printf( "\n org %u %f", i, b[i] ); */
    }
 
