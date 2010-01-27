@@ -47,9 +47,16 @@ void genmtx_t1(  t_SparseMatrix* sm_in, t_mindex N  ) {
         sm_in->pRow[row] = i;
 
 
+
+        /* lower diag */
+        if ( row > 0 ) {
+            sm_in->pNZElement[i] = -1;
+            sm_in->pCol[i]   = row - 1;
+            i++;
+        }
         /* main diag */
-        sm_in->pNZElement[i] = -1;
-        sm_in->pCol[i]   = i;
+        sm_in->pNZElement[i] = 2;
+        sm_in->pCol[i]   = row;
         i++;
 
         /* upper diag */
@@ -58,12 +65,7 @@ void genmtx_t1(  t_SparseMatrix* sm_in, t_mindex N  ) {
             sm_in->pCol[i]   = row + 1;
             i++;
         }
-        /* lower diag */
-        if ( row > 0 ) {
-            sm_in->pNZElement[i] = -1;
-            sm_in->pCol[i]   = row - 1;
-            i++;
-        }
+
     }
     sm_in->pRow[row] = i;
 
