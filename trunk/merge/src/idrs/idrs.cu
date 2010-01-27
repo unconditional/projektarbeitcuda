@@ -5,7 +5,7 @@
 
 #include "kernels/sparseMatrixMul_kernel.h"
 #include "kernels/dotMul_cuda_gpu.h"
-
+#include "kernels/norm_cuda_gpu.h"
 
 typedef struct idrs_context {
     void*          devmem1stcall;
@@ -82,6 +82,8 @@ extern "C" void idrs2nd(
     t_ve* om1;
     t_ve* om2;
     t_ve* v;
+
+    t_mindex resveci  = 1;
     void* devmem;
 
     if (deviceCount == 0)
@@ -107,14 +109,17 @@ extern "C" void idrs2nd(
     size_t h_memblocksize =   N * sizeof( t_ve )            /* om1             */
                             + N * sizeof( t_ve )            /* om2             */
                             + N * sizeof( t_ve )            /* debugbuffer1    */
+                            + N * sizeof( t_ve )            /* h_norm    */
                             ;
 
-    size_t d_memblocksize =  ( N + 512 )     * sizeof( t_ve )         /* v   */
-                           + (N *s ) * sizeof( t_ve )         /* dR   */
-                           + (N *s ) * sizeof( t_ve )         /* dX   */
-                           + (N )    * sizeof( t_ve )         /* dR_k   */
-                           + (N )    * sizeof( t_ve )         /* dX_k   */
-//                           + (N ) * sizeof( t_ve )            /* x   */
+    size_t d_memblocksize = (N*s )        * sizeof( t_ve )             /* P      */
+                           + ( N + 512 )  * sizeof( t_ve )    /* v      */
+                           + (N*s )       * sizeof( t_ve )            /* dR     */
+                           + (N*s )       * sizeof( t_ve )            /* dX     */
+                           + (N )         * sizeof( t_ve )            /* dR_k   */
+                           + (N )         * sizeof( t_ve )            /* dX_k   */
+                           + (N )         * sizeof( t_ve )            /* dnormv   */
+//                           + (N ) * sizeof( t_ve )             /* x   */
                       ;
 
     e = cudaMalloc ( &devmem , d_memblocksize );
@@ -125,11 +130,13 @@ extern "C" void idrs2nd(
 
     printf("\n additional using %u bytes in Device memory", d_memblocksize);
 
-    v          = (t_ve*) devmem ;
-    t_ve* dR   = &v[N + 512 ];
-    t_ve* dX   = &dR[ N * s ];
-    t_ve* dR_k = &dX[ N * s ];
-    t_ve* dX_k = &dR_k[ N  ];
+    t_ve* d_P    = (t_ve*) devmem ;
+    v            = &d_P[ N * s ];
+    t_ve* dR     = &v[N + 512 ];
+    t_ve* dX     = &dR[ N * s ];
+    t_ve* dR_k   = &dX[ N * s ];
+    t_ve* dX_k   = &dR_k[ N  ];
+    t_ve* dnormv = &dX_k[ N  ];
     x          = ctxholder[ctx].x;
 
     void* hostmem =   malloc( h_memblocksize );
@@ -138,6 +145,7 @@ extern "C" void idrs2nd(
     t_ve*  h_om1        = (t_ve*) hostmem;
     t_ve*  h_om2        = &h_om1[N];
     t_ve*  debugbuffer1 = &h_om2[N];
+    t_ve*  h_norm        = &debugbuffer1[N];
 
 
 
@@ -167,6 +175,7 @@ extern "C" void idrs2nd(
         e = cudaStreamSynchronize(0);
         CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
 
+/*
         if ( N < 200 ) {
             e = cudaMemcpy( debugbuffer1, mv.pElement, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
             CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
@@ -175,7 +184,7 @@ extern "C" void idrs2nd(
                printf("\n k = 1, mv.pElement[%u] = %f", i, debugbuffer1[i]);
             }
         }
-
+*/
         kernel_dotmul<<<dimGridsub,dimBlock>>>( mv.pElement, mr.pElement, om1 ) ;
         e = cudaGetLastError();
         CUDA_UTIL_ERRORCHECK("device_dotMul");
@@ -183,6 +192,7 @@ extern "C" void idrs2nd(
         e = cudaStreamSynchronize(0);
         CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
 
+/*
         if ( N < 200 ) {
             e = cudaMemcpy( debugbuffer1, om1, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
             CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
@@ -191,7 +201,7 @@ extern "C" void idrs2nd(
                printf("\n k = 1, om1[%u] = %f", i, debugbuffer1[i]);
             }
         }
-
+*/
         kernel_dotmul<<<dimGridsub,dimBlock>>>( mv.pElement, mv.pElement, om2 ) ;
         //kernel_dotmul<<<dimGridsub,dimBlock>>>( ctxholder[ctx].b, ctxholder[ctx].b, om2 ) ;
         e = cudaGetLastError();
@@ -233,6 +243,24 @@ extern "C" void idrs2nd(
         add_arrays_gpu<<<dimGridsub,dimBlock>>>( mr.pElement, dR_k, mr.pElement, N );
         e = cudaGetLastError();
         CUDA_UTIL_ERRORCHECK("add_arrays_gpu<<<dimGridsub,dimBlock>>>( mr.pElement, dR_k, mr.pElement, N );");
+
+
+        kernel_norm<<<dimGridsub,dimBlock>>>( mr.pElement, dnormv );
+        e = cudaGetLastError();
+        CUDA_UTIL_ERRORCHECK("kernel_norm<<<dimGridsub,dimBlock>>>( mr.pElement, dnormv )");
+
+
+        e = cudaMemcpy( h_norm, dnormv, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
+        CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
+
+        t_ve snorm = 0;
+        for ( t_mindex i = 0; i < N / 512 + 1 ; i++ ) {
+             snorm +=  h_norm[i];
+        }
+        resvec[ resveci++ ]  = sqrt( snorm );
+
+
+
 
         printf("\n iteration %u,    1 %f   2 %f", k , som1, som2 );
 

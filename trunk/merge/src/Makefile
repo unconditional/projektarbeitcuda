@@ -24,8 +24,11 @@ showenvironment.$(PRJACUDAEXEEXT): showenvironment.$(OX)
 	$(LD) -o showenvironment.$(PRJACUDAEXEEXT)  showenvironment.$(OX) > nul
 
 
-libidrs.$(LIBX): idrs.$(OX) kernelsparsemul.$(OX) kerneldotmul.$(OX) mxhelper.$(OX)
-	$(CC) -lib idrs.$(OX) kernelsparsemul.$(OX) kerneldotmul.$(OX) mxhelper.$(OX) -o libidrs.$(LIBX) >nul
+libidrs.$(LIBX): idrs.$(OX) kernelsparsemul.$(OX) kerneldotmul.$(OX) mxhelper.$(OX) kernelnorm.$(OX)
+	$(CC) -lib idrs.$(OX) kernelsparsemul.$(OX) kerneldotmul.$(OX) mxhelper.$(OX) kernelnorm.$(OX) -o libidrs.$(LIBX) >nul
+
+kernelnorm.$(OX): kernels/norm/norm_cuda_gpu.cu
+	$(CC) -c kernels/norm/norm_cuda_gpu.cu -o kernelnorm.$(OX) > nul
 
 kerneldotmul.$(OX): kernels/dotmul/dotMul_cuda_gpu.cu
 	$(CC) -c kernels/dotmul/dotMul_cuda_gpu.cu -o kerneldotmul.$(OX) > nul
