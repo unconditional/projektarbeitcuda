@@ -22,7 +22,6 @@ void initElement(t_FullMatrix * pMatrix)
 void setElement(t_FullMatrix * pMatrix, unsigned int row, unsigned int col, float val)
 {
     if((row < pMatrix->m)&&(col < pMatrix->n)){
-        printf("row=%d,col=%d,val=%lf,\n",row,col, val);
         pMatrix->pElement[(row)*(pMatrix->n) + col ] = val;
     }
 }
@@ -53,8 +52,6 @@ void calMV(t_SparseMatrix *pSparseMatrix, t_FullMatrix * pVector,t_FullMatrix * 
     for (i = 0; i < m; i++){
         colbegin = pRow[i];
         colend = pRow[i+1];
-        printf("colbegin = %d \n",colbegin);
-        printf("colend = %d \n",colend);
         for(j=colbegin;j<colend;j++)pResultElements[i] += pMatrixElements[j]*pVectorElements[pCol[j]];
     }  
 }
@@ -76,6 +73,10 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     t_FullMatrix fullVector, ResultVector;
     t_FullMatrix * pVector, *pResultVector;
     
+	cudaError_t e;	
+	float t_avg;
+	t_avg = 0;
+	
     pSparseMatrix = &sparseMatrix; 
     pVector = &fullVector;
     pResultVector = &ResultVector;
@@ -106,8 +107,7 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     pSparseMatrix->m = n;
     pSparseMatrix->n = m;
     pSparseMatrix->nzmax = nzmax;
-    printf("m=%d,n=%d,nzmax=%d, \n",m,n,nzmax);
-    //cmplx = (pi==NULL ? 0 : 1);
+
 	
 	//=========================================================================================
 	
@@ -122,7 +122,6 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     }
     for(i = 0; i < n+1; i++){  
         pSparseMatrix->pRow[i] = jc[i];
-		//printf("pSparseMatrix->pRow[%d] = %d \n",i,pSparseMatrix->pRow[i]);
     }
     
     //=====get Vector==========================================================
@@ -146,14 +145,19 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
     pResultVector->pElement = (t_ve*)mxMalloc(sizeof(t_ve)*m*n);
     initElement(pResultVector);
     //======================================================================================
-    // call cpu
-    //calMV(pSparseMatrix, pVector, pResultVector);
+    START_CUDA_TIMER;
+	// call cpu
+    calMV(pSparseMatrix, pVector, pResultVector);
     
 	//call gpu
 	//host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMatrix, t_FullMatrix * pVector)
-	printf("call host \n");
-	host_sparseMatrixMul(pResultVector, pSparseMatrix, pVector);
-    printf("after host \n");
+	//printf("call host \n");
+	//host_sparseMatrixMul(pResultVector, pSparseMatrix, pVector);
+    //printf("after host \n");
+	STOP_CUDA_TIMER( &t_avg);
+	printf("CPU runing time =%lf (ms) \n",t_avg);
+	
+	
 	//ir = mxGetIr(prhs[0]);
     //jc = mxGetJc(prhs[0]);
     //nzmax = mxGetNzmax(prhs[0]);
@@ -168,21 +172,8 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
      *if(jc[i]!=jc[i+1]) for(int k = jc[i]; k<jc[i+1]; k++)A[ir[k][i]=pr[k]+pi[k]
      */
 
-            
-        // printf("printf Sparse matrix \n");
-        // for(i=0; i < pSparseMatrix->nzmax; i++){     
-            // printf("%f,k=%d ",pSparseMatrix->pNZElement[i],i);
-            // printf(" \n");
-        // }
-        // printf("printf Vector \n");
-        // for(i=0; i < pVector->n*pVector->m; i++){     
-            // printf("%f,i=%d ",pVector->pElement[i],i);
-            // printf("\n");
-        // }
-        printf("printf Result Vector \n");
+       // printf("printf Result Vector \n");
        for(i=0; i < pResultVector->n*pResultVector->m; i++){  
-            printf("%f,i=%d ",pResultVector->pElement[i],i);
-            printf("\n");
 			//copy result back to matlab;
 			pr[i] = (double)pResultVector->pElement[i];
         }
