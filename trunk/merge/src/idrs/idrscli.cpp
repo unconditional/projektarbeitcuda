@@ -23,6 +23,7 @@ int main( int argc, char *argv[] )
 
 
    t_SparseMatrix a;
+   t_SparseMatrix a2;
    t_ve bla;
 
    t_ve*  r;
@@ -84,8 +85,9 @@ int main( int argc, char *argv[] )
     }
     a.pRow[a.m] = a.m;
 
+    genmtx_t1( &a2, 5 );
 
-    debug_dump_sparse( a );
+    debug_dump_sparse( a2 );
 
 
     starttime = time(NULL);
