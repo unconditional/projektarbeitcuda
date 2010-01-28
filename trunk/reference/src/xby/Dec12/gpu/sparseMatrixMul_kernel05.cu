@@ -75,18 +75,19 @@ __global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSpars
 		if((tx==0)&&(rowIdx<aEnd)){
 			//pResultElements[gridIndex*gridDim.x+blockIdx.x]=0;
 			pResultElements[rowIdx]=0;
+
 		}
-		__syncthreads();
 		
+		bBegin = pRow[rowIdx];
+		bEnd = pRow[rowIdx + 1];
 		//following is operations within one block 
 		// initialize the dot product for each row in A and vector B
 		//t_ve blocksum = 0;
 		t_ve blocksum[VECTOR_BLOCK_Y]; 
 		blocksum[ty]= 0;
 		//if nB> blockDim, split repeat the
-		bBegin = pRow[rowIdx];
-		bEnd = pRow[rowIdx + 1];
-		
+
+		__syncthreads();
 		//for(int b = bBegin; (b < bEnd)&&((tx+b) < bEnd); b += bStep ) {
 		for(int b = bBegin; b < bEnd; b += bStep ) {
 
@@ -101,11 +102,14 @@ __global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSpars
 			if ((rowIdx<aEnd)&&((b+tx) < bEnd)) {
 				Bs[tx] = pVectorElements[pCol[b + tx ]];
 				__syncthreads();
+				
 				//Cs[ty][tx] = pMatrixElements[b + tx] * pVectorElements[pCol[b + tx ]];//???
 				Cs[ty][tx] = pMatrixElements[b + tx] * Bs[tx];//???
+			
 			}
 			__syncthreads();
-				
+		
+		/*
 			if(tx == 0){
 				int kEnd = bEnd-b;
 				if(kEnd > blockDim.x)kEnd = blockDim.x;
@@ -113,27 +117,10 @@ __global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSpars
 				//for (int k = 0; k < kEnd; k++) blocksum += Cs[k];
 				for (int k = 0; k < kEnd; k++) blocksum[ty] += Cs[ty][k];
 				
-			
 			}
+
+		*/	
 			
-			/*
-			
-						
-			int offset; 
-			offset = VECTOR_BLOCK_SIZE/2;
-			while (offset > 0) {
-				if(tx < offset) {
-					Cs[tx] += Cs[tx + offset];
-				}
-				offset >>= 1;
-				__syncthreads();
-			}
-			__syncthreads();
-			if(threadIdx.x == 0)
-			blocksum += Cs[0]; //??? blocksum = Cs[0];
-			
-			*/
-			/*
 			int offset; 
 			offset = blockDim.x/2;
 			while (offset > 0) {
@@ -145,7 +132,7 @@ __global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSpars
 			}
 			blocksum[ty] += Cs[ty][0];
 			__syncthreads();
-			*/
+			
 		}//for b
 		__syncthreads();
 
