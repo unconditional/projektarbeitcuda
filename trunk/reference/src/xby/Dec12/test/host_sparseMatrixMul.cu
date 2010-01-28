@@ -69,17 +69,17 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	cudaDeviceProp deviceProp;
 	cudaGetDeviceProperties(&deviceProp,0);
 	printf("number of multiProcessors: %d \n",deviceProp.multiProcessorCount);
-	int sizeGrid = deviceProp.multiProcessorCount;
+	int gridSize = deviceProp.multiProcessorCount;
 	
 	
 	//printf("VECTOR_BLOCK_SIZE: %d \n",sizeBlock);
 	
-	sizeGrid = 1024 ;
+	gridSize = 1024 ;
 		/*	
 	//====for sparseMatrixMul_kernel04=======
 	dim3 dimBlock(sizeBlock);
 
-	if (sizeGrid > pSparseMatrix->m)sizeGrid = pSparseMatrix->m;
+	if (gridSize > pSparseMatrix->m)gridSize = pSparseMatrix->m;
 	//========================
 		
 */
@@ -89,14 +89,14 @@ void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMa
 	int blockY = VECTOR_BLOCK_Y; //16
 	dim3 dimBlock(blockX,blockY);
 	
-	if (sizeGrid*blockY > pSparseMatrix->m)sizeGrid = pSparseMatrix->m/blockY;
-	if ( (pSparseMatrix->m) % blockY !=0 ) sizeGrid+=1;
+	if (gridSize*blockY > pSparseMatrix->m)gridSize = pSparseMatrix->m/blockY;
+	if ( (pSparseMatrix->m) % blockY !=0 ) gridSize+=1;
 	
 	
 	//================================
 	
-	printf("grid size = %d\n",sizeGrid);
-	dim3 dimGrid(sizeGrid);
+	printf("grid size = %d\n",gridSize);
+	dim3 dimGrid(gridSize);
 	//if ( (sizeA) % sizeBlock !=0 ) dimGrid.x+=1;
 
 	printf("calling kernel \n");
