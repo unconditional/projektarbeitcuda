@@ -28,7 +28,7 @@ libidrs.$(LIBX): idrs.$(OX) kernelsparsemul.$(OX) kerneldotmul.$(OX) mxhelper.$(
 	$(CC) -lib idrs.$(OX) kernelsparsemul.$(OX) kerneldotmul.$(OX) mxhelper.$(OX) kernelnorm.$(OX) ortho.$(OX) -o libidrs.$(LIBX) >nul
 
 ortho.$(OX): bastianortho/mex_orth_bb.cpp
-	$(CC) -c bastianortho/mex_orth_bb.cpp -o ortho.$(OX)
+	$(CC) -c bastianortho/mex_orth_bb.cpp -o ortho.$(OX) > nul
 
 kernelnorm.$(OX): kernels/norm/norm_cuda_gpu.cu
 	$(CC) -c kernels/norm/norm_cuda_gpu.cu -o kernelnorm.$(OX) > nul
