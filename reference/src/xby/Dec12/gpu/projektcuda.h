@@ -20,7 +20,10 @@
 #define BLOCK_EXP 9
 #define DEF_BLOCKSIZE 1 << BLOCK_EXP
 
-#define VECTOR_BLOCK_SIZE DEF_BLOCKSIZE
+//#define VECTOR_BLOCK_SIZE DEF_BLOCKSIZE
+#define VECTOR_BLOCK_SIZE 32
+#define VECTOR_BLOCK_X 1
+#define VECTOR_BLOCK_Y 256
 
 #ifndef PRJACUDADOUBLE
 typedef float        t_ve; /* base type of Matrizes: 'float' or 'double' */

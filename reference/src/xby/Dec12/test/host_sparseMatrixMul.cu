@@ -1,86 +1,136 @@
 //host_SparseMV
 #include "test_comm.h"
+
+// ---------------------------------------------------------------------
+__host__ int smat_size( int count_nzmax, int cunt_rows ) {
+
+    return   ( sizeof(t_ve) + sizeof(t_mindex) ) * count_nzmax
+           + sizeof(t_mindex)  * (cunt_rows + 1);
+}
+
+// ---------------------------------------------------------------------
+__host__ void set_sparse_data( t_SparseMatrix* m, void* mv ) {
+
+   m->pCol = (t_mindex *) mv;
+   m->pNZElement = (t_ve *) (&m->pCol[m->nzmax] ) ;
+   m->pRow = (t_mindex *) (&m->pNZElement[m->nzmax]);
+
+}
 void host_sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMatrix, t_FullMatrix * pVector){
 
-	t_SparseMatrix data_in1,*data_in1_host,*data_in1_gpu;//input sparse Matrix
-	t_FullMatrix data_in2,*data_in2_host,*data_in2_gpu;//input vector
-	t_FullMatrix data_out,*data_out_host,*data_out_gpu;//output vector
+	t_SparseMatrix host_SparseMatrix,dev_SparseMatrix;
+	t_FullMatrix host_Vector,dev_Vector,host_ResultVector,dev_ResultVector;
 	size_t size_NZElement,size_Row,size_Col;
-	int sizeBlock;
-	data_in1_host=&data_in1;
-	data_in2_host=&data_in2;
-	data_out_host=&data_out;
-	
+	cudaError_t e;	
+	int sizeBlock,i;
+	float t_avg;
+	t_avg = 0;
 	sizeBlock = VECTOR_BLOCK_SIZE;
-	
-	size_NZElement = sizeof(t_ve)*pSparseMatrix->nzmax;
-	size_Row = sizeof(int)*pSparseMatrix->m;
-	size_Col = sizeof(int)*(pSparseMatrix->n+1);
+	//=====debug==================
+	//printf("=======in host========== \n");
+	//printf("pSparseMatrix->m=%d \n",pSparseMatrix->m);
+	//printf("pSparseMatrix->n=%d \n",pSparseMatrix->n);
+	//============================
+
 	// Create an input and output data array on the GPU
 	//malloc memory for Input Sparse-Matrix
-	
-		
-	cudaMalloc( (void **) &(data_in1_host->pNZElement),size_NZElement);
-	cudaMalloc( (void **) &(data_in1_host->pRow),size_Row);
-	cudaMalloc( (void **) &(data_in1_host->pCol),size_Col);
-	data_in1_host->m = pSparseMatrix->m;
-	data_in1_host->n = pSparseMatrix->n;
-	data_in1_host->nzmax = pSparseMatrix->nzmax;
-	cudaMemcpy(data_in1_host->pNZElement,pSparseMatrix->pNZElement,size_NZElement,cudaMemcpyHostToDevice);
-	cudaMemcpy(data_in1_host->pRow,pSparseMatrix->pRow,size_Row,cudaMemcpyHostToDevice);
-	cudaMemcpy(data_in1_host->pCol,pSparseMatrix->pCol,size_Col,cudaMemcpyHostToDevice);
-	cudaMalloc( (void **) &data_in1_gpu,sizeof(t_SparseMatrix)*1);
-	//cudaMalloc( (void **) &(data_in1_gpu->pNZElement),sizeof(t_ve)*pSparseMatrix->nzmax+sizeof(int)*pSparseMatrix->m+sizeof(int)*(pSparseMatrix->n+1));
-	cudaMemcpy(data_in1_gpu,data_in1_host,sizeof(t_SparseMatrix)*1,cudaMemcpyHostToDevice);
-	
+	printf("malloc sparse Matrix \n");
+	dev_SparseMatrix.m = pSparseMatrix->m;
+	dev_SparseMatrix.n = pSparseMatrix->n;
+	dev_SparseMatrix.nzmax = pSparseMatrix->nzmax;
+	int msize = smat_size( dev_SparseMatrix.nzmax, dev_SparseMatrix.n );
+    printf(" got result %u \n", msize);
+	void *devicemem;
+    
+	e = cudaMalloc ( &devicemem, msize );
+	CUDA_UTIL_ERRORCHECK("cudaMalloc")
+	//pSparseMatrix->pCol is the begin of memery block
+	e = cudaMemcpy(  devicemem, pSparseMatrix->pCol, msize , cudaMemcpyHostToDevice);
+   CUDA_UTIL_ERRORCHECK("cudaMemcpy")
+   set_sparse_data( &dev_SparseMatrix, devicemem);
 	//malloc device memory for Input vector
+	//printf("malloc vector \n");
 	size_t size_VElement, size_RElement;
 	size_VElement = sizeof(t_ve)*pVector->m*pVector->n;
 	size_RElement = sizeof(t_ve)*pSparseMatrix->m;
-	cudaMalloc( (void **) &data_in2_host,sizeof(t_FullMatrix)*1);
-	cudaMalloc( (void **) &(data_in2_host->pElement),size_VElement);
-	data_in2_host->m = pVector->m;
-	data_in2_host->n = pVector->n;
-	cudaMemcpy(data_in2_host->pElement,pVector->pElement,size_Col,cudaMemcpyHostToDevice);
-	cudaMalloc( (void **) &data_in2_gpu,sizeof(t_FullMatrix)*1);
-	//cudaMalloc( (void **) &(data_in1_gpu->pNZElement),sizeof(t_ve)*pSparseMatrix->nzmax+sizeof(int)*pSparseMatrix->m+sizeof(int)*(pSparseMatrix->n+1));
-	cudaMemcpy(data_in2_gpu,data_in2_host,sizeof(t_FullMatrix)*1,cudaMemcpyHostToDevice);
-
+	cudaMalloc( (void **) &(dev_Vector.pElement),size_VElement);
+	dev_Vector.m = pVector->m;//host_Vector.m;
+	dev_Vector.n = pVector->n;//host_Vector.n;
+	cudaMemcpy(dev_Vector.pElement,pVector->pElement,size_VElement,cudaMemcpyHostToDevice);
 	
-	
-	
+	//printf("malloc output \n");
 	//malloc output Vector
-	data_out_host->m = pSparseMatrix->m;
-	data_out_host->n = 1;
-	cudaMalloc( (void **) &(data_out_host->pElement),size_RElement);
-	cudaMalloc( (void **) &data_out_gpu,sizeof(t_FullMatrix)*1);
-	cudaMemcpy(data_out_gpu,data_out_host,sizeof(t_FullMatrix)*1,cudaMemcpyHostToDevice);
-
+	dev_ResultVector.m = pSparseMatrix->m;
+	dev_ResultVector.n = 1;
+	cudaMalloc( (void **) &(dev_ResultVector.pElement),size_RElement);
+	
 	// Compute execution configuration using 128 threads per block 
+		//dim3 dimGrid((sizeIn)/dimBlock.x);
+	cudaDeviceProp deviceProp;
+	cudaGetDeviceProperties(&deviceProp,0);
+	printf("number of multiProcessors: %d \n",deviceProp.multiProcessorCount);
+	int sizeGrid = deviceProp.multiProcessorCount;
+	
+	
+	//printf("VECTOR_BLOCK_SIZE: %d \n",sizeBlock);
+	
+	sizeGrid = 1024 ;
+		/*	
+	//====for sparseMatrixMul_kernel04=======
 	dim3 dimBlock(sizeBlock);
-	//dim3 dimGrid((sizeIn)/dimBlock.x);
-	dim3 dimGrid(pSparseMatrix->m);
+
+	if (sizeGrid > pSparseMatrix->m)sizeGrid = pSparseMatrix->m;
+	//========================
+		
+*/
+	//====for sparseMatrixMul_kernel05=======
+
+	int blockX = VECTOR_BLOCK_X; //32
+	int blockY = VECTOR_BLOCK_Y; //16
+	dim3 dimBlock(blockX,blockY);
+	
+	if (sizeGrid*blockY > pSparseMatrix->m)sizeGrid = pSparseMatrix->m/blockY;
+	if ( (pSparseMatrix->m) % blockY !=0 ) sizeGrid+=1;
+	
+	
+	//================================
+	
+	printf("grid size = %d\n",sizeGrid);
+	dim3 dimGrid(sizeGrid);
 	//if ( (sizeA) % sizeBlock !=0 ) dimGrid.x+=1;
-//sparseMatrixMul(t_FullMatrix * pResultVector,t_SparseMatrix *pSparseMatrix, t_FullMatrix * pVector)
-	sparseMatrixMul<<<dimGrid,dimBlock>>>(data_out_gpu,data_in1_gpu,data_in2_gpu);
-	cudaError_t e;	
+
+	printf("calling kernel \n");
+	
+	START_CUDA_TIMER;
+	sparseMatrixMul<<<dimGrid,dimBlock>>>(dev_ResultVector,dev_SparseMatrix,dev_Vector);
+	
 	e = cudaGetLastError();
 	if ( e != cudaSuccess)
 	{
 			fprintf(stderr, "CUDA Error on square_elements: '%s' \n", cudaGetErrorString(e));
 			exit(-1);
 	}
-	cudaMemcpy( data_out_gpu->pElement,pResultVector->pElement,  size_RElement, cudaMemcpyDeviceToHost);
+	STOP_CUDA_TIMER( &t_avg);
+	printf("GPU runing time =%lf (ms) \n",t_avg);
+	
+	
+	
+	//printf("get Result \n");
+	//cudaMemcpy( data_out_host->pElement,pResultVector->pElement,  size_RElement, cudaMemcpyDeviceToHost);
+	cudaMemcpy( pResultVector->pElement,dev_ResultVector.pElement,  size_RElement, cudaMemcpyDeviceToHost);
+	
 	pResultVector->m = pSparseMatrix->m;
-	pResultVector->m = 1;
-	cudaFree(data_in1_host->pNZElement);
-	cudaFree(data_in1_host->pRow);
-	cudaFree(data_in1_host->pCol);
-	cudaFree(data_in2_host->pElement);
-	cudaFree(data_out_host->pElement);
-	cudaFree(data_in1_gpu);
-	cudaFree(data_in2_gpu);
-	cudaFree(data_out_gpu);
+	pResultVector->n = 1;
+	//=========debug==============
+		//printf("==================Result in host============\n");
+		//for( i = 0; i < pResultVector->m; i++) printf("pResultVector->pElement[%d]=%f \n",i,pResultVector->pElement[i]);
+	//=======================
+	
+	//printf("free host \n");
+	cudaFree(devicemem);
+	cudaFree(dev_Vector.pElement);
+	cudaFree(dev_ResultVector.pElement);
+
 }
 
 

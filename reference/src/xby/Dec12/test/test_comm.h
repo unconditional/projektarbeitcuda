@@ -24,10 +24,12 @@
 #define FUNCTIONPATH3 "..\\gpu\\matrixMul_kernel03.cu"
 #include FUNCTIONPATH3
 
-#define FUNCTIONPATH4 "..\\gpu\\sparseMatrixMul_kernel04.cu"
+#define FUNCTIONPATH4 "..\\gpu\\sparseMatrixMul_kernel05.cu"
 #include FUNCTIONPATH4
 
 #define FUNCTIONPATH5 "..\\gpu\\scalarMul.cu"
 #include FUNCTIONPATH5
+
+#include "measurehelp.h"
 
 #endif//__TEST_COMM_H__
