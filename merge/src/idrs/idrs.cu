@@ -7,6 +7,8 @@
 #include "kernels/dotMul_cuda_gpu.h"
 #include "kernels/norm_cuda_gpu.h"
 
+#include "bastianortho.h"
+
 typedef struct idrs_context {
     void*          devmem1stcall;
     t_SparseMatrix A;
@@ -27,6 +29,13 @@ extern "C" size_t idrs_sizetve() {
   return sizeof(t_ve);
 }
 
+
+__host__  void testortholinkcompileonly() {
+
+    t_ve dummyRes;
+    t_ve dummyP;
+    orthogonalize( &dummyP, &dummyRes, 12345, 6 );
+}
 
 __global__ void kernel_vec_mul_skalar( t_ve *invec, t_ve scalar, t_ve *out, t_mindex N )
 {
