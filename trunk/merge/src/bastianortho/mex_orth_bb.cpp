@@ -82,7 +82,8 @@ extern void  orthogonalize(t_ve *pMatrix, t_ve *pRes, int N, int s) {
             }
         }
 
-    py= (t_ve*) alloca(s*sizeof(t_ve));
+    py= (t_ve*) malloc(s*sizeof(t_ve));
+
     for (i=0; i<s; i++)
         py[i]=0;
     for (k=2;k<=s;k++) {
@@ -94,6 +95,7 @@ extern void  orthogonalize(t_ve *pMatrix, t_ve *pRes, int N, int s) {
         divbyfac(pMatrix, nr_n, N, k);
 //          mexPrintf("%e\n",nr_n);
     }
+    free ( py );
 
     return;
 }
