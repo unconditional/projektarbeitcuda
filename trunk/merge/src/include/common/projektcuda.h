@@ -4,9 +4,8 @@
 #ifndef __PROJECTCUDAHEADER__
 #define __PROJECTCUDAHEADER__
 
-#define ab( r, s ) (r -1 ) * ( N + 1 ) + s -1
-
-#define a( r, s ) (r -1 ) * N  + s -1
+#define ab( r, s ) (s -1) *  N + r -1
+#define a( r, s ) (s - 1 ) * N + r -1
 
 #define CUDA_UTIL_ERRORCHECK(MSG)        if( e != cudaSuccess ) \
         {\
