@@ -31,7 +31,7 @@ ortho.$(OX): bastianortho/mex_orth_bb.cpp
 	$(CC) -c bastianortho/mex_orth_bb.cpp -o ortho.$(OX) > nul
 
 kernelsolver.$(OX): kernels/solver/gausskernel.cu
-	$(CC) -c kernels/solver/gausskernel.cu -o kernelsolver.$(OX)
+	$(CC) -c kernels/solver/gausskernel.cu -o kernelsolver.$(OX) > nul
 
 kernelnorm.$(OX): kernels/norm/norm_cuda_gpu.cu
 	$(CC) -c kernels/norm/norm_cuda_gpu.cu -o kernelnorm.$(OX) > nul

@@ -6,6 +6,7 @@
 #include "kernels/sparseMatrixMul_kernel.h"
 #include "kernels/dotMul_cuda_gpu.h"
 #include "kernels/norm_cuda_gpu.h"
+#include "kernels/gausskernel.h"
 
 #include "bastianortho.h"
 
@@ -122,7 +123,7 @@ extern "C" void idrs2nd(
                             ;
 
     size_t d_memblocksize =  (N*s )       * sizeof( t_ve )           /* P      */
-                           + (s *s)       * sizeof( t_ve )           /* M      */
+                           + s * (s + 1 + 1 )       * sizeof( t_ve )           /* M m c    */
                            + ( N + 512 )  * sizeof( t_ve )            /* v      */
                            + (N*s )       * sizeof( t_ve )            /* dR     */
                            + (N*s )       * sizeof( t_ve )            /* dX     */
@@ -142,7 +143,9 @@ extern "C" void idrs2nd(
 
     t_ve* P      = (t_ve*) devmem ;
     t_ve* M      = &P[ N * s ];
-    v            = &M[ s * s ];
+    t_ve* m      = &M[ s * s ];
+    t_ve* c      = &M[ s  ];
+    v            = &c[ s  ];
     t_ve* dR     = &v[N + 512 ];
     t_ve* dX     = &dR[ N * s ];
     t_ve* dR_k   = &dX[ N * s ];
@@ -175,6 +178,8 @@ extern "C" void idrs2nd(
     dim3 dimBlock(512);
     dim3 dimGridsub( A.m / 512 + 1 );
 
+    dim3 dimGridgauss( 1 );
+    dim3 dimBlockgauss(512);
 
     for ( int k = 1; k <= s; k++ ) {
         /* idrs.m line 23 */
@@ -286,6 +291,15 @@ extern "C" void idrs2nd(
 
     while (  (norm > tol ) && ( iter < maxit )  ) {
         for ( t_mindex k = 0; k <= s; k++ ) {
+
+//   dim3 dimGridgauss( 1 );
+//    dim3 dimBlockgauss(512);
+           device_gauss_solver<<<dimGridgauss,dimBlockgauss>>>( M, s, c ); /* vec m is s+1 column of M - see memory allocation plan  */
+           e = cudaGetLastError();
+           CUDA_UTIL_ERRORCHECK("device_gauss_solver<<<dimGridgauss,dimBlockgauss>>>( M, s, c )");
+
+           printf( "\n iterartion %u", iter );
+
            iter++;
         }
 

@@ -112,7 +112,7 @@ idrs2nd(
     P,
     0.1,  /* tol */
     s,   /* s - as discussed with Bastian on 2010-01-27 */
-    500,
+    30,
     irdshandle, /* Context Handle we got from idrs_1st */
     x,
     resvec,
