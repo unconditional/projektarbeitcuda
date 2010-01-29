@@ -36,9 +36,9 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 	int aEnd = mA;
 	int bEnd = nB;
 	int tx,bx,y;
+	int rowIdx;
 	tx = threadIdx.x;
 	bx = blockIdx.x;
-
     //initialise Cs 
 	//for(y = 0; y < VECTOR_BLOCK_Y; y++) Cs[y][tx] = 0;
 	//__syncthreads();
@@ -49,34 +49,36 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 	//			C[gridIndex*aStep+blockIdx.x*VECTOR_BLOCK_Y+y] = 0;
 	//}
 	//__syncthreads();
-	// if nB > gridDim???????
 	rowIdx = getRowBaseIdx(gridIndex,aStep,bx,VECTOR_BLOCK_Y);
 	//idx < (gridIndex*gridDim.x+mA%VECTOR_BLOCK_SIZE)*()
 	for(int a = aBegin; (a < aEnd)&&((gridIndex*gridDim.x+blockIdx.x)<aEnd); a += aStep, gridIndex++){
 		//initialize output vector 
+		t_ve blocksum[VECTOR_BLOCK_Y] ;
 		if(tx==0){
-			for(y = 0; y < VECTOR_BLOCK_Y; y++)
+			for(y = 0; y < VECTOR_BLOCK_Y; y++){
+				blocksum[y] = 0;
 				C[rowIdx+y] = 0;
+			}				
 		}
 		__syncthreads();
-		
 		//following is operations within one block 
 		// initialize the dot product for each row in A and vector B
-		t_ve blocksum = 0;
 		//if nB> blockDim, split repeat the
 		//for(int b = bBegin; (b < bEnd)&&((threadIdx.x+b) < bEnd); b += bStep ) {
-		for(int b = bBegin; b < bEnd; b += bStep ) {
-				
+		for(int b = bBegin; b < bEnd; b += bStep ) {				
 		//initialise Cs 
-			for(y = 0; y < VECTOR_BLOCK_Y; y++) Cs[y][tx] = 0;
+			for(y = 0; y < VECTOR_BLOCK_Y; y++) {
+				Cs[y][tx] = 0;	
+			}
 			__syncthreads();
 			// compute scalar product
 			Bs[tx] = B[b+tx];
-			for(y = 0; y < VECTOR_BLOCK_Y; y++)
+			for(y = 0; y < VECTOR_BLOCK_Y; y++){
 				if (( (rowIdx +y)<aEnd)&&((b+tx) < bEnd)) {
 				//Cs[threadIdx.x] = A[a + blockIdx.x ][b + threadIdx.x] * B[b + threadIdx.x ];
-					Cs[threadIdx.x] = A[(rowIdx + y)* nB+ b + tx] * Bs[tx];
+					Cs[y][tx] = 1;//A[(rowIdx + y)* nB+ b + tx] * Bs[tx];
 				}
+			}
 			__syncthreads();
 			/*
 			if(tx == 0){
@@ -85,7 +87,7 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 				if(kEnd > VECTOR_BLOCK_SIZE)kEnd = VECTOR_BLOCK_SIZE;
 				//Because I add Cs[0...k], if blockSize and Matrix does not fit, Parts of Cs[k] are not initialized as 0.  
 				for(y = 0; y < VECTOR_BLOCK_Y; y++){
-					for (int k = 1; k < kEnd; k++) Cs[y][0] += Cs[y][k];
+					for (int k = 1; k < kEnd; k++) Cs[y][0] += Cs[y][k];				
 					blocksum[y] += Cs[y][0];
 				}
 			}
@@ -93,23 +95,25 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 			*/
 			int offset; 
 			offset = VECTOR_BLOCK_SIZE/2;
-			for(y = 0; y < VECTOR_BLOCK_Y; y++)
+			
 			while (offset > 0) {
 				if(tx < offset) {
-					Cs[y][tx] += Cs[y][tx + offset];
+					for(y = 0; y < VECTOR_BLOCK_Y; y++)Cs[y][tx] += Cs[y][tx + offset];
 				}
 				offset >>= 1;
 				__syncthreads();
 			}
 			__syncthreads();
-			if(threadIdx.x == 0)
-			blocksum[y] += Cs[y][0]; //??? blocksum = Cs[0];
+			
+			if(tx== 0)
+				for(y = 0; y < VECTOR_BLOCK_Y; y++)blocksum[y] += Cs[y][0]; //??? blocksum = Cs[0];
 			
 		}//for b
 		__syncthreads();
 		
-		if(tx == 0) 
-			for(y = 0; y < VECTOR_BLOCK_Y; y++)C[rowIdx+y] = blocksum[y];
+		if(tx == 0) {
+			for(y = 0; y < VECTOR_BLOCK_Y; y++) C[rowIdx+y] = blocksum[y];
+		}
 		__syncthreads();	
 	}// for a
 
