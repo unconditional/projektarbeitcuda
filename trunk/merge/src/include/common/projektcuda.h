@@ -7,6 +7,9 @@
 #define ab( r, s ) (s -1) *  N + r -1
 #define a( r, s ) (s - 1 ) * N + r -1
 
+
+#define as( i, j ) (j - 1 ) * s + i -1
+
 #define CUDA_UTIL_ERRORCHECK(MSG)        if( e != cudaSuccess ) \
         {\
             fprintf(stderr, "*** Error on CUDA operation '%s': '%s'*** \n\n", MSG, cudaGetErrorString(e));\

@@ -772,7 +772,13 @@ extern "C" void idrswhole(
 
     idrs_1st( A_in, b_in, x0_in, N, r,  &irdshandle );
 
-    orthogonalize( P_init, P_ortho, N, s );
+    orthogonalize( P_init, r, N, s );
+
+    for ( t_mindex i = 1; i < N; i++ ) {
+        for ( t_mindex j = 1; j < s; j++ ) {
+            P_transp[ as(j, i) ] = P_init[ a(i, j) ];
+        }
+    }
 
     P.m = s;
     P.n = N;
