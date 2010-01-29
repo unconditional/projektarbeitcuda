@@ -103,20 +103,41 @@ int main( int argc, char *argv[] )
 
     starttime = time(NULL);
 
+/*
     idrs_1st( a2, b, xe, N, r,  &irdshandle );
 
-    /* in Matlab P is calculated */
+
+*/
+
+//idrs2nd(
+//    P,
+//    0.1,  /* tol */
+//    s,   /* s - as discussed with Bastian on 2010-01-27 */
+//    30,
+//    irdshandle, /* Context Handle we got from idrs_1st */
+//    x,
+//    resvec,
+//    &interations_needed
+//);
 
 
-idrs2nd(
-    P,
-    0.1,  /* tol */
-    s,   /* s - as discussed with Bastian on 2010-01-27 */
-    30,
-    irdshandle, /* Context Handle we got from idrs_1st */
+idrswhole(
+
+    a2,    /* A Matrix in buyu-sparse-format */
+    b,    /* b as in A * b = x */
+
+    s,
+    0.1, /* tol */
+    30, /* t_mindex maxit,*/
+
+    xe,
+
+     N,
+
     x,
     resvec,
     &interations_needed
+
 );
 
 

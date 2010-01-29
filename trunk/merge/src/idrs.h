@@ -3,6 +3,26 @@ extern "C" size_t idrs_sizetve();
 
 extern "C" void set_debuglevel( int debuglevel );
 
+
+extern "C" void idrswhole(
+
+    t_SparseMatrix A_in,    /* A Matrix in buyu-sparse-format */
+    t_ve*          b_in,    /* b as in A * b = x */
+
+    t_mindex s,
+    t_ve tol,
+    t_mindex maxit,
+
+    t_ve*          x0_in,
+
+    t_mindex N,
+
+    t_ve* x_out,
+    t_ve* resvec_out,
+    unsigned int* piter
+
+);
+
 extern "C" void idrs_1st(
 
                      t_SparseMatrix A_in,    /* A Matrix in buyu-sparse-format */
