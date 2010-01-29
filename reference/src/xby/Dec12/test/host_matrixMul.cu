@@ -70,17 +70,18 @@ void host_matrixMul(double* pC, double* pA,double *pB, int mA, int nB)
 	cudaGetDeviceProperties(&deviceProp,0);
 	printf("number of multiProcessors: %d \n",deviceProp.multiProcessorCount);
 	int gridSize = deviceProp.multiProcessorCount;
-	//gridSize = 1024;
+	gridSize = 1024;
 	
 	
 	//==================for matrixMul_kernel03.cu ========================
-	/*if(gridSize > mA) gridSize = mA;'*/
+	//if(gridSize > mA) gridSize = mA;
 	//================================================================
 	
 	//==================for matrixMul_kernel05.cu ========================
+	
 	int blockY = VECTOR_BLOCK_Y; //16
-	if (sizeGrid*blockY > mA)sizeGrid = mA/blockY;
-	if ( (mA) % blockY !=0 ) sizeGrid+=1;
+	if (gridSize*blockY > mA)gridSize = mA/blockY;
+	if ( (mA) % blockY !=0 ) gridSize+=1;
 	
 	//==========================================================
 
@@ -89,8 +90,9 @@ void host_matrixMul(double* pC, double* pA,double *pB, int mA, int nB)
  		
 
 	cudaError_t e;	
+	START_CUDA_TIMER;
 	for (i = 0; i < it ; i++){
-
+	
 			//Call function on GPU 
 		matrixMul<<<dimGrid,dimBlock>>>(data_out_f_gpu,data_in1_f_gpu, data_in2_f_gpu, mA,nB);
 		
@@ -102,10 +104,8 @@ void host_matrixMul(double* pC, double* pA,double *pB, int mA, int nB)
 		}
 	
 	}//it
-	
-	endTime=clock();
-	t_avg += (endTime-startTime);	
-	printf("laufTime in GPU = %lf \n", ((double) t_avg) / (CLOCKS_PER_SEC));
+	STOP_CUDA_TIMER( &t_avg);
+	printf("GPU runing time =%lf (ms) \n",t_avg);
 	// Copy result back to host 
 	cudaMemcpy( data_out_f, data_out_f_gpu, sizeof(float)*sizeC, cudaMemcpyDeviceToHost);
 
