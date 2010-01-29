@@ -131,7 +131,19 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
 	//=======================================================================
 	//call idrs interface 
 	//idrs_1st(A_in, b_in, xe_in, N, r_out, ih_out);
-	
+	/*
+	extern "C" void idrs_1st(
+                     t_SparseMatrix A_in,   //A Matrix in buyu-sparse-format 
+                     t_ve*          b_in,   // b as in A * b = x 
+                     t_ve*          xe_in,
+
+                     t_mindex N,
+
+                     t_ve*          r_out,    // the r from idrs.m line 6 : r = b - A*x; 
+
+                     t_idrshandle*  ih_out  // handle for haloding all the device pointers between matlab calls 
+           );
+	*/
 	//=======================================================================
 	//output r_out,t_idrshandle in matlab
 	outputIdx = 0; //r_out

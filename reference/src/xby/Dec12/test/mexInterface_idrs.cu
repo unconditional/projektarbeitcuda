@@ -1,22 +1,5 @@
 /* matlab interface for 
-__host__ void idrs(
-                     SparseMatrix A, // size NxN
-                     t_ve* b, // size N
-                     unsigned int s,
-                     t_ve  tol, // t_ve scalar 
-                     unsigned int maxit, //int scalar
-                     t_ve* x0, //size N
 
-                     unsigned int N, //vector and matrix size
-
-                     t_ve* x,  // output vector of size N
-                     t_ve* resvec, // output vector of size ??????
-                     unsigned int* piter //output int point 
-                  );
-	idrs2(
-
-
-	)
 				  */
 
 
@@ -167,24 +150,46 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[])
 	//=======================================================================
 	//call idrs interface 
 	//idrs(A,b,s,tol,maxit,x0,N,x,resvec,piter);
+	
+	/*
+	extern "C" void idrswhole(
+    t_SparseMatrix A_in,    // A Matrix in buyu-sparse-format 
+    t_ve*          b_in,    // b as in A * b = x 
+    t_mindex s,
+    t_ve tol,
+    t_mindex maxit,
+    t_ve*          x0_in,
+
+    t_mindex N,
+
+    t_ve* x_out,
+    t_ve* resvec_out,
+    unsigned int* piter
+	);
+	*/
 	//=======================================================================
 	//output x, resvec,piter in matlab
-    plhs[0] = mxCreateDoubleMatrix(N,1,mxREAL);
-	pr = mxGetPr(plhs[0]);
+	int outPutIdx;
+	//x
+	outPutIdx = 0;
+    plhs[outPutIdx] = mxCreateDoubleMatrix(N,1,mxREAL);
+	pr = mxGetPr(plhs[outPutIdx]);
 	for(i = 0; i < N; i++){
 		pr[i] = (double)x[i];
 	}
 	//output resvec
-	
+	outPutIdx = 1;
     size_resvec =10;
-    plhs[1] = mxCreateDoubleMatrix(size_resvec,1,mxREAL);
-	pr = mxGetPr(plhs[1]);
+    plhs[outPutIdx] = mxCreateDoubleMatrix(size_resvec,1,mxREAL);
+	pr = mxGetPr(plhs[outPutIdx]);
 	for(i = 0; i < size_resvec; i++){
 		pr[i] = (double)resvec[i];
 	}
 	//output iter of scalar value
-	plhs[2] = mxCreateNumericMatrix(1,1,mxUINT32_CLASS,mxREAL);
-	pr = mxGetPr(plhs[1]);
+	outPutIdx = 2;
+	//plhs[outPutIdx] = mxCreateNumericMatrix(1,1,mxUINT32_CLASS,mxREAL);
+	plhs[outPutIdx] = mxCreateDoubleMatrix(1,1,mxREAL);
+	pr = mxGetPr(plhs[outPutIdx]);
 	for(i = 0; i < 1; i++){
 		pr[i] = piter[i];
 	}
