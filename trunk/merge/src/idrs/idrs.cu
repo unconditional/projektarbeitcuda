@@ -10,6 +10,8 @@
 
 #include "bastianortho.h"
 
+#include "kernels/matrixMul_kernel.h"
+
 typedef struct idrs_context {
     void*          devmem1stcall;
     t_SparseMatrix A;
@@ -54,6 +56,37 @@ __global__ void sub_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_mindex N)
 
 }
 
+__global__ void sub_and_mul_arrays_gpu(
+                                         t_ve *in1,
+                                         t_ve *in2,
+                                         t_ve coefficient,
+                                         t_ve *out,
+                                         t_mindex N
+                                        )
+{
+    t_mindex i = threadIdx.y * blockDim.x + threadIdx.x;
+    if ( i < N )
+        out[i] = in1[i] - coefficient * in2[i];
+
+}
+
+
+__global__ void add_and_mul_arrays_gpu(
+                                         t_ve *in1,
+                                         t_ve *in2,
+                                         t_ve coefficient,
+                                         t_ve *out,
+                                         t_mindex N
+                                        )
+{
+    t_mindex i = threadIdx.y * blockDim.x + threadIdx.x;
+    if ( i < N )
+        out[i] = in1[i] + coefficient * in2[i];
+
+}
+
+
+
 __global__ void add_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_mindex N)
 {
     t_mindex i = threadIdx.y * blockDim.x + threadIdx.x;
@@ -84,6 +117,7 @@ extern "C" void idrs2nd(
 
     t_FullMatrix mv;
     t_FullMatrix mr;
+    t_FullMatrix mt;
 
     int cnt_multiprozessors;
     int deviceCount;
@@ -130,7 +164,10 @@ extern "C" void idrs2nd(
                            + (N )         * sizeof( t_ve )            /* dR_k   */
                            + (N )         * sizeof( t_ve )            /* dX_k   */
                            + (N )         * sizeof( t_ve )            /* dnormv   */
-//                           + (N ) * sizeof( t_ve )             /* x   */
+                           + (N )         * sizeof( t_ve )            /* q   */
+                           + (N + 512 )   * sizeof( t_ve )            /* t   */
+                           + (N + 512    ) * sizeof( t_ve )           /* buffer1   */
+//                           + (N ) * sizeof( t_ve )                  /* x   */
                       ;
 
     e = cudaMalloc ( &devmem , d_memblocksize );
@@ -151,6 +188,10 @@ extern "C" void idrs2nd(
     t_ve* dR_k   = &dX[ N * s ];
     t_ve* dX_k   = &dR_k[ N  ];
     t_ve* dnormv = &dX_k[ N  ];
+    t_ve* q      = &dnormv[ N  ];
+    t_ve* t      = &q[ N  ];
+    t_ve* buffer1 = &t[N + 512 ];
+
     x          = ctxholder[ctx].x;
 
     void* hostmem =   malloc( h_memblocksize );
@@ -163,9 +204,17 @@ extern "C" void idrs2nd(
 
     t_ve norm;
 
+
     mr.m        = A.m;
     mr.n        = 1;
     mr.pElement = ctxholder[ctx].r;
+
+    mt.m        = A.m;
+    mt.n        = 1;
+    mt.pElement = t;
+
+
+    t_ve* r = mr.pElement;
 
     mv.m        = A.m;
     mv.n        = 1;
@@ -181,7 +230,13 @@ extern "C" void idrs2nd(
     dim3 dimGridgauss( 1 );
     dim3 dimBlockgauss(512);
 
+    t_ve som ;
+
     for ( int k = 1; k <= s; k++ ) {
+
+        dR_k = &dR[ N * (k-1) ];
+        dX_k = &dX[ N * (k-1) ];
+
         /* idrs.m line 23 */
         sparseMatrixMul<<<dimGrid,dimBlock>>>( mv, A, mr );
         e = cudaGetLastError();
@@ -201,7 +256,7 @@ extern "C" void idrs2nd(
             }
         }
 */
-        kernel_dotmul<<<dimGridsub,dimBlock>>>( mv.pElement, mr.pElement, om1 ) ;
+        kernel_dotmul<<<dimGridsub,dimBlock>>>( v, r, om1 ) ;
         e = cudaGetLastError();
         CUDA_UTIL_ERRORCHECK("device_dotMul");
 
@@ -219,7 +274,7 @@ extern "C" void idrs2nd(
         }
 */
         kernel_dotmul<<<dimGridsub,dimBlock>>>( mv.pElement, mv.pElement, om2 ) ;
-        //kernel_dotmul<<<dimGridsub,dimBlock>>>( ctxholder[ctx].b, ctxholder[ctx].b, om2 ) ;
+        //kernel_dotmul<<<vdimGridsub,dimBlock>>>( ctxholder[ctx].b, ctxholder[ctx].b, om2 ) ;
         e = cudaGetLastError();
         CUDA_UTIL_ERRORCHECK("device_dotMul");
 
@@ -235,8 +290,7 @@ extern "C" void idrs2nd(
             som1 += h_om1[blockidx];
             som2 += h_om2[blockidx];
         }
-        t_ve som = som1 / som2;
-
+        som = som1 / som2;
 
 
 
@@ -276,7 +330,12 @@ extern "C" void idrs2nd(
         norm = snorm;
         resvec[ resveci++ ]  = sqrt( norm );
 
+        /* 28    M(:,k) = P*dR(:,k); */
 
+        t_ve* Mk = &M[ s * (k-1) ];
+        matrixMul<<<dimGrid,dimBlock>>>( P, dR_k , Mk, s, 1 ); /*  :-/  :-/ :-/ :-( */
+        e = cudaGetLastError();
+        CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( P, r , m, s, 1 )");
 
 
         printf("\n iteration %u,    1 %f   2 %f", k , som1, som2 );
@@ -287,18 +346,136 @@ extern "C" void idrs2nd(
 
 
     t_mindex iter   = s; /* iter.m line 31 */
-    t_mindex oldest = 1; /* iter.m line 32 */
+    t_mindex oldest = 0; /* iter.m line 32 */
+
+
+    /*
+     *
+     *  33   m = P* r   - we need a Matrixmul that can deal with P(s,N)   (mA = s = 6 << N) :-/
+     *
+     *
+     */
+
+    matrixMul<<<dimGrid,dimBlock>>>( P, r , m, s, 1 ); /*  */
+    e = cudaGetLastError();
+    CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( P, r , m, s, 1 )");
+
 
     while (  (norm > tol ) && ( iter < maxit )  ) {
         for ( t_mindex k = 0; k <= s; k++ ) {
 
-//   dim3 dimGridgauss( 1 );
-//    dim3 dimBlockgauss(512);
+           t_ve* dRoldest = &dR[ oldest  * N ];
+           t_ve* dXoldest = &dX[ oldest  * N ];
+
+           /* c = M\n  iter.m line 36 */
            device_gauss_solver<<<dimGridgauss,dimBlockgauss>>>( M, s, c ); /* vec m is s+1 column of M - see memory allocation plan  */
            e = cudaGetLastError();
            CUDA_UTIL_ERRORCHECK("device_gauss_solver<<<dimGridgauss,dimBlockgauss>>>( M, s, c )");
 
-           printf( "\n iterartion %u", iter );
+
+           /* q = -dR * c */
+           matrixMul<<<dimGrid,dimBlock>>>( q, dR , c, N, 1 ); /* the - is missing */
+           e = cudaGetLastError();
+           CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGridgauss,dimBlockgauss>>>( q, dR , c, N, 1 )");
+
+           add_arrays_gpu<<<dimGridsub,dimBlock>>>( r, q, v, N );
+           e = cudaGetLastError();
+           CUDA_UTIL_ERRORCHECK("add_arrays_gpu<<<dimGridsub,dimBlock>>>( x, dX_k, x, N )");
+
+           if ( k == 0 ) {
+               /* t = A*v  idrs.m line 40 */
+               sparseMatrixMul<<<dimGrid,dimBlock>>>( mt, A, mv );
+               e = cudaGetLastError();
+               CUDA_UTIL_ERRORCHECK("sparseMatrixMul<<<dimGrid,dimBlock>>>( mt, A, mv )");
+
+
+
+
+               kernel_dotmul<<<dimGridsub,dimBlock>>>( t, v, om1 ) ;
+                //kernel_dotmul<<<dimGridsub,dimBlock>>>( ctxholder[ctx].b, ctxholder[ctx].b, om2 ) ;
+               e = cudaGetLastError();
+               CUDA_UTIL_ERRORCHECK("device_dotMul");
+
+               kernel_dotmul<<<dimGridsub,dimBlock>>>( t, t, om2 ) ;
+                //kernel_dotmul<<<dimGridsub,dimBlock>>>( ctxholder[ctx].b, ctxholder[ctx].b, om2 ) ;
+               e = cudaGetLastError();
+               CUDA_UTIL_ERRORCHECK("device_dotMul");
+
+               e = cudaStreamSynchronize(0);
+               CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
+
+               e = cudaMemcpy( h_om1, om1, sizeof(t_ve) * N * 2, cudaMemcpyDeviceToHost);
+               CUDA_UTIL_ERRORCHECK("cudaMemcpy( h_om1, om1, sizeof(t_ve) * N * 2, cudaMemcpyDeviceToHost)");
+
+               t_ve  som1 = 0;
+               t_ve  som2 = 0;
+               for ( t_mindex blockidx = 0; blockidx < A.m / 512 + 1; blockidx++ ) {
+                    som1 += h_om1[blockidx];
+                    som2 += h_om2[blockidx];
+               }
+               t_ve som = som1 / som2;
+
+               /*  42            dR(:,oldest) = q - om*t; % 1 update */
+               sub_and_mul_arrays_gpu<<<dimGridsub,dimBlock>>>( q, t, som, dRoldest , N);
+               e = cudaGetLastError();
+               CUDA_UTIL_ERRORCHECK("sub_and_mul_arrays_gpu");
+
+
+               /*  43    dX(:,oldest) = -dX*c + om*v; % s updates + 1 scaling */
+               matrixMul<<<dimGrid,dimBlock>>>( dX, c , buffer1, N, 1 ); /* the - is missing */
+               e = cudaGetLastError();
+               CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( dX, c , dXoldest, N, 1 )");
+
+               add_and_mul_arrays_gpu<<<dimGridsub,dimBlock>>>( buffer1, v, som, dXoldest , N);
+               e = cudaGetLastError();
+               CUDA_UTIL_ERRORCHECK("add_and_mul_arrays_gpu");
+
+               printf("\n k = %u om = %f  %f %f", k, som, som1, som2   );
+
+           }
+           else {
+
+               t_FullMatrix mdRoldest;
+               t_FullMatrix mdXoldest;
+
+               mdRoldest.m        = 1;
+               mdRoldest.n        = N;
+               mdRoldest.pElement = dRoldest;
+
+               mdXoldest.m        = 1;
+               mdXoldest.n        = N;
+               mdXoldest.pElement = dXoldest;
+
+              /* 46  dR(:,oldest) = -A*dX(:,oldest); % 1 matmul */
+               sparseMatrixMul<<<dimGrid,dimBlock>>>( mdRoldest, A, mdXoldest );
+               e = cudaGetLastError();
+               CUDA_UTIL_ERRORCHECK("sparseMatrixMul<<<dimGrid,dimBlock>>>( mt, A, mv )");
+
+               /*  45    dX(:,oldest) = -dX*c + om*v; % s updates + 1 scaling */
+               matrixMul<<<dimGrid,dimBlock>>>( dX, c , buffer1, N, 1 ); /* the - is missing */
+               e = cudaGetLastError();
+               CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( dX, c , dXoldest, N, 1 )");
+
+               add_and_mul_arrays_gpu<<<dimGridsub,dimBlock>>>( buffer1, v, som, dXoldest , N);
+               e = cudaGetLastError();
+               CUDA_UTIL_ERRORCHECK("add_and_mul_arrays_gpu");
+           }
+
+           /*        r = r + dR(:,oldest); % simple addition */
+
+           add_arrays_gpu<<<dimGridsub,dimBlock>>>( r, dRoldest, r, N );
+           e = cudaGetLastError();
+           CUDA_UTIL_ERRORCHECK("add_arrays_gpu<<<dimGridsub,dimBlock>>>( r, dRoldest, r, N )");
+
+           /* x = x + dX(:,oldest); % simple addition */
+
+           add_arrays_gpu<<<dimGridsub,dimBlock>>>( x, dXoldest, x, N );
+           e = cudaGetLastError();
+           CUDA_UTIL_ERRORCHECK("add_arrays_gpu<<<dimGridsub,dimBlock>>>( r, dRoldest, r, N )");
+
+
+
+           //printf( "\n iterartion %u", iter );
 
            iter++;
         }

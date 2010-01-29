@@ -24,11 +24,14 @@ showenvironment.$(PRJACUDAEXEEXT): showenvironment.$(OX)
 	$(LD) -o showenvironment.$(PRJACUDAEXEEXT)  showenvironment.$(OX) > nul
 
 
-libidrs.$(LIBX): idrs.$(OX) kernelsparsemul.$(OX) kerneldotmul.$(OX) mxhelper.$(OX) kernelnorm.$(OX) ortho.$(OX) kernelsolver.$(OX)
-	$(CC) -lib idrs.$(OX) kernelsparsemul.$(OX) kerneldotmul.$(OX) mxhelper.$(OX) kernelnorm.$(OX) ortho.$(OX) kernelsolver.$(OX) -o libidrs.$(LIBX) >nul
+libidrs.$(LIBX): idrs.$(OX) kernelsparsemul.$(OX) kerneldotmul.$(OX) mxhelper.$(OX) kernelnorm.$(OX) ortho.$(OX) kernelsolver.$(OX) kernelmatmul.$(OX)
+	$(CC) -lib idrs.$(OX) kernelsparsemul.$(OX) kerneldotmul.$(OX) mxhelper.$(OX) kernelnorm.$(OX) ortho.$(OX) kernelsolver.$(OX) kernelmatmul.$(OX) -o libidrs.$(LIBX) >nul
 
 ortho.$(OX): bastianortho/mex_orth_bb.cpp
 	$(CC) -c bastianortho/mex_orth_bb.cpp -o ortho.$(OX) > nul
+
+kernelmatmul.$(OX): kernels/matrixMul/matrixMul_kernel.cu
+	$(CC) -c kernels/matrixMul/matrixMul_kernel.cu -o kernelmatmul.$(OX)
 
 kernelsolver.$(OX): kernels/solver/gausskernel.cu
 	$(CC) -c kernels/solver/gausskernel.cu -o kernelsolver.$(OX) > nul
