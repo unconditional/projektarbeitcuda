@@ -178,6 +178,9 @@ extern "C" void idrs2nd(
     e = cudaMemset (devmem, 0, d_memblocksize );
     CUDA_UTIL_ERRORCHECK("cudaMalloc");
 
+    e = cudaMemcpy( devmem, P_in.pElement, N*s* sizeof( t_ve ) , cudaMemcpyHostToDevice);
+    CUDA_UTIL_ERRORCHECK("cudaMemcpyHostToDevice");
+
     printf("\n additional using %u bytes in Device memory", d_memblocksize);
 
     t_ve* P      = (t_ve*) devmem ;
@@ -334,12 +337,8 @@ extern "C" void idrs2nd(
         resvec[ resveci++ ]  = sqrt( norm );
 
         /* 28    M(:,k) = P*dR(:,k); */
-
         t_ve* Mk = &M[ s * (k-1) ];
-        matrixMul<<<dimGrid,dimBlock>>>( Mk, P, dR_k , s, N );
-        e = cudaGetLastError();
-        CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( P, r , m, s, 1 )");
-
+        matrixMul<<<dimGrid,dimBlock>>>( Mk, P, dR_k , s, N );       e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( P, r , m, s, 1 )");
 
         printf("\n iteration %u,    1 %f   2 %f", k , som1, som2 );
 
@@ -352,16 +351,10 @@ extern "C" void idrs2nd(
     t_mindex oldest = 0; /* iter.m line 32 */
 
 
-    /*
-     *
-     *  33   m = P* r   - we need a Matrixmul that can deal with P(s,N)   (mA = s = 6 << N) :-/
-     *
-     *
-     */
+    /*  33   m = P* r    */
 
-    matrixMul<<<dimGrid,dimBlock>>>( P, r , m, s, 1 ); /*  */
-    e = cudaGetLastError();
-    CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( P, r , m, s, 1 )");
+    matrixMul<<<dimGrid,dimBlock>>>( m, P, r , s, N );   e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( P, r , m, s, 1 )");
+
 
 
     while (  (norm > tol ) && ( iter < maxit )  ) {
@@ -372,14 +365,14 @@ extern "C" void idrs2nd(
 
            /* c = M\n  iter.m line 36 */
            device_gauss_solver<<<dimGridgauss,dimBlockgauss>>>( M, s, c ); /* vec m is s+1 column of M - see memory allocation plan  */
-           e = cudaGetLastError();
-           CUDA_UTIL_ERRORCHECK("device_gauss_solver<<<dimGridgauss,dimBlockgauss>>>( M, s, c )");
-
+           e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("device_gauss_solver<<<dimGridgauss,dimBlockgauss>>>( M, s, c )");
 
            /* q = -dR * c */
-           matrixMul<<<dimGrid,dimBlock>>>( q, dR , c, N, 1 ); /* the - is missing */
+           matrixMul<<<dimGrid,dimBlock>>>( q, dR , c, N, s );
            e = cudaGetLastError();
            CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGridgauss,dimBlockgauss>>>( q, dR , c, N, 1 )");
+
+           /* the - is missing */
 
            add_arrays_gpu<<<dimGridsub,dimBlock>>>( r, q, v, N );
            e = cudaGetLastError();
