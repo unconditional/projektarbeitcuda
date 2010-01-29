@@ -336,7 +336,7 @@ extern "C" void idrs2nd(
         /* 28    M(:,k) = P*dR(:,k); */
 
         t_ve* Mk = &M[ s * (k-1) ];
-        matrixMul<<<dimGrid,dimBlock>>>( P, dR_k , Mk, s, 1 ); /*  :-/  :-/ :-/ :-( */
+        matrixMul<<<dimGrid,dimBlock>>>( Mk, P, dR_k , s, N );
         e = cudaGetLastError();
         CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( P, r , m, s, 1 )");
 
