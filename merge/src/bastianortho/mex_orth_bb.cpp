@@ -1,5 +1,5 @@
 #include <stdlib.h>
-// #include <stdio.h>
+#include <stdio.h>
 #include "projektcuda.h"
 
 #include <math.h>
@@ -76,13 +76,14 @@ extern void  orthogonalize(t_ve *pMatrix, t_ve *pRes, int N, int s) {
 
     // set random values for 2nd-s'th column
     for (i=1;i<=N;i++)
-        for (j=2;j<=N;j++) {
+        for (j=2;j<=s;j++) {
             {
                 pMatrix[a(i, j)]= (t_ve) rand();
             }
         }
 
     py= (t_ve*) malloc(s*sizeof(t_ve));
+    if (  py == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you P.pElement"); exit( -1 ); }
 
     for (i=0; i<s; i++)
         py[i]=0;

@@ -101,6 +101,7 @@ __host__ size_t smat_size( int cnt_elements, int cnt_cols ) {
 }
 
 
+
 extern "C" void idrs2nd(
     t_FullMatrix P_in,
     t_ve tol,
@@ -732,3 +733,64 @@ extern "C" void idrs_1st(
 }
 
 
+extern "C" void idrswhole(
+
+    t_SparseMatrix A_in,    /* A Matrix in buyu-sparse-format */
+    t_ve*          b_in,    /* b as in A * b = x */
+
+    t_mindex s,
+    t_ve tol,
+    t_mindex maxit,
+
+    t_ve*          x0_in,
+
+    t_mindex N,
+
+    t_ve* x_out,
+    t_ve* resvec_out,
+    unsigned int* piter
+
+) {
+
+    t_ve* r;
+    t_idrshandle irdshandle;
+
+
+    t_FullMatrix P;
+
+    t_ve* P_init;
+    t_ve* P_ortho;
+    t_ve* P_transp;
+
+    r = ( t_ve* ) malloc( sizeof( t_ve ) *  N );
+    if ( r == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
+
+    P_init = ( t_ve* ) malloc( sizeof( t_ve ) *  N * s * 3 );
+    if ( P_init == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
+    P_ortho = &P_init[ N * s ];
+    P_transp = &P_ortho[ N * s ];
+
+    idrs_1st( A_in, b_in, x0_in, N, r,  &irdshandle );
+
+    orthogonalize( P_init, P_ortho, N, s );
+
+    P.m = s;
+    P.n = N;
+    P.pElement = P_transp;
+    idrs2nd(
+       P,
+       tol,        /* tol */
+       s,          /* s - as discussed with Bastian on 2010-01-27 */
+       maxit,
+       irdshandle, /* Context Handle we got from idrs_1st */
+       x_out,
+       resvec_out,
+       piter
+   );
+
+
+
+
+    free(r);
+    free(P_init);
+}
