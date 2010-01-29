@@ -78,7 +78,7 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 					Cs[threadIdx.x] = A[(rowIdx + y)* nB+ b + tx] * Bs[tx];
 				}
 			__syncthreads();
-			
+			/*
 			if(tx == 0){
 				//30.Nov.2009 fixeded for Cs summe
 				int kEnd = bEnd-b;
@@ -90,7 +90,7 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 				}
 			}
 			__syncthreads();
-			/*
+			*/
 			int offset; 
 			offset = VECTOR_BLOCK_SIZE/2;
 			for(y = 0; y < VECTOR_BLOCK_Y; y++)
@@ -107,7 +107,7 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 			
 		}//for b
 		__syncthreads();
-		*/
+		
 		if(tx == 0) 
 			for(y = 0; y < VECTOR_BLOCK_Y; y++)C[rowIdx+y] = blocksum[y];
 		__syncthreads();	
