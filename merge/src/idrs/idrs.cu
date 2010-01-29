@@ -167,6 +167,7 @@ extern "C" void idrs2nd(
                            + (N )         * sizeof( t_ve )            /* q   */
                            + (N + 512 )   * sizeof( t_ve )            /* t   */
                            + (N + 512    ) * sizeof( t_ve )           /* buffer1   */
+                           + (N + 512    ) * sizeof( t_ve )           /* dm   */
 //                           + (N ) * sizeof( t_ve )                  /* x   */
                       ;
 
@@ -191,6 +192,7 @@ extern "C" void idrs2nd(
     t_ve* q      = &dnormv[ N  ];
     t_ve* t      = &q[ N  ];
     t_ve* buffer1 = &t[N + 512 ];
+    t_ve* dm      = &buffer1[N + 512 ];
 
     x          = ctxholder[ctx].x;
 
@@ -478,6 +480,41 @@ extern "C" void idrs2nd(
            //printf( "\n iterartion %u", iter );
 
            iter++;
+
+           kernel_norm<<<dimGridsub,dimBlock>>>( mr.pElement, dnormv );
+           e = cudaGetLastError();
+           CUDA_UTIL_ERRORCHECK("kernel_norm<<<dimGridsub,dimBlock>>>( mr.pElement, dnormv )");
+
+
+           e = cudaMemcpy( h_norm, dnormv, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
+           CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
+
+            t_ve snorm = 0;
+            for ( t_mindex i = 0; i < N / 512 + 1 ; i++ ) {
+                 snorm +=  h_norm[i];
+            }
+            norm = snorm;
+            resvec[ resveci++ ]  = sqrt( norm );
+            printf( "\n iterartion %u norm %f", iter, norm );
+
+            t_ve* Moldest = &M[ s * oldest ];
+
+
+            /* 53 dm = P*dR(:,oldest); % s inner products */
+            dm = Moldest;
+            matrixMul<<<dimGrid,dimBlock>>>( P, dRoldest , Moldest, s, 1 ); /* the - is missing */
+            e = cudaGetLastError();
+            CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( P, dRoldest , Moldest, s, 1 )");
+
+            /* 55  m = m + dm; */
+            add_arrays_gpu<<<dimGridgauss,dimBlock>>>( m, dm, m, s );
+            e = cudaGetLastError();
+            CUDA_UTIL_ERRORCHECK("add_arrays_gpu<<<dimGridsub,dimBlock>>>( r, dRoldest, r, N )");
+
+            oldest++;
+            if ( oldest > s - 1 ) {
+               oldest = 1 ;
+            }
         }
 
     }
