@@ -1,7 +1,7 @@
 #include "cuda.h"
 #include <stdio.h>
 #include "projektcuda.h"
-#include "project_comm.h"
+
 
 /* Kernel to square elements of the array on the GPU */
 /*
@@ -10,16 +10,15 @@
 	C=A*B
 	matrixMul_kernel03.cu
 description:
-	each row of A occuppy one block. if gridDim is smaller than the row number of A  
+	each row of A occuppy one block. if gridDim is smaller than the row number of A
 */
-                
-__global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
-{
-	
+
+__global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB) {
+
 	//define a Result Vector for each block
 	__shared__ float Cs[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim 512
-	
-	//define gridIndex, if gridDim < mA, gridIndex > 0; 
+
+	//define gridIndex, if gridDim < mA, gridIndex > 0;
 	int gridIndex = 0;
 	// get a thread indentifier
 	//int idx = gridIndex*gridDim.x + blockIdx.x*blockDim.x+threadIdx.x;
@@ -32,7 +31,7 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 	int tx;
 	tx = threadIdx.x;
 
-		//initialise Cs 
+		//initialise Cs
 		Cs[tx] = 0;
 		__syncthreads();
 		//initialize output vector for each block
@@ -48,15 +47,15 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 			C[gridIndex*gridDim.x+blockIdx.x]=0;
 		}
 		__syncthreads();
-		
-		//following is operations within one block 
+
+		//following is operations within one block
 		// initialize the dot product for each row in A and vector B
 		t_ve blocksum = 0;
 		//if nB> blockDim, split repeat the
 		//for(int b = bBegin; (b < bEnd)&&((threadIdx.x+b) < bEnd); b += bStep ) {
 		for(int b = bBegin; b < bEnd; b += bStep ) {
-				
-		//initialise Cs 
+
+		//initialise Cs#include "project_comm.h"
 			Cs[tx] = 0;
 			__syncthreads();
 			// compute scalar product
@@ -65,19 +64,19 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 				Cs[threadIdx.x] = A[(a + blockIdx.x)* nB+b + tx] * B[b + tx ];
 			}
 			__syncthreads();
-			
+
 			if(tx == 0){
 				//30.Nov.2009 fixeded for Cs summe
 				int kEnd = bEnd-b;
 				if(kEnd > VECTOR_BLOCK_SIZE)kEnd = VECTOR_BLOCK_SIZE;
-				//Because I add Cs[0...k], if blockSize and Matrix does not fit, Parts of Cs[k] are not initialized as 0.  
-			
+				//Because I add Cs[0...k], if blockSize and Matrix does not fit, Parts of Cs[k] are not initialized as 0.
+
 				for (int k = 1; k < kEnd; k++) Cs[0] += Cs[k];
 				blocksum += Cs[0];
 			}
 			__syncthreads();
 			/*
-			int offset; 
+			int offset;
 			offset = VECTOR_BLOCK_SIZE/2;
 			while (offset > 0) {
 				if(tx < offset) {
@@ -89,7 +88,7 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 			__syncthreads();
 			if(threadIdx.x == 0)
 			blocksum += Cs[0]; //??? blocksum = Cs[0];
-			
+
 		}//for b
 		__syncthreads();
 		*/
@@ -97,7 +96,8 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 		__syncthreads();
 		// summe all block, need test for mA bigger than one Grid
 		//idx = gridIndex*gridDim.x + blockIdx.x*blockDim.x+threadIdx.x;
-	
+
 	}
 
+}
 }
