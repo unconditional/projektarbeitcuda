@@ -10,8 +10,10 @@
 	C=A*B
 description:
 	each row of A occuppy one block. if gridDim is smaller than the row number of A  
+Release:
+	enhancedSparseMatrixMul_kernel.cu
 */
-__global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSparseMatrix, t_FullMatrix pVector)
+__global__ void enhancedSparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSparseMatrix, t_FullMatrix pVector,t_ve n)
 {
 	__shared__ float Cs[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim 512
 	//define gridIndex, if gridDim < mA, gridIndex > 0; 
@@ -64,7 +66,7 @@ __global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSpars
 
 			if (( (gridIndex*gridDim.x+blockIdx.x)<aEnd)&&((b+threadIdx.x) < bEnd)) {
 				
-				Cs[threadIdx.x] = pMatrixElements[b + threadIdx.x] * pVectorElements[pCol[b + threadIdx.x ]];
+				Cs[threadIdx.x] = n*pMatrixElements[b + threadIdx.x] * pVectorElements[pCol[b + threadIdx.x ]];
 			}
 			__syncthreads();
 				
