@@ -1,6 +1,7 @@
 
 #include "projektcuda.h"
-
+#include <stdlib.h>
+#include <stdio.h>
 
 __global__ void device_gauss_solver( t_ve* p_Ab, unsigned int N, t_ve* p_x )
 {
@@ -85,3 +86,49 @@ __global__ void device_gauss_solver( t_ve* p_Ab, unsigned int N, t_ve* p_x )
 
    __syncthreads();
 }
+
+
+__host__ void dbg_solver_check_result( t_ve* Ab_in, t_mindex N, t_ve* x_in ) {
+
+    cudaError_t e;
+
+    t_ve* Ab = (t_ve*) malloc( sizeof( t_ve* ) * (N+1) * N );
+    if ( Ab == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you Ab"); exit( -1 ); }
+    t_ve* x  = (t_ve*) malloc( sizeof( t_ve* ) * N );
+
+    e = cudaMemcpy( Ab, Ab_in, sizeof(t_ve) * (N+1) * N , cudaMemcpyDeviceToHost);
+    CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
+
+    e = cudaMemcpy( x, x_in, sizeof(t_ve) * (N), cudaMemcpyDeviceToHost);
+    CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
+
+// -------------------------------------------------------------
+
+   t_mindex i ;
+   t_mindex j;
+
+    for ( j = 1; j <= N; j++ ) {
+        t_ve sum = 0;
+        for ( i = 1; i <= N; i++ ) {
+            sum += Ab[ ab(j,i) ] * x[ (i-1) ] ;
+        }
+        //printf("\n %u %f   b %f", j, sum, p_Ab[ ab(j,N+1) ] );
+        //if ( sum != Ab[ ab(j,N+1) ] ) {
+        if ( abs( sum - Ab[ ab(j,N+1)] ) > 1 ) {
+            printf("check not ok row=%u, sum %f   b %f", j, sum , Ab[ ab(j,N+1)]  );
+            for ( int k = 1; k <=N; k++ ) {
+                printf("\n b[%u]=%f ", k, Ab[ ab(k,N+1) ] );
+            }
+            for ( int k = 1; k <=N; k++ ) {
+                printf("\n x[%u]=%f ", k, x[ (k-1) ] );
+            }
+            exit(-1); /*  needs to be changed to retunr instead of die!!! */
+        }
+    }
+// -------------------------------------------------------------
+
+    free(x);
+    free(Ab);
+
+}
+
