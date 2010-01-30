@@ -3,6 +3,30 @@
 #include "projektcuda.h"
 
 
+
+__global__ void matrixMul(
+                            t_ve* C_out,
+                            t_ve* A,
+                            t_ve* B,
+                            int mA,
+                            int mB
+                           ) {
+
+   // blockIdx.x is current row of C and B
+
+    if ( threadIdx.x == 0 ) {
+       t_ve c = 0;
+
+       for ( int as = 0; as < mB; as++ ) {
+            c += A[ blockIdx.x + as * mA] * B[as];
+       }
+
+       C_out[blockIdx.x] = c;
+    }
+
+
+}
+
 /* Kernel to square elements of the array on the GPU */
 /*
 	Matrix A is mA x nB  , Vector B is nB
@@ -13,7 +37,7 @@ description:
 	each row of A occuppy one block. if gridDim is smaller than the row number of A
 */
 
-__global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB) {
+__global__ void former_matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB) {
 
 	//define a Result Vector for each block
 	__shared__ float Cs[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim 512
@@ -107,7 +131,8 @@ __host__ void dbg_matrixMul_checkresult(
                                           t_ve* A_in,
                                           t_ve* B_in,
                                           t_mindex mA,
-                                          t_mindex mB
+                                          t_mindex mB,
+                                          char* debugname
                                         ) {
     cudaError_t e;
 
@@ -144,11 +169,9 @@ __host__ void dbg_matrixMul_checkresult(
        Co[cr] = Celement;
 
 
-       if ( Celement == C[cr] ) {
-           printf( "\n Matmul OK (sum is %f",Celement  );
-       }
-       else {
-           printf( "\n Matmul OK ( sum is C[%u]%f, should be %f", cr, C[cr], Celement  );
+       if ( Celement != C[cr] ) {
+
+           printf( "\n Matmul '%s' not OK ( sum is C[%u]%f, should be %f", debugname , cr, C[cr], Celement  );
            for ( t_mindex i = 0; i < mB; i++ ) {
               printf("\n C[%u]=%f", i, C[i] );
            }

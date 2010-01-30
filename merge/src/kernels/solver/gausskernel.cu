@@ -92,6 +92,8 @@ __host__ void dbg_solver_check_result( t_ve* Ab_in, t_mindex N, t_ve* x_in ) {
 
     cudaError_t e;
 
+    return ;
+
     t_ve* Ab = (t_ve*) malloc( sizeof( t_ve* ) * (N+1) * N );
     if ( Ab == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you Ab"); exit( -1 ); }
     t_ve* x  = (t_ve*) malloc( sizeof( t_ve* ) * N );
