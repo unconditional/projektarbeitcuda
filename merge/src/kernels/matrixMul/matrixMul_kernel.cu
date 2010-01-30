@@ -85,7 +85,9 @@ __global__ void former_matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB) {
 			// compute scalar product
 			if (( (gridIndex*gridDim.x+blockIdx.x)<aEnd)&&((b+tx) < bEnd)) {
 				//Cs[threadIdx.x] = A[a + blockIdx.x ][b + threadIdx.x] * B[b + threadIdx.x ];
-				Cs[threadIdx.x] = A[(a + blockIdx.x)* nB+b + tx] * B[b + tx ];
+				//Cs[threadIdx.x] = A[(a + blockIdx.x)* nB+b + tx] * B[b + tx ];
+				//30,Jan.2010
+				Cs[threadIdx.x] = ASpalte(a + blockIdx.x,b + tx,nB) * B[b + tx ];
 			}
 			__syncthreads();
 

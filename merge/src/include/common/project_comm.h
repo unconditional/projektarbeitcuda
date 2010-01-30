@@ -9,7 +9,8 @@
 #define AS(i) cutilBankChecker(((float*)&As[0]), (VECTOR_BLOCK_SIZE * i + j))
 #define BS(i) cutilBankChecker(((float*)&Bs[0]), (VECTOR_BLOCK_SIZE * i + j))
 
-
+#define AZeile(i,j,w) A[i*w+j]
+#define ASpalte(i,j,w) A[j*w+i]
 
 #else
 #define AS(i) As[i]
