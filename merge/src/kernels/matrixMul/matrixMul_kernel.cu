@@ -101,3 +101,88 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB) {
 
 }
 }
+
+__host__ void dbg_matrixMul_checkresult(
+                                          t_ve* C_in,
+                                          t_ve* A_in,
+                                          t_ve* B_in,
+                                          t_mindex mA,
+                                          t_mindex mB
+                                        ) {
+    cudaError_t e;
+
+    t_ve* C = (t_ve*) malloc( sizeof( t_ve* ) * mA );
+    if (  C == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you C"); exit( -1 ); }
+
+    t_ve* Co = (t_ve*) malloc( sizeof( t_ve* ) * mA );
+    if (  Co == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you C"); exit( -1 ); }
+
+    t_ve* A = (t_ve*) malloc( sizeof( t_ve* ) * mA  * mB );
+    if (  A == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you A"); exit( -1 ); }
+
+    t_ve* B = (t_ve*) malloc( sizeof( t_ve* ) * mB );
+    if (  B == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you B"); exit( -1 ); }
+
+
+    e = cudaMemcpy( A, A_in, sizeof(t_ve) * mA  * mB , cudaMemcpyDeviceToHost);
+    CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
+
+    e = cudaMemcpy( C, C_in, sizeof(t_ve) * mA, cudaMemcpyDeviceToHost);
+    CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
+
+    e = cudaMemcpy( B, B_in, sizeof(t_ve) * mB, cudaMemcpyDeviceToHost);
+    CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
+
+
+
+    for ( t_mindex cr = 0; cr < mA; cr++ ) {
+       t_ve Celement = 0;
+       for ( t_mindex br = 0; br < mB; br++ ) {
+           t_mindex as = br;
+           Celement += A[ cr + as * mA ] * B[ br ];
+       }
+       Co[cr] = Celement;
+
+
+       if ( Celement == C[cr] ) {
+           printf( "\n Matmul OK (sum is %f",Celement  );
+       }
+       else {
+           printf( "\n Matmul OK ( sum is C[%u]%f, should be %f", cr, C[cr], Celement  );
+           for ( t_mindex i = 0; i < mB; i++ ) {
+              printf("\n C[%u]=%f", i, C[i] );
+           }
+           printf( "\n" );
+
+           t_ve cumm = 0;
+           for ( t_mindex i = 0; i < mB; i++ ) {
+              t_mindex ai = i * mA ;
+              t_ve prod = B[i] * A[ai];
+              cumm += prod;
+              printf("\n B[%u] = %f A[%u]= %f  .>  control calculation:  a*b = %f   -> c = %f ", i, B[i], ai, A[ai] , prod, cumm );
+           }
+           printf( "\n" );
+
+           for ( t_mindex s = 0; s < mB ; s++ ) {
+               for ( t_mindex r = 0; r < mA ; r++ ) {
+                   t_mindex i = s * mA + r;
+                   printf("\n A(%u,%u) = A[%u]=%f", r+1, s+1 , i, A[i] );
+               }
+           }
+           exit(-1);
+       }
+
+    }
+
+//    e = cudaMemcpy( C_in, Co, sizeof(t_ve) * mA, cudaMemcpyHostToDevice);
+//    CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
+
+    free(A);
+    free(B);
+    free(C);
+    free(Co);
+
+
+
+
+}

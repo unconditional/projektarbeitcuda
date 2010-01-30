@@ -115,7 +115,7 @@ __host__ void dbg_solver_check_result( t_ve* Ab_in, t_mindex N, t_ve* x_in ) {
         //printf("\n %u %f   b %f", j, sum, p_Ab[ ab(j,N+1) ] );
         //if ( sum != Ab[ ab(j,N+1) ] ) {
         if ( abs( sum - Ab[ ab(j,N+1)] ) > 1 ) {
-            printf("check not ok row=%u, sum %f   b %f", j, sum , Ab[ ab(j,N+1)]  );
+            printf("\n Gauss Solver check not ok row=%u, sum %f   b %f", j, sum , Ab[ ab(j,N+1)]  );
             for ( int k = 1; k <=N; k++ ) {
                 printf("\n b[%u]=%f ", k, Ab[ ab(k,N+1) ] );
             }
