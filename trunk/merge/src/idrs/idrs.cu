@@ -269,19 +269,11 @@ extern "C" void idrs2nd(
         e = cudaGetLastError();
         CUDA_UTIL_ERRORCHECK("device_dotMul");
 
+
         e = cudaStreamSynchronize(0);
         CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
 
-/*
-        if ( N < 200 ) {
-            e = cudaMemcpy( debugbuffer1, om1, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
-            CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
-            if ( k == 1 ) {
-               for ( t_mindex i = 0; i < N; i++ )
-               printf("\n k = 1, om1[%u] = %f", i, debugbuffer1[i]);
-            }
-        }
-*/
+
         kernel_dotmul<<<dimGridsub,dimBlock>>>( mv.pElement, mv.pElement, om2 ) ;
         //kernel_dotmul<<<vdimGridsub,dimBlock>>>( ctxholder[ctx].b, ctxholder[ctx].b, om2 ) ;
         e = cudaGetLastError();
@@ -301,7 +293,8 @@ extern "C" void idrs2nd(
         }
         som = som1 / som2;
 
-
+        dbg_dotmul_checkresult( v, r, som1, N, "loop1, som1");
+        dbg_dotmul_checkresult( v, v, som2, N, "loop1, som2");
 
         kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mr.pElement,   som , dX_k, N );
         e = cudaGetLastError();
@@ -382,32 +375,15 @@ extern "C" void idrs2nd(
     while (  (norm > tol ) && ( iter < maxit )  ) {
         for ( t_mindex k = 0; k <= s; k++ ) {
 
-/*
-        if ( N < 200 ) {
-            e = cudaMemcpy( debugbuffer1, m, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
-            CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
-            for ( t_mindex i = 0; i < s; i++ )
-               printf("\n k =%u  m[%u] = %f", k, i, debugbuffer1[i ]);
 
-        }
-*/
            t_ve* dRoldest = &dR[ oldest  * N ];
            t_ve* dXoldest = &dX[ oldest  * N ];
-/*
-        if ( N < 200 ) {
-            e = cudaMemcpy( debugbuffer1, m, sizeof(t_ve) * s , cudaMemcpyDeviceToHost);
-            CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
-            for ( t_mindex i = 0; i < s; i++ )
-               printf("\n k =%u  m[%u] = %f", k, i, debugbuffer1[i ]);
 
-        }
-*/
            /* 36 c = M\n  iter.m line 36 */
            device_gauss_solver<<<dimGridgauss,dimBlockgauss>>>( M, s, c ); /* vec m is s+1 column of M - see memory allocation plan  */
            e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("device_gauss_solver<<<dimGridgauss,dimBlockgauss>>>( M, s, c )");
 
-
-          dbg_solver_check_result( M, s, c );
+           dbg_solver_check_result( M, s, c );
 
 
            /* 37  q = -dR * c */
@@ -425,27 +401,11 @@ extern "C" void idrs2nd(
 
            if ( k == 0 ) {
                /* t = A*v  idrs.m line 40 */
-/*
-        if ( N < 200 ) {
-            e = cudaMemcpy( debugbuffer1, v, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
-            CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
-            for ( t_mindex i = 0; i < 5; i++ )
-               printf("\n k =%u  v[%u] = %f", k, i, debugbuffer1[i ]);
-        }
-*/
+
                sparseMatrixMul<<<dimGrid,dimBlock>>>( mt, A, mv );
                e = cudaGetLastError();
                CUDA_UTIL_ERRORCHECK("sparseMatrixMul<<<dimGrid,dimBlock>>>( mt, A, mv )");
 
-
-/*
-        if ( N < 200 ) {
-            e = cudaMemcpy( debugbuffer1, t, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
-            CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
-            for ( t_mindex i = 0; i < 5; i++ )
-               printf("\n k =%u  t[%u] = %f", k, i, debugbuffer1[i ]);
-        }
-*/
 
                kernel_dotmul<<<dimGridsub,dimBlock>>>( t, v, om1 ) ;
                 //kernel_dotmul<<<dimGridsub,dimBlock>>>( ctxholder[ctx].b, ctxholder[ctx].b, om2 ) ;
@@ -471,7 +431,11 @@ extern "C" void idrs2nd(
                     printf("\n h_om1[%u] = %f ", blockidx, h_om1[blockidx] );
                }
                t_ve lsom = som1 / som2;
-               printf("\n k = %u om = %f  om1=%f om2=%f", k, som, som1, som2   );
+
+               dbg_dotmul_checkresult( t, v, som1, N, "loop2, som1");
+               dbg_dotmul_checkresult( t, t, som2, N, "loop2, som2");
+
+               printf("\n L2 k = %u om = %f  om1=%f om2=%f", k, som, som1, som2   );
 
                /*  42            dR(:,oldest) = q - om*t; % 1 update */
                sub_and_mul_arrays_gpu<<<dimGridsub,dimBlock>>>( q, t, som, dRoldest , N);
