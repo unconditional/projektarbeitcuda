@@ -101,10 +101,10 @@ __host__ void dbg_norm_checkresult ( t_ve *in1,
     }
    t_ve calnorm = sqrt(calresult);
 
-    if ( abs( calnorm - tobeckecked ) < 0.001 ) {
-        printf("\n Norm %s OK", debugname );
-    }
-    else {
+    if ( abs( calnorm - tobeckecked ) > 0.001 ) {
+//        printf("\n Norm %s OK", debugname );
+//    }
+//    else {
         printf("\n Norm %s *not* OK :  expected %f, got %f", debugname , calresult, tobeckecked );
         exit( - 1 );
     }
