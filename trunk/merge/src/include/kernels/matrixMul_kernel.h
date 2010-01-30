@@ -15,7 +15,8 @@ __host__ void dbg_matrixMul_checkresult(
                                           t_ve* A_in,
                                           t_ve* B_in,
                                           t_mindex mA,
-                                          t_mindex mB
+                                          t_mindex mB,
+                                          char* debugname
                                         );
 
 #endif
