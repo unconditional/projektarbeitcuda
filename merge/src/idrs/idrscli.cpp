@@ -7,10 +7,14 @@
 
 #include <time.h>
 
+#include <math.h>
+
 int main( int argc, char *argv[] )
 {
    time_t starttime;
    time_t endtime;
+
+
 
    int nparam = 30;
    if ( argc > 1 ) {
@@ -25,7 +29,8 @@ int main( int argc, char *argv[] )
    t_SparseMatrix a;
    t_SparseMatrix a2;
 
-
+   t_mindex maxit = N * 100;
+   t_ve tol =  10;
 
    t_ve bla;
 
@@ -57,7 +62,7 @@ int main( int argc, char *argv[] )
     P.pElement = ( t_ve* ) malloc( sizeof( t_ve ) *  N * s );
     if (  P.pElement == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you P.pElement"); exit( -1 ); }
 
-    resvec = ( t_ve* ) malloc( sizeof( t_ve ) *  N );
+    resvec = ( t_ve* ) malloc( sizeof( t_ve ) *  maxit );
     if (  resvec == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you xe"); exit( -1 ); }
 
     xe = ( t_ve* ) malloc( sizeof( t_ve ) *  N );
@@ -127,8 +132,8 @@ idrswhole(
     b,    /* b as in A * b = x */
 
     s,
-    0.1, /* tol */
-    100,  /* t_mindex maxit,*/
+    tol, /* tol */
+    maxit,  /* t_mindex maxit,*/
 
     xe,
 
@@ -142,17 +147,28 @@ idrswhole(
 
 
    endtime = time(NULL);
+
+   for ( int i = 0; i < interations_needed; i++ ) {
+       printf( "\n    resvec[%u] %f",i,  resvec[i] );
+   }
+
+   printf("\n --------------------------------------------------------- \n");
+   printf("\n N         :  %u ", N);
+   printf("\n used tolrance: norm < %f ", tol);
+
+   printf("\n used iterations:  %u ", interations_needed);
+   printf("\n maxit          :  %u ", maxit);
+
    printf("\n runtime time(): %u seconds \n ", endtime - starttime );
 
+/*
    if ( N < 11 ) {
    for ( int i = 0; i < N; i++ ) {
        printf( "\n   b[%u]=%f r %f  ", i, b[i], r[i] );
    }
    }
+*/
 
-   for ( int i = 0; i < s; i++ ) {
-       printf( "\n    resvec[%u] %f",i,  resvec[i] );
-   }
 
 }
 

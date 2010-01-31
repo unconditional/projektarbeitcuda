@@ -118,7 +118,7 @@ __global__ void matrixMul_long_mA( t_ve* C, t_ve* A, t_ve* B, int mA, int nB) {
 		*/
 		}//for b
 		__syncthreads();
-		
+
 		if(threadIdx.x == 0) C[gridIndex*gridDim.x+blockIdx.x] = blocksum;
 		__syncthreads();
 		// summe all block, need test for mA bigger than one Grid
@@ -170,9 +170,13 @@ __host__ void dbg_matrixMul_checkresult(
            Celement += A[ cr + as * mA ] * B[ br ];
        }
        Co[cr] = Celement;
-       t_ve tolerance = abs( Celement / 50 );
-       if ( tolerance < 0.015 ) {
-          tolerance = 0.015;
+//       t_ve tolerance = abs( Celement / 100 );
+       t_ve tolerance;
+       if ( abs(Celement) > 1 ) {
+            tolerance = abs(  Celement / 100 * mA ) ;
+       }
+       else {
+          tolerance = 0.05 * mA;
        }
       //t_ve tolerance = Celement = 0;
        t_ve diff = Celement - C[cr];
@@ -200,6 +204,7 @@ __host__ void dbg_matrixMul_checkresult(
                }
            }
            printf( "\n Matmul '%s' not OK ( sum is C[%u]%f, should be %f (tolerance %f, diff %f)", debugname , cr, C[cr], Celement,tolerance, diff);
+           printf( "\n mA = %u; mB = %u \n ", mA, mB );
            exit(-1);
        }
 
