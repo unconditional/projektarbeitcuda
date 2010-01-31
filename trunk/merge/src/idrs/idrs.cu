@@ -463,7 +463,7 @@ extern "C" void idrs2nd(
                add_and_mul_arrays_gpu<<<dimGridsub,dimBlock>>>( q, t, -om, dRoldest , N);  e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("sub_and_mul_arrays_gpu");
 
                /*  43    dX(:,oldest) = -dX*c + om*v; % s updates + 1 scaling */
-               matrixMul<<<dimGridN,dimBlock>>>( buffer1, dX, c , N, s ); e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( dX, c , dXoldest, N, 1 )");
+               matrixMul_long_mA<<<dimGrid,dimBlock>>>( buffer1, dX, c , N, s ); e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( dX, c , dXoldest, N, 1 )");
 
                dbg_matrixMul_checkresult( buffer1, dX, c , N, s, "43    dX(:,oldest) = -dX*c + om*v; % s updates + 1 scaling" );
 
