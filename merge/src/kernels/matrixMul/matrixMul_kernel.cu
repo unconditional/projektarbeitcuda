@@ -183,7 +183,7 @@ __host__ void dbg_matrixMul_checkresult(
        if ( abs( Celement - C[cr] ) > tolerance ) {
 
            printf( "\n Matmul '%s' not OK ( sum is C[%u]%f, should be %f", debugname , cr, C[cr], Celement  );
-           for ( t_mindex i = 0; i < mB; i++ ) {
+           for ( t_mindex i = 0; i < mA; i++ ) {
               printf("\n C[%u]=%f", i, C[i] );
            }
            printf( "\n" );
