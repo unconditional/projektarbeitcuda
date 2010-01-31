@@ -33,7 +33,7 @@ int main( int argc, char *argv[] )
    t_ve tol =  10;
 
    if ( argc > 2 ) {
-      tol = atoi( argv[2] );
+      tol = atof( argv[2] );
    }
    if ( argc > 3 ) {
       set_debuglevel( atoi( argv[3] ));
@@ -59,6 +59,7 @@ int main( int argc, char *argv[] )
 
 
    printf("\n manual IDRS driver, running Matrix size %u \n", N);
+   printf("\n  tolerance %f \n", tol );
 
     a.n = N;
     a.m = N;
@@ -75,6 +76,9 @@ int main( int argc, char *argv[] )
     xe = ( t_ve* ) malloc( sizeof( t_ve ) *  N );
     if (  xe == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you xe"); exit( -1 ); }
 
+    x = ( t_ve* ) malloc( sizeof( t_ve ) *  N );
+    if (  x == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you xe"); exit( -1 ); }
+
     b = ( t_ve* ) malloc( sizeof( t_ve ) *  N );
     if ( b == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
 
@@ -82,7 +86,7 @@ int main( int argc, char *argv[] )
     if ( r == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
 
    for ( int i = 0; i < N; i++ ) {
-      b[i] =  i + 10;
+      b[i] =  10;
       xe[i] = 2 * i - 1;
       /* printf( "\n org %u %f", i, b[i] ); */
    }
@@ -154,6 +158,10 @@ idrswhole(
 
 
    endtime = time(NULL);
+
+   for ( int i = 0; i < N; i++ ) {
+       printf( "\n    x[%u] %f",i,  x[i] );
+   }
 
    for ( int i = 0; i < interations_needed; i++ ) {
        printf( "\n    resvec[%u] %f",i,  resvec[i] );

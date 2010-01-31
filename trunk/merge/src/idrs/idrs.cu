@@ -167,7 +167,7 @@ extern "C" void idrs2nd(
     unsigned int s,
     unsigned int maxit,
     t_idrshandle ih_in, /* Context Handle we got from idrs_1st */
-    t_ve* x,
+    t_ve* x_out,
     t_ve* resvec,
    unsigned int* piter
 ) {
@@ -255,7 +255,7 @@ extern "C" void idrs2nd(
     t_ve* buffer1 = &t[N + 512 ];
     t_ve* dm      = &buffer1[N + 512 ];
 
-    x          = ctxholder[ctx].x;
+    t_ve* x          = ctxholder[ctx].x;
 
     void* hostmem =   malloc( h_memblocksize );
     if ( hostmem == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you hostmem"); exit( -1 ); }
@@ -567,6 +567,10 @@ extern "C" void idrs2nd(
 
     }
     *piter = iter;
+
+
+    e = cudaMemcpy( x_out, x, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
+    CUDA_UTIL_ERRORCHECK("cudaMemcpy");
 
     e = cudaFree( devmem );
     CUDA_UTIL_ERRORCHECK("e = cudaFree( devmem );");
