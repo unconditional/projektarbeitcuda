@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include "projektcuda.h"
 
-
+#define AZeile(i,j,w) A[i*w+j]
+#define ASpalte(i,j,w) A[j*w+i]
 
 __global__ void matrixMul(
                             t_ve* C_out,
@@ -169,9 +170,13 @@ __host__ void dbg_matrixMul_checkresult(
            Celement += A[ cr + as * mA ] * B[ br ];
        }
        Co[cr] = Celement;
-
-
-       if ( Celement != C[cr] ) {
+       t_ve tolerance = abs( Celement / 50 );
+       if ( tolerance < 0.015 ) {
+          tolerance = 0.015;
+       }
+      //t_ve tolerance = Celement = 0;
+       t_ve diff = Celement - C[cr];
+       if ( abs( Celement - C[cr] ) > tolerance ) {
 
            printf( "\n Matmul '%s' not OK ( sum is C[%u]%f, should be %f", debugname , cr, C[cr], Celement  );
            for ( t_mindex i = 0; i < mB; i++ ) {
@@ -194,6 +199,7 @@ __host__ void dbg_matrixMul_checkresult(
                    printf("\n A(%u,%u) = A[%u]=%f", r+1, s+1 , i, A[i] );
                }
            }
+           printf( "\n Matmul '%s' not OK ( sum is C[%u]%f, should be %f (tolerance %f, diff %f)", debugname , cr, C[cr], Celement,tolerance, diff);
            exit(-1);
        }
 
