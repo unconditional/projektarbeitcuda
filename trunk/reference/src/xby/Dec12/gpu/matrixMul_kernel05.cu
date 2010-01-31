@@ -76,7 +76,7 @@ __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB)
 			for(y = 0; y < VECTOR_BLOCK_Y; y++){
 				if (( (rowIdx +y)<aEnd)&&((b+tx) < bEnd)) {
 				//Cs[threadIdx.x] = A[a + blockIdx.x ][b + threadIdx.x] * B[b + threadIdx.x ];
-					Cs[y][tx] = 1;//A[(rowIdx + y)* nB+ b + tx] * Bs[tx];
+					Cs[y][tx] = A[(rowIdx + y)* nB+ b + tx] * Bs[tx];
 				}
 			}
 			__syncthreads();
