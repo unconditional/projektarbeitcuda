@@ -389,6 +389,7 @@ extern "C" void idrs2nd(
         t_ve* Mk = &M[ s * (k-1) ];
 
         matrixMul<<<dimGrids,dimBlock>>>( Mk, P, dR_k , s, N );       e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( P, r , m, s, 1 )");
+        //matrixMul_long_mA<<<dimGrids,dimBlock>>>( Mk, P, dR_k , s, N );       e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( P, r , m, s, 1 )");
         if( debugmode > 1 ) { dbg_matrixMul_checkresult( Mk, P, dR_k , s, N, "28    M(:,k) = P*dR(:,k);" ); }
 
         if( debugmode > 0 ) { printf("\n L1 k=%u, norm = %f   1 %f   2 %f", k, norm, som1, som2 ); }
@@ -544,7 +545,14 @@ extern "C" void idrs2nd(
             t_ve* Moldest = &M[ s * oldest ];
 
             dm = Moldest;
+
+            e = cudaStreamSynchronize(0);
+            CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
+
             matrixMul<<<dimGrids,dimBlock>>>( Moldest, P, dRoldest ,  s, N );   e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( P, dRoldest , Moldest, s, 1 )");
+
+            e = cudaStreamSynchronize(0);
+            CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
 
             if( debugmode > 1  ) { dbg_matrixMul_checkresult( Moldest, P, dRoldest ,  s, N, "53 dm = P*dR(:,oldest)" ); }
 
