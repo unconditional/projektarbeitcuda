@@ -303,7 +303,7 @@ extern "C" void idrs2nd(
         t_ve* dR_k = &dR[ N * (k-1) ];
         t_ve* dX_k = &dX[ N * (k-1) ];
 
-        /* idrs.m line 23 */
+        /* 23 idrs.m line 23 */
 
         e = cudaMemset (v, 0, sizeof(t_ve) * N );
         CUDA_UTIL_ERRORCHECK("cudaMemset");
@@ -416,7 +416,7 @@ extern "C" void idrs2nd(
            dbg_solver_check_result( M, s, c );
 
            /* 37  q = -dR * c */
-           matrixMul<<<dimGridN,dimBlock>>>( q, dR , c, N, s );    e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGridgauss,dimBlockgauss>>>( q, dR , c, N, 1 )");
+           matrixMul_long_mA<<<dimGrid,dimBlock>>>( q, dR , c, N, s );    e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGridgauss,dimBlockgauss>>>( q, dR , c, N, 1 )");
            dbg_matrixMul_checkresult( q, dR , c, N, s, "37  q = -dR * c " );
 
            kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( q, -1 , q, N );  e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mv.pElement, - som , dR_k, N )");
