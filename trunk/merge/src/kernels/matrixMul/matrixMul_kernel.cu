@@ -38,7 +38,7 @@ description:
 	each row of A occuppy one block. if gridDim is smaller than the row number of A
 */
 
-__global__ void former_matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB) {
+__global__ void matrixMul_long_mA( t_ve* C, t_ve* A, t_ve* B, int mA, int nB) {
 
 	//define a Result Vector for each block
 	__shared__ float Cs[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim 512

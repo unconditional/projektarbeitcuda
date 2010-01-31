@@ -10,6 +10,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 __global__ void matrixMul( t_ve* C, t_ve* A, t_ve* B, int mA, int nB);
 
+
+__global__ void matrixMul_long_mA( t_ve* C, t_ve* A, t_ve* B, int mA, int nB);
+
+
 __host__ void dbg_matrixMul_checkresult(
                                           t_ve* C_in,
                                           t_ve* A_in,
