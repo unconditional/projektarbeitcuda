@@ -32,6 +32,10 @@ int main( int argc, char *argv[] )
    t_mindex maxit = N * 100;
    t_ve tol =  10;
 
+   if ( argc > 2 ) {
+      tol = atoi( argv[2] );
+   }
+
    t_ve bla;
 
    t_ve*  r;
