@@ -124,7 +124,7 @@ __global__ void matrixMul_long_mA( t_ve* C, t_ve* A, t_ve* B, int mA, int nB) {
 		// summe all block, need test for mA bigger than one Grid
 		//idx = gridIndex*gridDim.x + blockIdx.x*blockDim.x+threadIdx.x;
 
-	}
+	}//for a
 
 
 }
