@@ -35,6 +35,9 @@ int main( int argc, char *argv[] )
    if ( argc > 2 ) {
       tol = atoi( argv[2] );
    }
+   if ( argc > 3 ) {
+      set_debuglevel( atoi( argv[3] ));
+   }
 
    t_ve bla;
 
@@ -157,6 +160,8 @@ idrswhole(
    }
 
    printf("\n --------------------------------------------------------- \n");
+   printf("\n debuglevel         :  %u  (0 is normal mode for measurement)", get_debuglevel() );
+
    printf("\n N         :  %u ", N);
    printf("\n used tolrance: norm < %f ", tol);
 

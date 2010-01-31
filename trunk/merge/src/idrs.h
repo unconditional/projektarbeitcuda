@@ -2,7 +2,7 @@
 extern "C" size_t idrs_sizetve();
 
 extern "C" void set_debuglevel( int debuglevel );
-
+extern "C" int get_debuglevel();
 
 extern "C" void idrswhole(
 
