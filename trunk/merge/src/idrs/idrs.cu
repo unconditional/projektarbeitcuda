@@ -74,6 +74,34 @@ __host__ void dbg_vec_mul_skalar(
 }
 
 /* ------------------------------------------------------------------------------------- */
+__host__ void dbg_dump_mtx(
+                             t_ve*    dv,
+                             t_mindex m,
+                             t_mindex n,
+                             char*    mname
+                          )
+{
+
+
+    cudaError_t e;
+    t_ve* v = (t_ve*) malloc( sizeof( t_ve* )  * m * n );
+    if (  v == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you C"); exit( -1 ); }
+
+    e = cudaMemcpy( v, dv, sizeof(t_ve) * m * n , cudaMemcpyDeviceToHost);
+    CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
+
+    for( t_mindex s=0; s < n; s++  ) {
+        for( t_mindex r=0; r < m; r++  ) {
+
+           t_mindex i = s * m + r;
+           printf("\n %s(%u,%u)=%s[%u] = %f ",mname, r+1, s+1, mname, i, v[i] );
+        }
+    }
+
+    free( v);
+
+}
+/* ------------------------------------------------------------------------------------- */
 
 __global__ void sub_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_mindex N)
 {
@@ -82,22 +110,6 @@ __global__ void sub_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_mindex N)
         out[i] = in1[i] - in2[i];
 
 }
-
-/*
-__global__ void sub_and_mul_arrays_gpu(
-                                         t_ve *in1,
-                                         t_ve *in2,
-                                         t_ve coefficient,
-                                         t_ve *out,
-                                         t_mindex N
-                                        )
-{
-    t_mindex i = blockIdx.x * blockDim.x + threadIdx.x;
-    if ( i < N )
-        out[i] = in1[i] - coefficient * in2[i];
-
-}
-*/
 
 __global__ void add_and_mul_arrays_gpu(
                                          t_ve *in1,
@@ -267,6 +279,13 @@ extern "C" void idrs2nd(
 
 //    t_ve som ;
 
+
+    //dbg_dump_mtx( dX,N,s, "dX" );
+    //dbg_dump_mtx( dR,N,s, "dR" );
+    //dbg_dump_mtx( P,s,N, "P" );
+    dbg_dump_mtx( r,N,1, "r" );
+    dbg_dump_mtx( x,N,1, "x" );
+
     for ( int k = 1; k <= s; k++ ) {
 
         t_ve* dR_k = &dR[ N * (k-1) ];
@@ -343,7 +362,9 @@ extern "C" void idrs2nd(
         e = cudaStreamSynchronize(0);
         CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
     }
-
+    //dbg_dump_mtx( dX,N,s, "dX" );
+    //dbg_dump_mtx( dR,N,s, "dR" );
+    //dbg_dump_mtx( M,s,s, "M" );
 
     t_mindex iter   = s; /* iter.m line 31 */
     t_mindex oldest = 0; /* iter.m line 32 */
