@@ -173,7 +173,7 @@ __host__ void dbg_matrixMul_checkresult(
 //       t_ve tolerance = abs( Celement / 100 );
        t_ve tolerance;
        if ( abs(Celement) > 1 ) {
-            tolerance = abs(  Celement / 100 * mA ) ;
+            tolerance = abs(  Celement / 10 * mA ) ;
        }
        else {
           tolerance = 0.05 * mA;
