@@ -218,6 +218,7 @@ extern "C" void idrs2nd(
                            + (N + 512 )   * sizeof( t_ve )            /* t   */
                            + (N + 512    ) * sizeof( t_ve )           /* buffer1   */
                            + (N + 512    ) * sizeof( t_ve )           /* dm   */
+                           +  maxit * sizeof( t_ve )                  /* dm   */
 //                           + (N ) * sizeof( t_ve )                  /* x   */
                       ;
 
@@ -416,7 +417,13 @@ extern "C" void idrs2nd(
            dbg_solver_check_result( M, s, c );
 
            /* 37  q = -dR * c */
-           matrixMul_long_mA<<<dimGrid,dimBlock>>>( q, dR , c, N, s );    e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGridgauss,dimBlockgauss>>>( q, dR , c, N, 1 )");
+//           if ( N > 2000 ) {
+               matrixMul_long_mA<<<dimGrid,dimBlock>>>( q, dR , c, N, s );    e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGridgauss,dimBlockgauss>>>( q, dR , c, N, 1 )");
+//           }
+//           else {
+//               matrixMul<<<dimGridN,dimBlock>>>( q, dR , c, N, s );    e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGridgauss,dimBlockgauss>>>( q, dR , c, N, 1 )");
+//           }
+
            dbg_matrixMul_checkresult( q, dR , c, N, s, "37  q = -dR * c " );
 
            kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( q, -1 , q, N );  e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mv.pElement, - som , dR_k, N )");
@@ -482,7 +489,7 @@ extern "C" void idrs2nd(
 
 
                /*  45    dX(:,oldest) = -dX*c + om*v; % s updates + 1 scaling */
-               matrixMul<<<dimGridN,dimBlock>>>( buffer1, dX, c , N, s );  e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( dX, c , dXoldest, N, 1 )");
+                matrixMul_long_mA<<<dimGrid,dimBlock>>>( buffer1, dX, c , N, s );  e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( dX, c , dXoldest, N, 1 )");
 
                dbg_matrixMul_checkresult( buffer1, dX, c , N, s, "45    dX(:,oldest) = -dX*c + om*v");
 
