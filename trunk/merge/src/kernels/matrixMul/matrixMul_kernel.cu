@@ -115,10 +115,10 @@ __global__ void matrixMul_long_mA( t_ve* C, t_ve* A, t_ve* B, int mA, int nB) {
 			__syncthreads();
 			if(threadIdx.x == 0)
 			blocksum += Cs[0]; //??? blocksum = Cs[0];
-
+		*/
 		}//for b
 		__syncthreads();
-		*/
+		
 		if(threadIdx.x == 0) C[gridIndex*gridDim.x+blockIdx.x] = blocksum;
 		__syncthreads();
 		// summe all block, need test for mA bigger than one Grid
@@ -126,7 +126,7 @@ __global__ void matrixMul_long_mA( t_ve* C, t_ve* A, t_ve* B, int mA, int nB) {
 
 	}
 
-}
+
 }
 
 __host__ void dbg_matrixMul_checkresult(
