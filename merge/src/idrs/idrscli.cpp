@@ -128,7 +128,7 @@ idrswhole(
 
     s,
     0.1, /* tol */
-    30, /* t_mindex maxit,*/
+    100,  /* t_mindex maxit,*/
 
     xe,
 
@@ -144,7 +144,7 @@ idrswhole(
    endtime = time(NULL);
    printf("\n runtime time(): %u seconds \n ", endtime - starttime );
 
-   if ( N < 101 ) {
+   if ( N < 11 ) {
    for ( int i = 0; i < N; i++ ) {
        printf( "\n   b[%u]=%f r %f  ", i, b[i], r[i] );
    }

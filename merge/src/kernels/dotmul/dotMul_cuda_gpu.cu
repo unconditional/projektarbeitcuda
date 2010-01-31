@@ -103,11 +103,13 @@ __host__ void dbg_dotmul_checkresult ( t_ve *in1,
     for( t_mindex i = 0; i < N; i++ ) {
         calresult += v1[i] * v2[i];
     }
-    if ( abs( calresult - tobeckecked ) > 0.001 ) {
+    t_ve absdiff = abs( calresult - tobeckecked );
+    t_ve tolerance = calresult / 10000;
+    if ( absdiff > tolerance ) {
 //        printf("\n Dotmul %s OK", debugname );
 //    }
 //    else {
-        printf("\n Dotmul %s *not‹ OK :  expected %f, got %f", debugname , calresult, tobeckecked );
+        printf("\n Dotmul %s *not‹ OK :  expected %f, got %f (diff %f, tolerace %f )", debugname , calresult, tobeckecked, absdiff, tolerance );
         exit( - 1 );
     }
 
