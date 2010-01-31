@@ -345,8 +345,8 @@ extern "C" void idrs2nd(
         }
         om = som1 / som2;
 
-        dbg_dotmul_checkresult( v, r, som1, N, "loop1, som1");
-        dbg_dotmul_checkresult( v, v, som2, N, "loop1, som2");
+        if( debugmode > 1 ) { dbg_dotmul_checkresult( v, r, som1, N, "loop1, som1"); };
+        if( debugmode > 1 ) { dbg_dotmul_checkresult( v, v, som2, N, "loop1, som2"); };
 
         kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mr.pElement,   om , dX_k, N ); e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mr.pElement,   som , dX_k, N )");
 
@@ -408,7 +408,7 @@ extern "C" void idrs2nd(
     /*  33   m = P* r    */
 
     matrixMul<<<dimGrids,dimBlock>>>( m, P, r , s, N );   e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("matrixMul<<<dimGrid,dimBlock>>>( P, r , m, s, 1 )");
-    dbg_matrixMul_checkresult( m, P, r , s, N, " 33   m = P* r " );
+    if( debugmode > 1 ) { dbg_matrixMul_checkresult( m, P, r , s, N, " 33   m = P* r " ) ; }
 
 
     while (  (norm > tol ) && ( iter < maxit )  ) {
