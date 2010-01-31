@@ -9,9 +9,6 @@ guanhua.bai@googlemail.com
 
 Known problems:
 
-* currently Multiplikation of non-square matrizes (full)
-  does not work properly
-
 * never get a real device to work properly with "double precision".
 
 
@@ -54,5 +51,23 @@ use idrscli.exe to start the standalone-checks of IDRS implementation
 
 1.5 use 'idrs.h' for interfacing, for example by Mex-Function from Matlab
     ensure libidrs.lib/libidrs.a is added to your linker-configuration!
+
+
+2. idrscli.exe commandline options
+
+   idrscli.exe N tolerance debugmode
+
+   example:
+
+   idrscli.exe 30 0.1 1
+
+   runs the cli wthi N=30 , tol = 0.1, debugmode 1
+
+3. Debugmodes
+
+   0    No debug, use for measurements
+   1    printout status information
+   2    check is GPU operation by calculating the same values in CPU and check if equal
+
 
 
