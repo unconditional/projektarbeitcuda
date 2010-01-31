@@ -12,6 +12,8 @@
 
 #include "kernels/matrixMul_kernel.h"
 
+int debugmode = 1;
+
 typedef struct idrs_context {
     void*          devmem1stcall;
     t_SparseMatrix A;
@@ -60,17 +62,25 @@ __host__ void dbg_vec_mul_skalar(
     t_ve* v = (t_ve*) malloc( sizeof( t_ve* ) * N );
     if (  v == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you C"); exit( -1 ); }
 
+    t_ve* vresult = (t_ve*) malloc( sizeof( t_ve* ) * N );
+    if (  vresult == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you C"); exit( -1 ); }
+
     e = cudaMemcpy( v, in1_in, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
-    CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
+    CUDA_UTIL_ERRORCHECK("cudaMemcpy");
+
+    e = cudaMemcpy( vresult, out1_in, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
+    CUDA_UTIL_ERRORCHECK("cudaMemcpy");
 
     for ( t_mindex i = 0; i < N ; i++ ) {
-        t_ve prod = in1_in[i] * scalar_in;
-        if ( prod  != out1_in[i] ) {
-            printf("\n scalarmul NOT OK");
-            exit( -1);
+        t_ve prod = v[i] * scalar_in;
+
+        if ( prod  != vresult[i] ) {
+            fprintf(stderr, "\n vecmul NOT OK");
+            exit( -3);
         }
     }
-    free( v);
+    free( v );
+    free( vresult );
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -283,8 +293,10 @@ extern "C" void idrs2nd(
     //dbg_dump_mtx( dX,N,s, "dX" );
     //dbg_dump_mtx( dR,N,s, "dR" );
     //dbg_dump_mtx( P,s,N, "P" );
-    dbg_dump_mtx( r,N,1, "r" );
-    dbg_dump_mtx( x,N,1, "x" );
+    //dbg_dump_mtx( r,N,1, "r" );
+    //dbg_dump_mtx( x,N,1, "x" );
+
+    //if ( debugmode > 0 ) { printf("\n DEBUGMODE %u - starting L1", debugmode ); }
 
     for ( int k = 1; k <= s; k++ ) {
 
@@ -293,20 +305,25 @@ extern "C" void idrs2nd(
 
         /* idrs.m line 23 */
 
-               e = cudaMemset (v, 0, sizeof(t_ve) * N );
-               CUDA_UTIL_ERRORCHECK("cudaMalloc");
-               sparseMatrixMul<<<dimGrid,dimBlock>>>( mt, A, mv ); e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("sparseMatrixMul<<<dimGrid,dimBlock>>>( mt, A, mv )");
+        e = cudaMemset (v, 0, sizeof(t_ve) * N );
+        CUDA_UTIL_ERRORCHECK("cudaMemset");
+
+        sparseMatrixMul<<<dimGrid,dimBlock>>>( mt, A, mv ); e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("sparseMatrixMul<<<dimGrid,dimBlock>>>( mt, A, mv )");
 
         sparseMatrixMul<<<dimGrid,dimBlock>>>( mv, A, mr );   e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("testsparseMatrixMul");
 
+
         e = cudaStreamSynchronize(0);
         CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
+
 
         kernel_dotmul<<<dimGridsub,dimBlock>>>( v, r, om1 ) ;  e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("device_dotMul");
 
         kernel_dotmul<<<dimGridsub,dimBlock>>>( v, v, om2 ) ;  e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("device_dotMul");
 
         e = cudaStreamSynchronize(0); CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
+
+//        if ( debugmode > 0 ) { printf("\n DEBUGMODE %u - L1, k = %u, after Dotmul", debugmode, k ); }
 
         e = cudaMemcpy( h_om1, om1, sizeof(t_ve) * N * 2, cudaMemcpyDeviceToHost);   CUDA_UTIL_ERRORCHECK("cudaMemcpy( h_om1, om1, sizeof(t_ve) * N * 2, cudaMemcpyDeviceToHost)");
 
@@ -323,11 +340,14 @@ extern "C" void idrs2nd(
         dbg_dotmul_checkresult( v, v, som2, N, "loop1, som2");
 
         kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mr.pElement,   om , dX_k, N ); e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mr.pElement,   som , dX_k, N )");
+
+
         dbg_vec_mul_skalar( r, dX_k, om, N, "mr.pElement,   om , dX_k, N" );
 
 
         kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mv.pElement, - om , dR_k, N ); e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("kernel_vec_mul_skalar<<<dimGridsub,dimBlock>>>( mv.pElement, - som , dR_k, N )");
         dbg_vec_mul_skalar( v, dR_k, -1 * om, N, "mv.pElement, - om , dR_k, N" );
+
 
         e = cudaStreamSynchronize(0);
         CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
@@ -336,8 +356,13 @@ extern "C" void idrs2nd(
 
         add_arrays_gpu<<<dimGridsub,dimBlock>>>( r, dR_k, r, N );  e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("add_arrays_gpu<<<dimGridsub,dimBlock>>>( mr.pElement, dR_k, mr.pElement, N );");
 
+
+        /* 26 normr = norm(r) */
+        e = cudaMemset (dnormv, 0, sizeof(t_ve) * N );
+        CUDA_UTIL_ERRORCHECK("cudaMemset");
         kernel_norm<<<dimGridsub,dimBlock>>>( mr.pElement, dnormv );  e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("kernel_norm<<<dimGridsub,dimBlock>>>( mr.pElement, dnormv )");
 
+        //dbg_dump_mtx( dnormv,N,1, "dnormv" );
 
         e = cudaMemcpy( h_norm, dnormv, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
         CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");

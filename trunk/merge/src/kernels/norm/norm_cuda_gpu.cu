@@ -8,7 +8,6 @@ __global__ void kernel_norm(t_ve* in,t_ve* out )
 {
     __shared__ t_ve Vs [DEF_BLOCKSIZE];
 
-
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     Vs[threadIdx.x] = in[idx] * in[idx];
 
@@ -44,28 +43,41 @@ __global__ void kernel_norm(t_ve* in,t_ve* out )
 
 #ifdef PRJCUDAEMU
 
-    if ( threadIdx.x <  32 )
+    if ( threadIdx.x <  32 ) {
         Vs[threadIdx.x] += Vs[ threadIdx.x + 32 ];
+    }
     __syncthreads();
-    if ( threadIdx.x <  16 )
+
+    if ( threadIdx.x <  16 ) {
         Vs[threadIdx.x] += Vs[ threadIdx.x + 16 ];
+    }
     __syncthreads();
-    if ( threadIdx.x <  8 )
+
+    if ( threadIdx.x <  8 ) {
+
         Vs[threadIdx.x] += Vs[ threadIdx.x +  8 ];
+    }
     __syncthreads();
-    if ( threadIdx.x <  4 )
+
+    if ( threadIdx.x <  4 ) {
         Vs[threadIdx.x] += Vs[ threadIdx.x +  4 ];
+    }
     __syncthreads();
-    if ( threadIdx.x <  2 )
+
+    if ( threadIdx.x <  2 ) {
         Vs[threadIdx.x] += Vs[ threadIdx.x +  2 ];
+    }
     __syncthreads();
-    if ( threadIdx.x <  1 )
+
+    if ( threadIdx.x <  1 ) {
         Vs[threadIdx.x] += Vs[ threadIdx.x +  1 ];
+    }
     __syncthreads();
-        if ( threadIdx.x == 0 ) {
+
+    if ( threadIdx.x == 0 ) {
             //out[blockIdx.x] =  Vs[0]  ;
             out[blockIdx.x] =  Vs[0]  ;
-        }
+    }
 
 
 #endif
@@ -99,13 +111,15 @@ __host__ void dbg_norm_checkresult ( t_ve *in1,
     for( t_mindex i = 0; i < N; i++ ) {
         calresult += v1[i] * v1[i];
     }
-   t_ve calnorm = sqrt(calresult);
 
-    if ( abs( calnorm - tobeckecked ) > 0.001 ) {
+    t_ve calnorm = sqrt(calresult);
+    t_ve tolerance = calnorm / 10000;
+//    t_ve tolerance = 0.0001;
+    if ( abs( calnorm - tobeckecked ) > tolerance ) {
 //        printf("\n Norm %s OK", debugname );
 //    }
 //    else {
-        printf("\n Norm %s *not* OK :  expected %f, got %f", debugname , calresult, tobeckecked );
+        printf("\n Norm %s *not* OK :  expected  %f (CPU), got %f (GPU) (tolerance %f)", debugname, calnorm, tobeckecked, tolerance );
         exit( - 1 );
     }
 
