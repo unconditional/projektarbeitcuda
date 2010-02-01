@@ -792,8 +792,8 @@ extern "C" void idrs_1st(
     }
     t_ve norm = sqrt(snorm);
 
-    // dbg_dump_mtx( d_b,N + 10,1, "b" );
-    // dbg_dump_mtx( normv,N,1, "normv" );
+    //dbg_dump_mtx( d_b,N + 10,1, "b" );
+    //dbg_dump_mtx( normv,N,1, "normv" );
 
     if( debugmode > 1 ) { dbg_norm_checkresult( d_b, norm , N, "1st norm for scaling, norm"); }
 
