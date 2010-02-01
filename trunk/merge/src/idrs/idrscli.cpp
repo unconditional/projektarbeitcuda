@@ -24,7 +24,7 @@ int main( int argc, char *argv[] )
    t_mindex N                  = nparam;
    t_mindex sparse_NZ_elements = nparam;
 
-   t_mindex s = 6;
+   t_mindex s = 4;
 
    t_SparseMatrix a;
    t_SparseMatrix a2;
@@ -88,11 +88,7 @@ int main( int argc, char *argv[] )
    for ( int i = 0; i < N; i++ ) {
       b[i] =  0;
 
-      xe[i] =  1; /*   x = ones(n,1);
-                       as in http://ta.twi.tudelft.nl/NW/users/gijzen/example.m
-                       if 1 is good enough for the examples... ;-)
-                  */
-      /* printf( "\n org %u %f", i, b[i] ); */
+      xe[i] =  ((t_ve) rand()) / RAND_MAX;
    }
 
     b[0]   =  1;
@@ -187,6 +183,7 @@ idrswhole(
    printf("\n debuglevel         :  %u  (0 is normal mode for measurement)", get_debuglevel() );
 
    printf("\n N         :  %u ", N);
+   printf("\n s         :  %u ", s);
    printf("\n used tolrance: norm < %f ", tol);
    printf("\n used rel. tolrance:  %f ", tol *resvec[0]  );
 
