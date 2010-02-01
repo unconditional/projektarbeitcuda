@@ -20,7 +20,7 @@ int N = 10;
 __global__ void minikernel(  int N_in, t_ve* out  ) {
 
     int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < N ) {
+    if (i < N_in ) {
        out[i] = 1234;
     }
 }
