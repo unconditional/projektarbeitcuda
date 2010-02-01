@@ -86,7 +86,7 @@ int main( int argc, char *argv[] )
     if ( r == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
 
    for ( int i = 0; i < N; i++ ) {
-      b[i] =  i + 100;
+      b[i] =  i + 10;
 
       xe[i] =  1; /*   x = ones(n,1);
                        as in http://ta.twi.tudelft.nl/NW/users/gijzen/example.m
