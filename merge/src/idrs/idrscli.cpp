@@ -86,10 +86,12 @@ int main( int argc, char *argv[] )
     if ( r == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
 
    for ( int i = 0; i < N; i++ ) {
-      b[i] =  i + 10000;
-      //b[i] =  ((t_ve) rand()) / (RAND_MAX);
-      //xe[i] = 2 * i - 1;
-      xe[i] =  i + 20000;
+      b[i] =  i + 100;
+
+      xe[i] =  1; /*   x = ones(n,1);
+                       as in http://ta.twi.tudelft.nl/NW/users/gijzen/example.m
+                       if 1 is good enough for the examples... ;-)
+                  */
       /* printf( "\n org %u %f", i, b[i] ); */
    }
 
@@ -140,6 +142,9 @@ int main( int argc, char *argv[] )
 if ( N < 30 ) {
    for ( int i = 0; i < N; i++ ) {
        printf( "\n    b[%u] %f",i,  b[i] );
+   }
+   for ( int i = 0; i < N; i++ ) {
+       printf( "\n    x0[%u] %f",i,  xe[i] );
    }
 }
 
