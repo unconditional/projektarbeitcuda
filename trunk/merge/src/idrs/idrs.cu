@@ -625,8 +625,9 @@ extern "C" void idrs_1st(
 
                      t_ve*          r_out,    /* the r from idrs.m line 6 : r = b - A*x; */
 
-                     t_idrshandle*  ih_out  /* handle for haloding all the device pointers between matlab calls */
+                     t_idrshandle*  ih_out,  /* handle for haloding all the device pointers between matlab calls */
 
+                     t_ve*        resvec_out
            ) {
 
 
@@ -677,7 +678,8 @@ extern "C" void idrs_1st(
                     + N * sizeof( t_ve )            /* om1             */
                     + N * sizeof( t_ve )            /* om2             */
                     + N * sizeof( t_ve )            /* x               */
-                    + N * sizeof( t_ve )            /* resvec          */
+
+                    + N * sizeof( t_ve )            /* normv           */
 
                       ;
 
@@ -741,6 +743,8 @@ extern "C" void idrs_1st(
     ctxholder[ctx].om1 = (t_ve *) &d_r[N + 512 ];
     ctxholder[ctx].om2 = (t_ve *) &ctxholder[ctx].om1[N];
 
+    t_ve* normv        = (t_ve *) &ctxholder[ctx].om2[N];
+
     dim3 dimGrid ( cnt_multiprozessors );
     dim3 dimGridsub( N / 512 + 1 );
     dim3 dimBlock(512);
@@ -771,6 +775,30 @@ extern "C" void idrs_1st(
     e = cudaMemcpy( r_out, d_r, sizeof(t_ve) * N, cudaMemcpyDeviceToHost);
     CUDA_UTIL_ERRORCHECK("cudaMemcpyDeviceToHost");
 
+    /* 7  normr = norm(r);  */
+
+    kernel_norm<<<dimGridsub,dimBlock>>>( d_r, normv );  e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("kernel_norm<<<dimGridsub,dimBlock>>>( mr.pElement, dnormv )");
+
+    t_ve* h_norm = (t_ve*) malloc( sizeof( t_ve* ) * N );
+    if (  h_norm == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you B"); exit( -1 ); }
+
+    e = cudaMemcpy( h_norm, normv, sizeof(t_ve) * N, cudaMemcpyDeviceToHost);
+    CUDA_UTIL_ERRORCHECK("cudaMemcpyDeviceToHost");
+
+    t_ve snorm = 0;
+    for ( t_mindex i = 0; i < N / 512 + 1 ; i++ ) {
+             snorm +=  h_norm[i];
+    }
+    t_ve norm = sqrt(snorm);
+    if( debugmode > 1 ) { dbg_norm_checkresult( d_r, norm , N, "1st norm for scaling, norm"); }
+
+
+
+    /* 9  */
+
+    resvec_out[0] = norm;
+
+    free(h_norm);
 
     ctxholder[ctx].devmem1stcall = devmem;
     ctxholder[ctx].A             = A_d;
@@ -823,7 +851,9 @@ extern "C" void idrswhole(
 
     printf("\n this is debugmode %u \n", debugmode);
 
-    idrs_1st( A_in, b_in, x0_in, N, r,  &irdshandle );
+
+
+    idrs_1st( A_in, b_in, x0_in, N, r,  &irdshandle, resvec_out );
 
     orthogonalize( P_init, r, N, s );
 
@@ -842,7 +872,7 @@ extern "C" void idrswhole(
     P.pElement = P_transp;
     idrs2nd(
        P,
-       tol,        /* tol */
+       tol * resvec_out[0],        /* tol */
        s,          /* s - as discussed with Bastian on 2010-01-27 */
        maxit,
        irdshandle, /* Context Handle we got from idrs_1st */
