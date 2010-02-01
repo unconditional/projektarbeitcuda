@@ -30,7 +30,7 @@ int main( int argc, char *argv[] )
    t_SparseMatrix a2;
 
    t_mindex maxit = N * 100;
-   t_ve tol =  10;
+   t_ve tol =  0.01;
 
    if ( argc > 2 ) {
       tol = atof( argv[2] );
@@ -87,7 +87,8 @@ int main( int argc, char *argv[] )
 
    for ( int i = 0; i < N; i++ ) {
       b[i] =  10;
-      xe[i] = 2 * i - 1;
+      //xe[i] = 2 * i - 1;
+      xe[i] = rand()/(RAND_MAX + 1) ;
       /* printf( "\n org %u %f", i, b[i] ); */
    }
 
