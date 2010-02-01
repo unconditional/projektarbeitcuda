@@ -1,4 +1,4 @@
-echo "setup for Geforce 9500 GT"
+echo "setup for Windows Device Double (GTX 2800)"
 
 set DOUBLEDEFINE=-DPRJACUDADOUBLE
 
@@ -6,7 +6,7 @@ set DOUBLEDEFINE=-DPRJACUDADOUBLE
 set DOUBLEFLAGS=%DOUBLEDEFINE% -arch=sm_13
 
 
-set PRJACUDACFLAGS=-I include/common %DOUBLEFLAGS% -deviceemu -DPRJCUDAEMU
+set PRJACUDACFLAGS=-I include/common %DOUBLEFLAGS%
 set BLA="set by skript"
 set PRJACUDAOBJEXT=obj
 set PRJACUDAEXEEXT=exe
