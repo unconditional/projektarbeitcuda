@@ -11,7 +11,8 @@ Known problems:
 
 * never get a real device to work properly with "double precision".
 
-
+* Implementation works fine for N < 300.( tol = 0.01 )
+  Currently no Convergence for float precision and N > 400 and tol = 0.1
 
 
 1. Building the idrs-library:
