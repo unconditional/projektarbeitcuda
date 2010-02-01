@@ -120,6 +120,10 @@ __host__ void dbg_norm_checkresult ( t_ve *in1,
 //    }
 //    else {
         printf("\n Norm %s *not* OK :  expected  %f (CPU), got %f (GPU) (tolerance %f)", debugname, calnorm, tobeckecked, tolerance );
+        for( t_mindex i = 0; i < N; i++ ) {
+            printf("\n in[%u]=%f", i, v1[i] );
+        }
+        printf("\n Norm %s *not* OK :  expected  %f (CPU), got %f (GPU) (tolerance %f)", debugname, calnorm, tobeckecked, tolerance );
         exit( - 1 );
     }
 
