@@ -33,7 +33,9 @@ extern "C" void idrs_1st(
 
                      t_ve*          r_out,    /* the r from idrs.m line 6 : r = b - A*x; */
 
-                     t_idrshandle*  ih_out  /* handle for haloding all the device pointers between matlab calls */
+                     t_idrshandle*  ih_out,  /* handle for haloding all the device pointers between matlab calls */
+
+                     t_ve*        resvec_out
 
            );
 

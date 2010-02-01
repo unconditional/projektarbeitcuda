@@ -173,6 +173,7 @@ idrswhole(
 
    printf("\n N         :  %u ", N);
    printf("\n used tolrance: norm < %f ", tol);
+   printf("\n used rel. tolrance:  %f ", tol *resvec[0]  );
 
    printf("\n used iterations:  %u ", interations_needed);
    printf("\n maxit          :  %u ", maxit);
