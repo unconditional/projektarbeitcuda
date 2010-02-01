@@ -777,7 +777,7 @@ extern "C" void idrs_1st(
 
     /* 7  normr = norm(r);  */
 
-    kernel_norm<<<dimGridsub,dimBlock>>>( d_r, normv );  e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("kernel_norm<<<dimGridsub,dimBlock>>>( mr.pElement, dnormv )");
+    kernel_norm<<<dimGridsub,dimBlock>>>( d_b, normv );  e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("kernel_norm<<<dimGridsub,dimBlock>>>( mr.pElement, dnormv )");
 
     t_ve* h_norm = (t_ve*) malloc( sizeof( t_ve* ) * N );
     if (  h_norm == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you B"); exit( -1 ); }
@@ -790,7 +790,7 @@ extern "C" void idrs_1st(
              snorm +=  h_norm[i];
     }
     t_ve norm = sqrt(snorm);
-    if( debugmode > 1 ) { dbg_norm_checkresult( d_r, norm , N, "1st norm for scaling, norm"); }
+    if( debugmode > 1 ) { dbg_norm_checkresult( d_b, norm , N, "1st norm for scaling, norm"); }
 
 
 
@@ -872,7 +872,7 @@ extern "C" void idrswhole(
     P.pElement = P_transp;
     idrs2nd(
        P,
-       tol * resvec_out[0],        /* tol */
+       tol * resvec_out[0],        /* tolr = tol * norm(b) */
        s,          /* s - as discussed with Bastian on 2010-01-27 */
        maxit,
        irdshandle, /* Context Handle we got from idrs_1st */
