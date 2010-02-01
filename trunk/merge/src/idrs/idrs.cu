@@ -668,8 +668,8 @@ extern "C" void idrs_1st(
 
 
     h_memblocksize =   smat_size( A_in.nzmax, A_in.m )  /* A sparse     */
-                     + N * sizeof( t_ve )               /* b full       */
-                     + N * sizeof( t_ve )               /* xe        */
+                     + ( N + 512 ) * sizeof( t_ve )     /* b full       */
+                     + N * sizeof( t_ve )               /* xe           */
                      ;
 
     d_memblocksize =  h_memblocksize
@@ -690,6 +690,7 @@ extern "C" void idrs_1st(
 
 
     hostmem =   malloc( h_memblocksize );
+    memset(hostmem, 0, h_memblocksize);
     if ( hostmem == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you hostmem"); exit( -1 ); }
 
 /*
@@ -719,7 +720,7 @@ extern "C" void idrs_1st(
     t_ve* b = (t_ve *) &pRow[A_in.m + 1];
     memcpy( b, b_in,  N *  sizeof(t_ve) );
 
-    xe = (t_ve *) &b[N];
+    xe = (t_ve *) &b[N + 512];
     memcpy( xe, xe_in,  N *  sizeof(t_ve) );
 
     e = cudaMalloc ( &devmem , d_memblocksize );
@@ -735,7 +736,7 @@ extern "C" void idrs_1st(
 
     set_sparse_data(  A_in, &A_d, devmem );
     d_b     = (t_ve *) &A_d.pRow[A_in.m + 1];
-    d_xe    = (t_ve *) &d_b[N];
+    d_xe    = (t_ve *) &d_b[N + 512 ];
 
     d_tmpAb = (t_ve *) &d_xe[N];
     d_r     = (t_ve *) &d_tmpAb[ N + 512 ];
@@ -790,6 +791,10 @@ extern "C" void idrs_1st(
              snorm +=  h_norm[i];
     }
     t_ve norm = sqrt(snorm);
+
+    // dbg_dump_mtx( d_b,N + 10,1, "b" );
+    // dbg_dump_mtx( normv,N,1, "normv" );
+
     if( debugmode > 1 ) { dbg_norm_checkresult( d_b, norm , N, "1st norm for scaling, norm"); }
 
 
