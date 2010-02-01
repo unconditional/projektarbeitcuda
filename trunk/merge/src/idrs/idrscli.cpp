@@ -86,7 +86,7 @@ int main( int argc, char *argv[] )
     if ( r == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
 
    for ( int i = 0; i < N; i++ ) {
-      b[i] =  i + 10;
+      b[i] =  0;
 
       xe[i] =  1; /*   x = ones(n,1);
                        as in http://ta.twi.tudelft.nl/NW/users/gijzen/example.m
@@ -94,6 +94,9 @@ int main( int argc, char *argv[] )
                   */
       /* printf( "\n org %u %f", i, b[i] ); */
    }
+
+    b[0]   =  1;
+    b[N-1] = -1;
 
     a.pRow = ( t_mindex* ) malloc( sizeof( t_mindex ) * ( a.m + 1) );
     if ( a.pRow == NULL) { fprintf(stderr, "sorry, can not allocate memory for you  a.pRow"); exit( -1 ); }
@@ -116,7 +119,7 @@ int main( int argc, char *argv[] )
     }
     a.pRow[a.m] = a.m;
 
-    genmtx_t1( &a2, nparam );
+    genmtx_t2( &a2, nparam );
 
     debug_dump_sparse( a2 );
 
