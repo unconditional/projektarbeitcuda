@@ -78,7 +78,8 @@ extern void  orthogonalize(t_ve *pMatrix, t_ve *pRes, int N, int s) {
     for (i=1;i<=N;i++)
         for (j=2;j<=s;j++) {
             {
-                pMatrix[a(i, j)]= (t_ve) rand();
+                //pMatrix[a(i, j)]= (t_ve) rand();
+                 pMatrix[a(i, j)]= ((t_ve) rand()) / RAND_MAX ;
             }
         }
 
