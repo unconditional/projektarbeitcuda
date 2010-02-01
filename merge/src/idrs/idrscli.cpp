@@ -86,9 +86,10 @@ int main( int argc, char *argv[] )
     if ( r == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
 
    for ( int i = 0; i < N; i++ ) {
-      b[i] =  i;
+      b[i] =  i + 10000;
+      //b[i] =  ((t_ve) rand()) / (RAND_MAX);
       //xe[i] = 2 * i - 1;
-      xe[i] = rand()/(RAND_MAX + 1) * i;
+      xe[i] =  i + 20000;
       /* printf( "\n org %u %f", i, b[i] ); */
    }
 
@@ -118,7 +119,7 @@ int main( int argc, char *argv[] )
     debug_dump_sparse( a2 );
 
 
-    starttime = time(NULL);
+
 
 /*
     idrs_1st( a2, b, xe, N, r,  &irdshandle );
@@ -136,7 +137,13 @@ int main( int argc, char *argv[] )
 //    resvec,
 //    &interations_needed
 //);
+if ( N < 30 ) {
+   for ( int i = 0; i < N; i++ ) {
+       printf( "\n    b[%u] %f",i,  b[i] );
+   }
+}
 
+starttime = time(NULL);
 
 idrswhole(
 
