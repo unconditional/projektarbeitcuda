@@ -86,9 +86,9 @@ int main( int argc, char *argv[] )
     if ( r == NULL) { fprintf(stderr, "sorry, can not allocate memory for you b"); exit( -1 ); }
 
    for ( int i = 0; i < N; i++ ) {
-      b[i] =  10;
+      b[i] =  i;
       //xe[i] = 2 * i - 1;
-      xe[i] = rand()/(RAND_MAX + 1) ;
+      xe[i] = rand()/(RAND_MAX + 1) * i;
       /* printf( "\n org %u %f", i, b[i] ); */
    }
 
