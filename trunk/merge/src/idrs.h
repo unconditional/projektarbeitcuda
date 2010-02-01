@@ -40,7 +40,7 @@ extern "C" void idrs_1st(
 
 extern "C" void idrs2nd(
     t_FullMatrix P_in,
-    t_ve         tol,
+    t_ve         tolr,
     unsigned int s,
     unsigned int maxit,
     t_idrshandle ih_in, /* Context Handle we got from idrs_1st */

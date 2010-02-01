@@ -12,7 +12,7 @@
 
 #include "kernels/matrixMul_kernel.h"
 
-int debugmode = 1;
+int debugmode = 0; /* No debugging as default. 1 = printf, 2=check all Operations in CPU */
 
 typedef struct idrs_context {
     void*          devmem1stcall;
@@ -163,7 +163,7 @@ __host__ size_t smat_size( int cnt_elements, int cnt_cols ) {
 
 extern "C" void idrs2nd(
     t_FullMatrix P_in,
-    t_ve tol,
+    t_ve tolr,
     unsigned int s,
     unsigned int maxit,
     t_idrshandle ih_in, /* Context Handle we got from idrs_1st */
@@ -411,7 +411,7 @@ extern "C" void idrs2nd(
     if( debugmode > 1 ) { dbg_matrixMul_checkresult( m, P, r , s, N, " 33   m = P* r " ) ; }
 
 
-    while (  (norm > tol ) && ( iter < maxit )  ) {
+    while (  (norm > tolr ) && ( iter < maxit )  ) {
         for ( t_mindex k = 0; k <= s; k++ ) {
 
            t_ve om;
