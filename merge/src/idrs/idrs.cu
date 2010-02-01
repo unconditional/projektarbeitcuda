@@ -312,19 +312,23 @@ extern "C" void idrs2nd(
         t_ve* dR_k = &dR[ N * (k-1) ];
         t_ve* dX_k = &dX[ N * (k-1) ];
 
-        /* 23 idrs.m line 23 */
 
-        e = cudaMemset (v, 0, sizeof(t_ve) * N );
-        CUDA_UTIL_ERRORCHECK("cudaMemset");
 
-        sparseMatrixMul<<<dimGrid,dimBlock>>>( mt, A, mv ); e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("sparseMatrixMul<<<dimGrid,dimBlock>>>( mt, A, mv )");
+//        e = cudaMemset (v, 0, sizeof(t_ve) * N );
+//        CUDA_UTIL_ERRORCHECK("cudaMemset");
+
+        /* 22 v = A*r; */
+        //sparseMatrixMul<<<dimGrid,dimBlock>>>( mt, A, mv ); e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("sparseMatrixMul<<<dimGrid,dimBlock>>>( mt, A, mv )");
 
         sparseMatrixMul<<<dimGrid,dimBlock>>>( mv, A, mr );   e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("testsparseMatrixMul");
+
 
 
         e = cudaStreamSynchronize(0);
         CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
 
+        //dbg_dump_mtx( v,N,1, "v" );
+        //dbg_dump_mtx( r,N,1, "r" );
 
         kernel_dotmul<<<dimGridsub,dimBlock>>>( v, r, om1 ) ;  e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("device_dotMul");
 
@@ -446,6 +450,9 @@ extern "C" void idrs2nd(
                e = cudaMemset (t, 0, sizeof(t_ve) * N );
                CUDA_UTIL_ERRORCHECK("cudaMalloc");
                sparseMatrixMul<<<dimGrid,dimBlock>>>( mt, A, mv ); e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("sparseMatrixMul<<<dimGrid,dimBlock>>>( mt, A, mv )");
+
+        e = cudaStreamSynchronize(0);
+        CUDA_UTIL_ERRORCHECK("cudaStreamSynchronize(0)");
 
                kernel_dotmul<<<dimGridsub,dimBlock>>>( t, v, om1 ) ; e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("device_dotMul");
                kernel_dotmul<<<dimGridsub,dimBlock>>>( t, t, om2 ) ; e = cudaGetLastError(); CUDA_UTIL_ERRORCHECK("device_dotMul");
@@ -577,6 +584,8 @@ extern "C" void idrs2nd(
 
     e = cudaFree( ctxholder[ctx].devmem1stcall );
     CUDA_UTIL_ERRORCHECK("cudaFree ctxholder[ctx].devmem1stcall ");
+
+   free( hostmem );
 }
 
 
@@ -814,7 +823,7 @@ extern "C" void idrs_1st(
 
     *ih_out = ctx;  /* context handle for later use in later calls */
 
-}
+}  /* end idrs1st */
 
 
 extern "C" void idrswhole(
