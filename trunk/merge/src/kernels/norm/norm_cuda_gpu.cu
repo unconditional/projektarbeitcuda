@@ -97,7 +97,7 @@ __host__ void dbg_norm_checkresult ( t_ve *in1,
     cudaError_t e;
 
 
-    t_ve* v1 = (t_ve*) malloc( sizeof( t_ve* ) * N );
+    t_ve* v1 = (t_ve*) malloc( sizeof( t_ve ) * N );
     if (  v1 == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you C"); exit( -1 ); }
 
 
