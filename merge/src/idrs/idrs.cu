@@ -787,7 +787,7 @@ extern "C" void idrs_1st(
 
     /* 7  normr = norm(r);  */
 
-    kernel_norm<<<dimGridsub,dimBlock>>>( d_b, normv );  e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("kernel_norm<<<dimGridsub,dimBlock>>>( mr.pElement, dnormv )");
+    kernel_norm<<<dimGridsub,dimBlock>>>( d_r, normv );  e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("kernel_norm<<<dimGridsub,dimBlock>>>( mr.pElement, dnormv )");
 
     t_ve* h_norm = (t_ve*) malloc( sizeof( t_ve* ) * N );
     if (  h_norm == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you B"); exit( -1 ); }
@@ -804,7 +804,7 @@ extern "C" void idrs_1st(
     //dbg_dump_mtx( d_b,N + 10,1, "b" );
     //dbg_dump_mtx( normv,N,1, "normv" );
 
-    if( debugmode > 1 ) { dbg_norm_checkresult( d_b, norm , N, "1st norm for scaling, norm"); }
+    if( debugmode > 1 ) { dbg_norm_checkresult( d_r, norm , N, "1st norm for scaling, norm"); }
 
 
 
