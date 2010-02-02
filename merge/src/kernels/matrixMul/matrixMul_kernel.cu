@@ -41,7 +41,7 @@ description:
 __global__ void matrixMul_long_mA( t_ve* C, t_ve* A, t_ve* B, int mA, int nB) {
 
 	//define a Result Vector for each block
-	__shared__ float Cs[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim 512
+	__shared__ t_ve Cs[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim 512
 
 	//define gridIndex, if gridDim < mA, gridIndex > 0;
 	int gridIndex = 0;

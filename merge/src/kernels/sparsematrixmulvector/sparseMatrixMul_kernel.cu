@@ -1,4 +1,4 @@
-#include "cuda.h"
+
 #include <stdio.h>
 #include "projektcuda.h"
 
@@ -16,9 +16,7 @@ description:
 */
 __global__ void sparseMatrixMul(t_FullMatrix pResultVector,t_SparseMatrix pSparseMatrix, t_FullMatrix pVector)
 {
-	//__shared__ float As[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim
-	//__shared__ float Bs[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim
-	__shared__ float Cs[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim
+	__shared__ t_ve Cs[VECTOR_BLOCK_SIZE];//VECTOR_BLOCK_SIZE shuld equal blockDim
 	//define gridIndex, if gridDim < mA, gridIndex > 0;
 	int gridIndex = 0;
 	int tx = threadIdx.x;
