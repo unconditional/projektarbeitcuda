@@ -139,16 +139,16 @@ __host__ void dbg_matrixMul_checkresult(
                                         ) {
     cudaError_t e;
 
-    t_ve* C = (t_ve*) malloc( sizeof( t_ve* ) * mA );
+    t_ve* C = (t_ve*) malloc( sizeof( t_ve ) * mA );
     if (  C == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you C"); exit( -1 ); }
 
-    t_ve* Co = (t_ve*) malloc( sizeof( t_ve* ) * mA );
+    t_ve* Co = (t_ve*) malloc( sizeof( t_ve ) * mA );
     if (  Co == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you C"); exit( -1 ); }
 
-    t_ve* A = (t_ve*) malloc( sizeof( t_ve* ) * mA  * mB );
+    t_ve* A = (t_ve*) malloc( sizeof( t_ve ) * mA  * mB );
     if (  A == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you A"); exit( -1 ); }
 
-    t_ve* B = (t_ve*) malloc( sizeof( t_ve* ) * mB );
+    t_ve* B = (t_ve*) malloc( sizeof( t_ve ) * mB );
     if (  B == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you B"); exit( -1 ); }
 
 

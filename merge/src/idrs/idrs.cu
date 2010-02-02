@@ -68,10 +68,10 @@ __host__ void dbg_vec_mul_skalar(
                            )
 {
     cudaError_t e;
-    t_ve* v = (t_ve*) malloc( sizeof( t_ve* ) * N );
+    t_ve* v = (t_ve*) malloc( sizeof( t_ve ) * N );
     if (  v == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you C"); exit( -1 ); }
 
-    t_ve* vresult = (t_ve*) malloc( sizeof( t_ve* ) * N );
+    t_ve* vresult = (t_ve*) malloc( sizeof( t_ve ) * N );
     if (  vresult == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you C"); exit( -1 ); }
 
     e = cudaMemcpy( v, in1_in, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
@@ -103,7 +103,7 @@ __host__ void dbg_dump_mtx(
 
 
     cudaError_t e;
-    t_ve* v = (t_ve*) malloc( sizeof( t_ve* )  * m * n );
+    t_ve* v = (t_ve*) malloc( sizeof( t_ve )  * m * n );
     if (  v == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you C"); exit( -1 ); }
 
     e = cudaMemcpy( v, dv, sizeof(t_ve) * m * n , cudaMemcpyDeviceToHost);
