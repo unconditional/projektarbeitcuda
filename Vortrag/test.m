@@ -49,6 +49,8 @@ bb_bar3(sparseMatrix)
 set(gca,'YTickLabel', 2.^[0,4:9]);
 set(gca,'XTickLabel',2.^[0,4:9]);
 title('Sparse 2D 1 Diagonale ')
+xlabel('blkX')
+ylabel('blkY')
 %%====Sparse 2D 32 Diagonale==========================================
 figure
 sparseMatrix = [
@@ -65,5 +67,4 @@ set(gca,'YTickLabel', 2.^[0,4:9]);
 set(gca,'XTickLabel',2.^[0,4:9]);
 title('Sparse 2D 32 Diagonale ')
 xlabel('blkX')
-
 ylabel('blkY')
