@@ -51,6 +51,7 @@ set(gca,'XTickLabel',2.^[0,4:9]);
 title('Sparse 2D 1 Diagonale ')
 xlabel('blkX')
 ylabel('blkY')
+zlabel('Lauf Zeit(ms)');
 %%====Sparse 2D 32 Diagonale==========================================
 figure
 sparseMatrix = [
@@ -68,3 +69,23 @@ set(gca,'XTickLabel',2.^[0,4:9]);
 title('Sparse 2D 32 Diagonale ')
 xlabel('blkX')
 ylabel('blkY')
+zlabel('Lauf Zeit(ms)');
+
+%%====Voll Matrix Optimierung==========================================
+figure
+sparseMatrix = [
+
+1.56	,15.94	,80			,3.44	,87.19	;
+2.669	,26.059	,130.038	,0.564	,11.216 ;
+0.207	,1.056	,4.963		,0.176	,2.998  
+];
+
+bb_bar3(sparseMatrix)
+set(gca,'YTickLabel', 2.^[0,4:9]);
+set(gca,'XTickLabel',2.^[0,4:9]);
+title('Full-Matrix Optimierung  ')
+xlabel('')
+ylabel('')
+set(gca,'YTickLabel',{'CPU';'Old GPU';'GPU'});
+set(gca,'XTickLabel',{'1000x50','100000x50','500000x50','1000x1000','5000x5000'});
+zlabel('Lauf Zeit(ms)');
