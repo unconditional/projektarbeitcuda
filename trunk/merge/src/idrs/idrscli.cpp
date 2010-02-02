@@ -39,8 +39,6 @@ int main( int argc, char *argv[] )
       set_debuglevel( atoi( argv[3] ));
    }
 
-   t_ve bla;
-
    t_ve*  r;
    t_ve*  b;
    t_ve*  xe;
@@ -51,9 +49,6 @@ int main( int argc, char *argv[] )
 
    unsigned int interations_needed;
 
-   t_idrshandle irdshandle;
-
-   t_mindex blai;
    printf( "\n Build configuration host Complier: sizeof(t_ve) = %u \n", sizeof(t_ve));
    printf( "\n Build configuration libidrs: sizeof(t_ve) = %u \n"      , idrs_sizetve());
 
@@ -190,7 +185,7 @@ idrswhole(
    printf("\n used iterations:  %u ", interations_needed);
    printf("\n maxit          :  %u ", maxit);
 
-   printf("\n runtime time(): %u seconds \n ", endtime - starttime );
+   printf("\n runtime time(): %u seconds ", endtime - starttime );
 
 /*
    if ( N < 11 ) {
