@@ -307,7 +307,7 @@ extern "C" void idrs2nd(
 
     //if ( debugmode > 0 ) { printf("\n DEBUGMODE %u - starting L1", debugmode ); }
 
-    for ( int k = 1; k <= s; k++ ) {
+    for ( t_mindex k = 1; k <= s; k++ ) {
 
         t_ve* dR_k = &dR[ N * (k-1) ];
         t_ve* dX_k = &dX[ N * (k-1) ];
@@ -789,7 +789,7 @@ extern "C" void idrs_1st(
 
     kernel_norm<<<dimGridsub,dimBlock>>>( d_r, normv );  e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("kernel_norm<<<dimGridsub,dimBlock>>>( mr.pElement, dnormv )");
 
-    t_ve* h_norm = (t_ve*) malloc( sizeof( t_ve* ) * N );
+    t_ve* h_norm = (t_ve*) malloc( sizeof( t_ve ) * N );
     if (  h_norm == NULL ) { fprintf(stderr, "sorry, can not allocate memory for you B"); exit( -1 ); }
 
     e = cudaMemcpy( h_norm, normv, sizeof(t_ve) * N, cudaMemcpyDeviceToHost);
@@ -812,7 +812,9 @@ extern "C" void idrs_1st(
 
     resvec_out[0] = norm;
 
+    if ( debugmode > 0 ) { printf("\n %s %u: trying free", __FILE__, __LINE__ ); }
     free(h_norm);
+    if ( debugmode > 0 ) { printf("\n %s %u: sucessfull free", __FILE__, __LINE__ ); }
 
     ctxholder[ctx].devmem1stcall = devmem;
     ctxholder[ctx].A             = A_d;
