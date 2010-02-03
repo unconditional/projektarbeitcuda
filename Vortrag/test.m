@@ -29,15 +29,22 @@ sparseMatrix = [
     0.219,      0.241,  0.878,  1.129,  2.898,  4;    
     0.0355,     0.059,  0.2789, 0.5348, 1.126,  2.399;
     0.09168,    0.091,  0.0932, 0.1191, 0.1739, 0.281
-]
+];
 
-bb_bar3(sparseMatrix)
-set(gca,'YTickLabel',{'Matlab';'CPU';'GPU'});
-set(gca,'XTickLabel',[1,3,16,32,64,128]);
-title('Sparse Matrix Multiplikation ')
-zlabel('Lauf Zeit(ms)');
-xlabel('')
-ylabel('')
+% bb_bar3(sparseMatrix)
+% set(gca,'YTickLabel',{'Matlab';'CPU';'GPU'});
+% set(gca,'XTickLabel',[1,3,16,32,64,128]);
+% title('Sparse Matrix Multiplikation ')
+% zlabel('Lauf Zeit(ms)');
+% xlabel('')
+% ylabel('')
+x=[1,3,16,32,64,128];
+n=3;
+
+
+plot(x,sparseMatrix(1,:),x,sparseMatrix(2,:),x,sparseMatrix(3,:));
+legend('Matlab','CPU','GPU');
+ylabel('Lauf Zeit(ms)');
 
 %%====Sparse 2D block 1 Diagonale==========================================
 figure
