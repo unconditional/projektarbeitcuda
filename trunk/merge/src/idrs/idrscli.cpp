@@ -166,14 +166,19 @@ idrswhole(
 
    endtime = time(NULL);
 
-   for ( int i = 0; i < N; i++ ) {
-       printf( "\n    x[%u] %f",i,  x[i] );
+   printf("\n --------------------------------------------------------- \n");
+   printf("\n ---------------         Result           ---------------- \n");
+   printf("\n --------------------------------------------------------- \n");
+   printf("\n\n ***X***X (m,x[n]) follows ***X***X");
+   for ( unsigned int i = 0; i < N; i++ ) {
+       printf( "\n%u\t%f", i + 1,  x[i] );
    }
-
-   for ( int i = 0; i < interations_needed; i++ ) {
-       printf( "\n    resvec[%u] %f",i,  resvec[i] );
+   printf("\n\n ***X***X***X x ends here");
+   printf("\n\n *** resvec (iter,resvec[i]) follows ***X***X");
+   for ( unsigned int i = 0; i < interations_needed; i++ ) {
+       printf( "\n%u\t%f",i + 1,  resvec[i] );
    }
-
+   printf("\n\n *** end of resvec (iter,resvec[i]) ");
    printf("\n --------------------------------------------------------- \n");
    printf("\n debuglevel         :  %u  (0 is normal mode for measurement)", get_debuglevel() );
 
