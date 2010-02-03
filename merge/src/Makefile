@@ -11,6 +11,7 @@ HOSTCC = $(PRJACUDAHOSCC)
 OX = $(PRJACUDAOBJEXT)
 LIBX = $(PRJACUDALIBEXT)
 
+RM = rm
 
 all: showenvironment.$(PRJACUDAEXEEXT) idrs.$(OX) idrscli.$(OX) idrscli.$(PRJACUDAEXEEXT) libidrs.$(LIBX)
 
@@ -54,3 +55,7 @@ idrs.$(OX): idrs/idrs.cu
 
 showenvironment.$(OX): showenvironment/showenvironment.cu
 	$(CC) -c showenvironment/showenvironment.cu -o showenvironment.$(OX) > nul
+
+clean:
+	$(RM) *.$(OX)
+	$(RM) *.$(LIBX)
