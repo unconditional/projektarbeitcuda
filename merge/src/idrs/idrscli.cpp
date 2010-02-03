@@ -83,7 +83,7 @@ int main( int argc, char *argv[] )
    for ( int i = 0; i < N; i++ ) {
       b[i] =  0;
 
-      xe[i] =  ((t_ve) rand()) / RAND_MAX;
+      xe[i] =  ((t_ve) rand()) / RAND_MAX - 0.5;
    }
 
     b[0]   =  1;
