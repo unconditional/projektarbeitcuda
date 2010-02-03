@@ -156,7 +156,7 @@ __global__ void add_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_mindex N)
 __host__ size_t smat_size( int cnt_elements, int cnt_cols ) {
 
     return   ( sizeof(t_ve) + sizeof(t_mindex) ) * cnt_elements
-           + sizeof(t_mindex)  * (cnt_cols + 1);
+           + sizeof(t_mindex)                    * (cnt_cols + 1);
 }
 
 
