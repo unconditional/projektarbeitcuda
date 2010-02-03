@@ -7,7 +7,7 @@ export DOUBLEDEFINE
 #DOUBLEFLAGS="$DOUBLEDEFINE --gpu-architecture sm_13"
 DOUBLEFLAGS=""
 
-PRJACUDACFLAGS="-deviceemu -DPRJCUDAEMU -I include/common -I include $DOUBLEFLAGS"
+PRJACUDACFLAGS="-Xcompiler \"-Wall\" -deviceemu -DPRJCUDAEMU -I include/common -I include $DOUBLEFLAGS"
 export PRJACUDACFLAGS
 
 PRJACUDAOBJEXT=o
