@@ -787,6 +787,7 @@ extern "C" void idrs_1st(
 
     /* 7  normr = norm(r);  */
 
+    if ( debugmode > 0 ) { printf("\n %s %u: dimGridsub = %u", __FILE__, __LINE__, dimGridsub.x ); }
     kernel_norm<<<dimGridsub,dimBlock>>>( d_r, normv );  e = cudaGetLastError();  CUDA_UTIL_ERRORCHECK("kernel_norm<<<dimGridsub,dimBlock>>>( mr.pElement, dnormv )");
 
     t_ve* h_norm = (t_ve*) malloc( sizeof( t_ve ) * N );
