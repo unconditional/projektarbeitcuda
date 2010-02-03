@@ -21,7 +21,7 @@ __global__ void minikernel(  int N_in, t_ve* out  ) {
 
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < N_in ) {
-       out[i] = 1234;
+       out[i] = 1000 + (t_ve)i;
     }
 }
 
@@ -48,14 +48,14 @@ int  main () {
         printf("  Number of multiprocessors:                     %d\n", deviceProp.multiProcessorCount);
     }
 
-    t_ve* hostmem = (t_ve*) malloc( sizeof(t_ve) * N  );
+    t_ve* hostmem = (t_ve*) malloc(  sizeof(t_ve) * N   );
 
     if ( hostmem == NULL ) { printf("sorry, can not allocate memory for you"); exit(-1); }
 
-    t_ve* devmem;
+    void* devmem;
     cudaError_t e;
 
-    e = cudaMalloc ( &devmem , sizeof(t_ve) * N );
+    e = cudaMalloc ( &devmem , sizeof(int) + sizeof(t_ve) * N );
     CUDA_UTIL_ERRORCHECK("cudaMalloc");
 
 //    e = cudaMemset (devmem, 0, sizeof(t_ve) * N );
@@ -64,12 +64,17 @@ int  main () {
     dim3 dimGrid( 1 );
     dim3 dimBlock(512);
 
-    minikernel<<<dimGrid,dimBlock>>>( N,  devmem );
+    int* basevector =  (int*) devmem;
+
+    t_ve* outvec = (t_ve*) &basevector[1];
+
+
+    minikernel<<<dimGrid,dimBlock>>>( N,  outvec );
 
     e = cudaGetLastError();
     CUDA_UTIL_ERRORCHECK("minikernel");
 
-    e = cudaMemcpy( hostmem, devmem, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
+    e = cudaMemcpy( hostmem, outvec, sizeof(t_ve) * N , cudaMemcpyDeviceToHost);
     CUDA_UTIL_ERRORCHECK(" cudaMemcpy debugbuffer");
 
     for  ( int i = 0; i < N; i++ ) {
