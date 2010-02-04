@@ -1,6 +1,5 @@
 IDRS Algorithm implemenetd in CUDA
 
-contact: "Bastian Bandlow" <bandlow@tet.upb.de>  (University of Paderborn)
 
 achim@grolmsnet.de,
 buyuxiao@mail.upb.de,
