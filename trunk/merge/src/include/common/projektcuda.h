@@ -32,6 +32,7 @@ typedef float        t_ve; /* base type of Matrizes: 'float' or 'double' */
 typedef double        t_ve; /* base type of Matrizes: 'float' or 'double' */
 #endif
 
+#define SIZE_VE   sizeof( t_ve )
 
 typedef t_ve*        pt_ve;
 

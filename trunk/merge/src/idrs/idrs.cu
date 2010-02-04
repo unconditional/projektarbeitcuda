@@ -619,9 +619,15 @@ __host__ void set_sparse_data( t_SparseMatrix A_in, t_SparseMatrix* A_out, void*
     A_out->n     = A_in.n;
     A_out->nzmax = A_in.nzmax;
 
-    A_out->pCol       = (t_mindex *)  mv;
-    A_out->pNZElement = (t_ve *)     (&A_out->pCol[A_out->nzmax] ) ;
-    A_out->pRow       = (t_mindex *) (&A_out->pNZElement[A_out->nzmax]);
+
+    A_out->pNZElement = (t_ve *)     mv ;
+
+    A_out->pCol       = (t_mindex *)  &A_out->pNZElement[ A_out->nzmax ];
+    A_out->pRow       = (t_mindex *) (&A_out->pCol[A_out->nzmax]);
+
+//    A_out->pCol       = (t_mindex *)  mv;
+//    A_out->pNZElement = (t_ve *)     (&A_out->pCol[A_out->nzmax] ) ;
+//    A_out->pRow       = (t_mindex *) (&A_out->pNZElement[A_out->nzmax]);
 
 }
 
@@ -717,20 +723,25 @@ extern "C" void idrs_1st(
 
     /* copy all parameter vectors to ony monoliythic block starting at hostmem */
 
-    t_mindex *pcol = (t_mindex *) hostmem;
-    memcpy( pcol, A_in.pCol, A_in.nzmax * sizeof(t_mindex) );
 
-    t_ve* pNZElement =  (t_ve *) &pcol[A_in.nzmax] ;
-    memcpy( pNZElement, A_in.pNZElement, A_in.nzmax *  sizeof(t_ve) );
 
-    t_mindex* pRow = (t_mindex *) (&pNZElement[A_in.nzmax]);
-    memcpy( pRow, A_in.pRow, ( A_in.m + 1 ) *  sizeof(t_mindex) );
-
-    t_ve* b = (t_ve *) &pRow[A_in.m + 1];
+    t_ve* b = (t_ve *) hostmem;
     memcpy( b, b_in,  N *  sizeof(t_ve) );
 
     xe = (t_ve *) &b[N + 512];
     memcpy( xe, xe_in,  N *  sizeof(t_ve) );
+
+
+    t_ve* pNZElement =  (t_ve *) &xe[N] ;
+    memcpy( pNZElement, A_in.pNZElement, A_in.nzmax *  sizeof(t_ve) );
+
+    t_mindex *pcol = (t_mindex *) &pNZElement[A_in.nzmax];
+    memcpy( pcol, A_in.pCol, A_in.nzmax * sizeof(t_mindex) );
+
+
+    t_mindex* pRow = (t_mindex *) (&pcol[A_in.nzmax]);
+    memcpy( pRow, A_in.pRow, ( A_in.m + 1 ) *  sizeof(t_mindex) );
+
 
     e = cudaMalloc ( &devmem , d_memblocksize );
     CUDA_UTIL_ERRORCHECK("cudaMalloc")
@@ -738,22 +749,33 @@ extern "C" void idrs_1st(
     e = cudaMemset (devmem, 0, d_memblocksize );
     CUDA_UTIL_ERRORCHECK("cudaMemset");
 
-    e = cudaMemcpy( devmem, hostmem, h_memblocksize , cudaMemcpyHostToDevice);
-    CUDA_UTIL_ERRORCHECK("cudaMemcpyHostToDevice");
 
-    free(hostmem);
 
-    set_sparse_data(  A_in, &A_d, devmem );
-    d_b     = (t_ve *) &A_d.pRow[A_in.m + 1];
-    d_xe    = (t_ve *) &d_b[N + 512 ];
 
-    d_tmpAb = (t_ve *) &d_xe[N];
+
+
+
+    d_tmpAb = (pt_ve) devmem;
     d_r     = (t_ve *) &d_tmpAb[ N + 512 ];
 
     ctxholder[ctx].om1 = (t_ve *) &d_r[N + 512 ];
     ctxholder[ctx].om2 = (t_ve *) &ctxholder[ctx].om1[N];
 
     t_ve* normv        = (t_ve *) &ctxholder[ctx].om2[N];
+
+    pt_ve devinputmem = &normv[N];
+
+//    set_sparse_data(  A_in, &A_d, devinputmem );
+    d_b     = (t_ve *) devinputmem ;
+    d_xe    = (t_ve *) &d_b[N + 512 ];
+    set_sparse_data(  A_in, &A_d, &d_xe[N] );
+
+
+    e = cudaMemcpy( devinputmem, hostmem, h_memblocksize , cudaMemcpyHostToDevice);
+    CUDA_UTIL_ERRORCHECK("cudaMemcpyHostToDevice");
+
+    free(hostmem);
+
 
     dim3 dimGrid ( cnt_multiprozessors );
     dim3 dimGridsub( N / 512 + 1 );
