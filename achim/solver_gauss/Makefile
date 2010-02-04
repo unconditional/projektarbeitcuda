@@ -1,8 +1,8 @@
 CFLAGS = -deviceemu
 CC = nvcc $(CFLAGS)
 
-#solver: gauss_plain.o gausskernel.o util.o problemsamples.o idrs.o idrsdriver
-#	$(CC)  -o gauss_plain gauss_plain.o gausskernel.o util.o problemsamples.o idrs.o > nul
+solver: gauss_plain.o gausskernel.o util.o problemsamples.o
+	$(CC)  -o gauss_plain gauss_plain.o gausskernel.o util.o problemsamples.o  > nul
 
 all: measure_gauss measure_triangle_adder measure_cublas_emu measure_cublas
 

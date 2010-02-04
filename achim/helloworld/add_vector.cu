@@ -11,7 +11,7 @@ typedef unsigned int t_vidx ; // index of vector elements
 
 __global__ void add_arrays_gpu( t_ve *in1, t_ve *in2, t_ve *out, t_vidx Ntot)
 {
-	t_vidx i = blockIdx.x * blockDim.x + threadIdx.x;
+	t_vidx i = threadIdx.y * blockDim.x + threadIdx.x;
 	if ( i < Ntot )
 		out[i] = in1[i] + in2[i];
 }

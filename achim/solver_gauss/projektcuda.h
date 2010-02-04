@@ -1,7 +1,14 @@
 
-#define ab( r, s ) (r -1 ) * ( N + 1 ) + s -1
 
-#define a( r, s ) (r -1 ) * N  + s -1
+
+#ifndef __PROJECTCUDAHEADER__
+#define __PROJECTCUDAHEADER__
+
+
+#define ab( r, s ) (s -1) *  N + r -1
+
+
+#define a( r, s ) (s - 1 ) * N + r -1
 
 #define CUDA_UTIL_ERRORCHECK(MSG)        if( e != cudaSuccess ) \
         {\
@@ -17,10 +24,18 @@
 
 #define VECTOR_BLOCK_SIZE DEF_BLOCKSIZE
 
+#ifndef PRJACUDADOUBLE
 typedef float        t_ve; /* base type of Matrizes: 'float' or 'double' */
+#endif
+
+#ifdef PRJACUDADOUBLE
+typedef double        t_ve; /* base type of Matrizes: 'float' or 'double' */
+#endif
+
+
 typedef t_ve*        pt_ve;
 
-typedef int        t_mindex;
+typedef unsigned int        t_mindex;
 
 
 typedef struct Matrix{
@@ -45,3 +60,6 @@ typedef struct SparseMatrix{
 } t_SparseMatrix;
 
 
+typedef int t_idrshandle;
+
+#endif
