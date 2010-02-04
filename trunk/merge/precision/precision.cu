@@ -15,6 +15,8 @@ typedef float        t_ve; /* base type of Matrizes: 'float' or 'double' */
 typedef double       t_ve; /* base type of Matrizes: 'float' or 'double' */
 #endif
 
+typedef unsigned int tindex ;
+
 int N = 10;
 
 __global__ void minikernel(  int N_in, t_ve* out  ) {
@@ -29,6 +31,8 @@ __global__ void minikernel(  int N_in, t_ve* out  ) {
 int  main () {
    printf("\n the precision- and compile-option checker \n");
    printf("\n sizeof(t_ve) = %u", sizeof(t_ve));
+   printf("\n sizeof(tindex) = %u", sizeof(tindex));
+
 
 
     int deviceCount;
@@ -55,7 +59,7 @@ int  main () {
     void* devmem;
     cudaError_t e;
 
-    e = cudaMalloc ( &devmem , sizeof(int) + sizeof(t_ve) * N );
+    e = cudaMalloc ( &devmem , sizeof(tindex) + sizeof(t_ve) * N );
     CUDA_UTIL_ERRORCHECK("cudaMalloc");
 
 //    e = cudaMemset (devmem, 0, sizeof(t_ve) * N );
@@ -64,7 +68,7 @@ int  main () {
     dim3 dimGrid( 1 );
     dim3 dimBlock(512);
 
-    int* basevector =  (int*) devmem;
+    tindex* basevector =  (tindex*) devmem;
 
     t_ve* outvec = (t_ve*) &basevector[1];
 
