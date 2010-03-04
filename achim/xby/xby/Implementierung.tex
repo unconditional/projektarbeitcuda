@@ -1,0 +1,8 @@
+\subsection{Multiplikation von Matrize mit Vektor in CUDA Implimentierung}
+Multiplikation der Matrize mal Vektor trefft sehr haufig in wissenschaftliche Rechnen auf. Die Operation kann in unterschiedliche Vektor-Multipliktionen zerlegen.
+
+\subsubsection{Fullmatrizemultiplikation}
+Die genaue Implimentierung der Vektor-Multiplikation in CUDA wird folgend (Fig ) gezeigt. Vektor A wird mit Vektor B multipliziert. Man bearbeitet jede Element-Multiplikation in jeweiligem Thread und erzeugt Produktvektor Cs.  Alle Elements von Cs wudern zur ein Skalarwert summiert. Weil CUDA-Blocksize beschrankt ist, [NVIDIA_CUDA_ProgramingGuide_2.3,A.1.1], maximum 512 Threads per Block, muss man für große Vektoren in meher Blocks oder ein Block iterativ verwnden.
+\begin{firuge}[htbp]
+\centering
+\includegraphics[bb=0 0 410 307,scale = .8]{}
