@@ -2,21 +2,22 @@
 Multiplikation der Matrize mal Vektor trefft sehr haufig in wissenschaftliche Rechnen auf. Die Operation kann in unterschiedliche Vektor-Multipliktionen zerlegen.
 
 \subsubsection{Fullmatrizemultiplikation}
-Die genaue Implimentierung der Vektor-Multiplikation in CUDA wird folgend (Fig ) gezeigt. Vektor A wird mit Vektor B multipliziert. Man bearbeitet jede Element-Multiplikation in jeweiligem Thread und erzeugt Produktvektor Cs.  Alle Elements von Cs wudern zur ein Skalarwert summiert. Weil CUDA-Blocksize beschrankt ist, [NVIDIA_CUDA_ProgramingGuide_2.3,A.1.1], maximum 512 Threads per Block, muss man für große Vektoren in meher Blocks oder ein Block iterativ verwnden.
+Die genaue Implimentierung der Vektor-Multiplikation in CUDA wird folgend \lgroup Fig \rgroup gezeigt. Vektor A wird mit Vektor B multipliziert. Man bearbeitet jede Element-Multiplikation in jeweiligem Thread und erzeugt Produktvektor Cs.  Alle Elements von Cs wudern zur ein Skalarwert summiert. Weil CUDA-Blocksize beschrankt ist, [NVIDIA_CUDA_ProgramingGuide_2.3,A.1.1], maximum 512 Threads per Block, muss man für große Vektoren in meher Blocks oder ein Block iterativ verwnden.
+
 \begin{firuge}[htbp]
-	\centering
-	\includegraphics{.//pic//Vektor}
-	\caption{Vektor Multiplikation. A : first vector; B:second vector ; Cs: product vector.}
-	\lable{fig:vektor}
+\centering
+\includegraphics[height=3cm,width=3cm]{.//pic//Vektor}
+\caption{Vektor Multiplikation. A : first vector; B:second vector ; Cs: product vector.}
+\lable{fig:Vektor Multiplikation}
 \end{figure}
 
 Bei der Multipliktionen der Matrizen mit Vektoren ist ganz änhlich,dass jede zerlegende Vektor-Multipliktion in ein Block bearbeitet wird.
 
 \begin{firuge}[htbp]
 \centering
-\includegraphics{.//pic//MatrixVektor}
+\includegraphics[height=3cm,width=3cm]{.//pic//MatrixVektor}
 \caption{Matriz mal Vektor. A:Matrize; b: Vektor; c: produkt Vektor}
-\lable{fig:vektor}
+\lable{fig:MatrixVektor-Multiplikation}
 \end{figure}
 
 
@@ -29,17 +30,17 @@ In vielen Fall bearbeitet man Sparse-Matritzen bei numerische Rechenen. Wie seht
 \centering
 \begin{minipage}[t]{0.3\textwidth}
 	\centering
-	\includegraphics{.//pic//orignal_sparse}
+	\includegraphics[height=3cm,width=3cm]{.//pic//orignal_sparse}
 	\caption{Originale-Matrize}
 \end{minipage}
 \begin{minipage}[t]{0.3\textwidth}
 	\centering
-	\includegraphics{.//pic//numerische_sparse1}
+	\includegraphics[height=3cm,width=3cm]{.//pic//numerische_sparse1}
 	\caption{Sparsame Struktur}
 \end{minipage}
 \begin{minipage}[t]{0.3\textwidth}
 	\centering
-	\includegraphics{.//pic//numerische_sparse2}
+	\includegraphics[height=3cm,width=3cm]{.//pic//numerische_sparse2}
 	\caption{"compressed column structure"}
 \end{minipage}	
 \end{figure}
@@ -50,9 +51,9 @@ In "compressed column structure " wird Sparsematrizen in Spaltfolg gespeichert. 
 
 \begin{firuge}[htbp]
 \centering
-\includegraphics{.//pic//sparseMul}
+\includegraphics[height=3cm,width=3cm]{.//pic//sparseMul}
 \caption{Sparsematrizenmultiplikation. A:Sparsematrize, Jc:Vektor der Zeileinfo, Pr: Vecktor der Nonzeroelements, Ir: Vektor der Spalteninfo ; b: Vektor; c: produkt Vektor}
-\lable{fig:sparsmultiplikation}
+\lable{fig:Sparsematriz-Multiplikation}
 \end{figure}
 
 \subsection{Perfrmance-Optimierung}
@@ -68,9 +69,9 @@ Aus der Beschreibungen der Operationen Multipliktionen der Matrize mal Vektor un
 
 \begin{firuge}[htbp]
 \centering
-\includegraphics{.//pic//dreieck}
+\includegraphics[height=3cm,width=3cm]{.//pic//dreieck}
 \caption{Dreieckförmige Summation. Von Oben nach Unter zeigt}
-\lable{fig:Dreieckförmige}
+\lable{fig:Dreieck}
 \end{figure}
 
 \subsubsection{Minimierung leer laufende Thread}
@@ -80,12 +81,12 @@ Im Cuda, bearbeitet jede Multiprzessors gleichzeitig eine Warp von 32 Threads[cu
 \centering
 \begin{minipage}[t]{0.3\textwidth}
 	\centering
-	\includegraphics{.//pic//einDiagonal}
+	\includegraphics[height=3cm,width=3cm]{.//pic//einDiagonal}
 	\caption{Multipliktion Ein-Diagonalematrize mal Vektor. BlockY: Anzahl der Y-Dimension von Block; BlockX: Anzahl der X-Dimension von Block}
 \end{minipage}
 \begin{minipage}[t]{0.3\textwidth}
 	\centering
-	\includegraphics{.//pic//moreDiagonal}
+	\includegraphics[height=3cm,width=3cm]{.//pic//moreDiagonal}
 	\caption{Multipliktion 32-Diagonalematrize mal Vektor. BlockY: Anzahl der Y-Dimension von Block; BlockX: Anzahl der X-Dimension von Block.}
 \end{minipage}
 \end{figure}
@@ -94,7 +95,7 @@ Wie effezient ist denn optimierte CUDA-Implimentierung?
 Weiter Versuch der Vergleichung von matlab,CPU-und GPU-Implimentierung wird in Fig[] ausgewiesen. Für 128-Diagonalmatize kann CUDA-Implimentierung gegen CPU zu Faktor 9 erreichen.
 \begin{firuge}[htbp]
 \centering
-\includegraphics{.//pic//compareSparse}
+\includegraphics[height=3cm,width=3cm]{.//pic//compareSparse}
 \caption{Vergleichung der Sparseermatrize-Multiplikation von matlab,CPU-und GPU-Implimentierung.}
 \lable{fig:compareSparse}
 \end{figure}
@@ -104,7 +105,7 @@ Im Grafikater ,sind Zugriff der Globalespeicher  langsamer als änder Speicher.  
 
 \begin{firuge}[htbp]
 \centering
-\includegraphics{.//pic//sharememory}
+\includegraphics[height=3cm,width=3cm]{.//pic//sharememory}
 \caption{Vergleich von optimierte Fullmatrix-Multiplikatin mit C-Implimentierung und alte GPU-Implimentirung für MxN Fullmatrizen}
 \lable{fig:sharememory}
 \end{figure}
