@@ -101,7 +101,7 @@
 
 
 
-
+\usepackage{amssymb,amsmath}
 \usepackage[ngerman]{babel}
 \usepackage[utf8]{inputenc}
 % *** CITATION PACKAGES ***
@@ -414,8 +414,9 @@ Email: buyuxiao@mail.uni-paderborn.de
 
 \begin{abstract}
 %\boldmath
-Dieser Text beschreibt unsere Erfahrungen und Ergebnisse bei der Implementierung des IDR(s) \cite{idrs} Algorithmus auf CUDA-fähigen Grafikkarten des Herstellers Nvidia
-mit doppelter Fließkommagenauigkeit im Rahmen einer vierteljährlichen Projektarbeit an der Universität Paderborn im Winter 2009/2001
+Dieser Text beschreibt unsere Erfahrungen und Ergebnisse bei der Implementierung
+des IDR(s) \cite{idrs} Algorithmus auf CUDA-fähigen Grafikkarten des Herstellers Nvidia
+mit doppelter Fließkommagenauigkeit im Rahmen einer vierteljährlichen Projektarbeit an der Universität Paderborn im Winter 2009/2010
 \end{abstract}
 % IEEEtran.cls defaults to using nonbold math in the Abstract.
 % This preserves the distinction between vectors and scalars. However,
@@ -444,17 +445,26 @@ mit doppelter Fließkommagenauigkeit im Rahmen einer vierteljährlichen Projekta
 \section{Aufgabenstellung und Rahmenbedingungen}
 % no \IEEEPARstart
 
+\subsubsection{zu implementierender Algorithmus}
 
 
+Unsre Aufgabe bestand darin einen iterativer Löser für lineare Gleichungssysteme
+auf einer CUDA-fähigen Grafikkarte zu implementieren.
+Die Ausführung in Bezug auf die Implementierung in Matlab sollte beschleunigt werden.
+Als Löser  wurde in der Aufgabenstellung der Algorithmus IDR($s$) \cite{idrs} gewählt.
+Dieser wurde exakt vorgegeben in Form einer Matlab-Eingabedatei \cite{idrsm}.
+IDR($s$) wird betrieben mit  $s \in [3,6]$. Die Anzahl $N$ der Zeilen des Gleichungssystems
+wurde durch die Aufgabenstellung festgelegt auf $N < 10^6$
 
-\subsection{IDR(s)}
+\subsubsection{Zielarchitektur CUDA}
 
-   Testzitat \cite{IEEEhowto:kopka}
-   Gent, blabla
-
-\subsubsection{CUDA}
-
-GPU, Nvidia, SIMT, blabla
+Zur Beschleunigung der Grafikoperationen fertigen einige Grafikartenhersteller
+(bspw. ATI, Nvidia) GPUs mit mehrfachen parallen Prozessoren.
+Das vom Hersteller Nvidia angebotenes API "CUDA" bietet
+die Möglichkeit eigenen C und C++ Code parallel auf Karten
+dieses Herstellers ablaufen zu lassen.
+Die CUDA-Geräte GTX-260 und Tesla-**** bieten als Rechengenauigkeit
+"Double precision" nach IEEE 754.
 
 
 % An example of a floating figure using the graphicx package.
@@ -542,24 +552,93 @@ GPU, Nvidia, SIMT, blabla
 
 
 \section{Implementierung der Operationen}
-verwendete Muster, Schwierigkeiten, blabla
+
+(buyu)
 
 
-% conference papers do not normally have an appendix
-
-
-% use section* for acknowledgement
 \section{Integration des Gesamtalgorithmus}
 
+(achim)
 
-blabla
+Der Gesamtalgorithmus wurde zu einer Library gelinkt die aus eigenem Code heraus
+als auch per bereitgestelltem Kommandozeilentool aufgerufen werden kann.
+Für den Aufruf aus Matlab haben wir ein passendes Mex-Interface erstellt und auf
+die Parameterreihenfolge der idrs.m angepasst so daß idrs-cuda als Plugin-Replacement
+für idrs.m in Matlab benutzt werden kann.
+
+Die Einzelnen Operationen wurden je in ein Command-Muster \cite{entwurfsmuster} gewrappt
+und je einmal in CUDA und auf der Host-CPU implementiert. Die Host-Implemetierung
+wird dabei als Referenz und Sollwertgeber für das erwartete Ergebnis benutzt.
+Der Algorithmus wurde als Template-Muster ausgeführt so daß im Testbetrieb wahlweise
+CUDA-und CPU Operationen auf die Algorithmus-Instanz aufkonfiguriert werden können
+oder zwei Algorithmus-Instanzen im Parallelbetrieb gefahren werden können.
+Dadurch können wir im Testbetrieb alle Algorithmusschritte mit einem Soll-Ist-Vergleich
+durchfahren und so automatisiert jene Abweichungen zwischen CPU-und CUDA-Implementierung lokalisieren die
+manuell schwer oder garnicht aufgefunden werden können.
+
+Alle Ergebnisse der IDR(s)-Operationen sind Spaltenvektoren. Dies
+vereinfacht stark die Implementierung: Da wir alle Matrizen spaltenweise speichern
+können die Ergebnisse direkt durch den Operationskernel in den Puffer
+der jeweiligen Spalte der Zielmatrix geschrieben werden.
+
+Die CUDA-Karte kann Double-Werte bei einer Wortgröße $w = sizeof(double) = 8$ nur von Speicheradressen $s$ mit  $s \mod w = 0$  laden.
+Eine schwer zu ortende Fehlerquelle war deshalb unsere Speicherstruktur bei der wir
+zunächst Integer mit $sizeof(int) = 4$ zwischen den Fließpunktvektoren
+abgelegt hatten.
 
 \section{Ergebnis und Schlußfolgerung}
+(achim)
 
-blabla
+\subsection{Testproblem }
 
 
+\begin{math}
 
+\begin{pmatrix} 2 &  0 &  0 &  0 \\
+                0 &  2 &  1 &  0 \\
+                0 &  1 &  2 &  1 \\
+                0 &  0 &  0 &  2
+\end{pmatrix}
+
+\end{math}
+
+% Kondensatorkante
+
+\subsection{Konvergenzverhalten}
+ (bild residduum(i)) tbd
+
+\subsection{Zeitverhalten}
+
+
+Weitere Ideen zur Laufzeitverbesserung sind
+
+\begin{itemize}
+ \begin{item}
+Spezialkernel die angepasst
+sind auf bestimmte Matrixgrößen, denn der optimale Kernel für
+ $A_{Ns} \cdot B_{s1}$ muß anders implementiert werden als  $A_{sN} \cdot B_{N1}$.
+Hier wählt das Operation-Command selbstätigt den passenden Kernel in Abhängigkeit
+von s und N.
+ \end{item}
+
+\begin{item}
+
+Instrumentation-Code analog dem Tuning-Interface des Oracle-RDBMS. Die Idee besteht darin
+automatisiert jene Operationen zu identifizieren die in Summe den größten
+Beitrag zur Gesamtlaufzeit beitragen.
+Das Codeskelett dieses Instrumentation-Codes wurde bereits erstellt,
+aber noch nicht im Gesamtsystem verbaut.
+\end{item}
+
+\begin{item}
+ Operationen-Commands per Regelsatz in Abhängigkeit von Problemgröße und
+        Struktur die Größe von Block und Grid wählen
+\end{item}
+\end{itemize}
+
+
+% Einbau von Measure in Code ( -> Oracle Kernel)
+%
 
 
 % trigger a \newpage just before the given reference
@@ -586,14 +665,28 @@ blabla
 % (used to reserve space for the reference number labels box)
 \begin{thebibliography}{1}
 
-\bibitem{IEEEhowto:kopka}
-H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
-  0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
+
 
 \bibitem{idrs}
  Peter Sonneveld and Martin B. van Gijzen, \emph{IDR(s): a family of simple and fast algorithms for solving large nonsymmetric linear systems.}\hskip 1em plus
   0.5em minus 0.4em\relax SIAM J. Sci. Comput. Vol. 31, No. 2, pp. 1035-1062 (2008)
 
+\bibitem{idrsm}
+ Peter Sonneveld and Martin B. van Gijzen, (December 2008) \emph{ idrs.m }\hskip 1em plus
+  0.5em minus 0.4em\relax [Online] Available: http://ta.twi.tudelft.nl/NW/users/gijzen/idrs.m
+
+\bibitem{entwurfsmuster}
+
+ Erich Gamma, Richard Helm, Ralph E. Johnson, John Vlissides
+  \emph{ Design Patterns. Elements of Reusable Object-Oriented Software.  }\hskip 1em plus
+  0.5em minus 0.4em\relax Addison Wesley, 1995
+
+\bibitem{oracle}
+
+  Mogens Norgaard
+  \emph{ You probably dont't tune right } in
+  \emph{ Oracle Insights: Tales of the Oak Table }\hskip 1em plus
+  0.5em minus 0.4em\relax New York, Apress, 2004, ch.2, pp 71-94
 
 \end{thebibliography}
 
