@@ -1,14 +1,16 @@
 %Typische Problem  Dreiecksmassig
 
 In der GPU-Programmierung kann mann auch viele Probleme treffen.
-Ein typisches Problem ist Bloksummation. Aus der Beschreibungen der Operationen Multiplikationen der Matrize mal Vektor und Sparsematrize  mal Vektor beruhen obige Operationen auf Vektormultiplikationen, die schliesslich ein Summierungsverfahren in jedem Block enthalten. Blocksummation in einzigen Thread ist nicht effizient. Die einfuehrende Algorithmus: Dreieckfoermige Summation lautet wie Fig [] . In erst Schritte werden 2n und 2n+1 Elements des Produktvektors Cs in jeweilig Threads summiert. In zweiter Schritte werden 4n und 4n+2 Elements summiert. Bis BlockSize/2 Schritte erhalt man endlich Ergebnisse. 
 
-%\begin{firuge}[htbp]
+\subsection{Dreieckförmige Summation}
+Ein typisches Problem ist Bloksummation. Aus der Beschreibungen der Operationen Multiplikationen der Matrize mal Vektor und Sparsematrize  mal Vektor beruhen obige Operationen auf Vektormultiplikationen, die schließlich ein Summierungsverfahren in jedem Block enthalten. Blocksummation in einzigen Thread ist nicht effizient. Die einführende Algorithmus: Dreieckförmige Summation lautet wie Fig.\ref{Dreieck} . In erst Schritte werden 2n und 2n+1 Elements des Produktvektors Cs in jeweilig Threads summiert. In zweiter Schritte werden 4n und 4n+2 Elements summiert. Bis BlockSize/2 Schritte erhalt man endlich Ergebnisse. 
+
+\begin{figure}[htbp]
 %\centering
-%\includegraphics[height=5cm,width=6cm]{.//pic//dreieck}
-%\caption{Dreieckförmige Summation. Von Oben nach Unter zeigt}
-%\lable{fig:Dreieckförmige}
-%\end{figure}
+\includegraphics[width=3.5in]{.//pic//dreieck}
+\caption{\label{Dreieck}Dreieckförmige Summation. Von Oben nach Unter zeigt}
+\end{figure}
 
 Beispiel Code sieht folgende aus,
+
 \input{.//xby//dreieck_code}

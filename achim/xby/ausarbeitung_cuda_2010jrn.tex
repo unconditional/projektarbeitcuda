@@ -127,6 +127,7 @@
 %
 \ifCLASSINFOpdf
    \usepackage[pdftex]{graphicx}
+   %\usepackage[pdftex]{subfig}
   % declare the path(s) where your graphic files are
    \graphicspath{{../pdf/}{../jpeg/}}
   % and their extensions so you won't have to specify these with
@@ -561,6 +562,10 @@ der linearen Algebra, im einzelnen
 
 \subsection{Implementierung der Operationen}
 
+\input{.//xby//Implementierung_dotmul}
+\input{.//xby//Implementierung_vollmatrize}
+\input{.//xby//Implementierung_sparematrize}
+
 % An example of a floating figure using the graphicx package.
 % Note that \label must occur AFTER (or within) \caption.
 % For figures, \caption should occur after the \includegraphics.
@@ -648,10 +653,16 @@ der linearen Algebra, im einzelnen
 \section{Typische Probleme bei der GPU-Programmierung}
 
 \input{.//xby//dreieck_massig}
+\input{.//xby//minimierung_leerthreads}
+\input{.//xby//share_memory}
+\input{.//xby//block_uebergreiffen}
 
 \section{Testergebnisse}
 
 \subsection{sparsemul}
+
+\input{.//xby//sparsemul_result}
+
 \subsection{norm und dotmul}
 \subsection{Löser Gauss}
 \subsection{IDRS Gesamtalgorithmus}
