@@ -562,6 +562,14 @@ der linearen Algebra, im einzelnen
 
 \subsection{Implementierung der Operationen}
 
+
+\subsubsection{Löser Gauss}
+Basis für die CUDA Implementierung ist ein Algoritumus aus der
+Standardliteratur \cite{sedgewick} mit Pivotisierung.
+Da Teile des Algorithmus (Rückwärtssubstitution, Maximum suchen bei der
+Povitisierung) nur sequentiell ausgeführt werden können fehlt die volle
+Ausnutzung der Parallelität.
+
 % An example of a floating figure using the graphicx package.
 % Note that \label must occur AFTER (or within) \caption.
 % For figures, \caption should occur after the \includegraphics.
@@ -647,6 +655,30 @@ der linearen Algebra, im einzelnen
 
 
 \section{Typische Probleme bei der GPU-Programmierung}
+
+\subsection{Fehlersuche im laufenden Algorithmus}
+
+Der auf der Karte ablaufende Prozess ist zum Debuggen und
+automatisierten Testen zunächst schwer zugänglich weil
+die klassischen Instrumente des Debuggings, angefangen beim
+klassischen 'printf()' darauf aufsetzen daß alle benötigten Daten
+im Speicher zugänglich sind.
+
+Diese Probleme werden in unserer Implementierung adressiert
+durch eine Zwischenschicht die im Debugging Mode die jeweils
+für das Debugging relevanten Daten aus der Karte extrahiert und
+in leicht verarbeitbarer Form ins Memory spiegelt:
+
+Die Einzelnen Operationen wurden je in ein Command-Muster \cite{entwurfsmuster} gewrappt
+und je einmal in CUDA und auf der Host-CPU implementiert. Die Host-Implemetierung
+wird dabei als Referenz und Sollwertgeber für das erwartete Ergebnis benutzt.
+Der Algorithmus wurde als Template-Muster ausgeführt so daß im Testbetrieb wahlweise
+CUDA-und CPU Operationen auf die Algorithmus-Instanz aufkonfiguriert werden können
+oder zwei Algorithmus-Instanzen im Parallelbetrieb gefahren werden können.
+Dadurch können wir im Testbetrieb alle Algorithmusschritte mit einem Soll-Ist-Vergleich
+durchfahren und so automatisiert jene Abweichungen zwischen CPU-und CUDA-Implementierung lokalisieren die
+manuell schwer oder garnicht aufgefunden werden können.
+
 
 \section{Testergebnisse}
 
@@ -797,6 +829,14 @@ The authors would like to thank...
  Erich Gamma, Richard Helm, Ralph E. Johnson, John Vlissides
   \emph{ Design Patterns. Elements of Reusable Object-Oriented Software.  }\hskip 1em plus
   0.5em minus 0.4em\relax Addison Wesley, 1995
+
+
+\bibitem{sedgewick}
+
+ Robert Sedgewick
+  \emph{ Algorithmen in C  }\hskip 1em plus
+  0.5em minus 0.4em\relax Addison Wesley, 1992
+
 
 \bibitem{oracle}
 
