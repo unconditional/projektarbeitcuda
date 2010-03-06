@@ -126,12 +126,13 @@
 % *** GRAPHICS RELATED PACKAGES ***
 %
 \ifCLASSINFOpdf
-  % \usepackage[pdftex]{graphicx}
+   \usepackage[pdftex]{graphicx}
   % declare the path(s) where your graphic files are
-  % \graphicspath{{../pdf/}{../jpeg/}}
+  % \graphicspath{{pix}}
   % and their extensions so you won't have to specify these with
   % every instance of \includegraphics
   % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+  %\DeclareGraphicsExtensions{.png}
 \else
   % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
   % will default to the driver specified in the system graphics.cfg if no
@@ -650,9 +651,29 @@ der linearen Algebra, im einzelnen
 \section{Testergebnisse}
 
 \subsection{sparsemul}
+
+(buyu)
+
 \subsection{norm und dotmul}
+
+(achim) tbd
+
 \subsection{Löser Gauss}
+
+Bislang langsamer als CPU-Implementierung
+
 \subsection{IDRS Gesamtalgorithmus}
+
+Der CUDA-IDR(s) konvergiert bis zu einer Genauigkeit von $10^{-4}$ bei $N=700$
+
+\begin{figure}[htbp]
+
+   \includegraphics[width=3in]{pix/bastian/image002.png}
+   
+   \caption{Ein Platzhalter: Bastian hat GNUplot benutzt}%
+   
+\end{figure} 
+
 
 
 \section{Möglichkeiten für die weitere Optimierung}
