@@ -1,6 +1,6 @@
 %Implementierung_dotmul
-
-
+dotmul\\
+Im folgenden Blid Fig.\ref{Vektor} wird das Implementierungsmethode in CUDA gezeigt. A und B sind Vektoren, die sich miteinander in jeweiligem Thread multipliziert werden müssen. Cs sind erzeugte Produktvektoren, die allen zu einem Wert summiert werden. Da eine Beschrankung des CUDA-Blocksizes maximum 512 Threads enthält, muss ein Block iterativ oder mehrere Blocks verwendet werden.
 
 \begin{figure}[htbp]
 %\centering
