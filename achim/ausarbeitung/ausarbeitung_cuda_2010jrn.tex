@@ -548,7 +548,7 @@ der linearen Algebra, im einzelnen
   \hline
   norm & $  n = |\vec{\bf{a}}|= \sqrt{ \vec{\bf{a}} \cdot \vec{\bf{a}} }$ & \\
   \hline
-  matrixmul & $   \vec{\bf{c}}= \bf{A}_{full} \cdot \vec{b} $ & $\bf{A_{full}}$ dünnbesetzt\\
+  matrixmul & $   \vec{\bf{c}}= \bf{A}_{full} \cdot \vec{b} $ & $\bf{A_{full}}$ vollbesetzt\\
   \hline
 
   sparsemul & $   \vec{\bf{c}}= \bf{A}_{sparse} \cdot \vec{b} $ & $\bf{A_{sparse}}$ dünnbesetzt \\
@@ -669,10 +669,10 @@ Der CUDA-IDR(s) konvergiert bis zu einer Genauigkeit von $10^{-4}$ bei $N=700$
 \begin{figure}[htbp]
 
    \includegraphics[width=3in]{pix/bastian/image002.png}
-   
+
    \caption{Ein Platzhalter: Bastian hat GNUplot benutzt}%
-   
-\end{figure} 
+
+\end{figure}
 
 
 
@@ -689,7 +689,7 @@ von s und N.
 
 \begin{item}
 
-Instrumentation-Code analog dem Tuning-Interface des Oracle-RDBMS. Die Idee besteht darin
+Instrumentation-Code analog dem Tuning-Interface des Oracle-RDBMS \cite{oracle}. Die Idee besteht darin
 automatisiert jene Operationen zu identifizieren die in Summe den größten
 Beitrag zur Gesamtlaufzeit beitragen.
 Das Codeskelett dieses Instrumentation-Codes wurde bereits erstellt,
@@ -770,6 +770,18 @@ The authors would like to thank...
 % set second argument of \begin to the number of references
 % (used to reserve space for the reference number labels box)
 \begin{thebibliography}{1}
+
+
+\bibitem{cudpg}
+   NVIDIA Corporation. (2009) \emph{ NVIDIA CUDA Programming Guide Version 2.3 }\hskip 1em plus
+  0.5em minus 0.4em\relax
+[Online] Available: http://www.nvidia.de/object/cuda\_develop\_emeai.html
+
+\bibitem{cudbp}
+   NVIDIA Corporation. (2009)
+  \emph{ NVIDIA CUDA C Programming Best Practices Guide } \hskip 1em plus
+  0.5em minus 0.4em\relax CUDA Toolkit 2.3
+[Online] Available: http://www.nvidia.de/object/cuda\_develop\_emeai.html
 
 
 \bibitem{idrs}
