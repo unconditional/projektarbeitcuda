@@ -485,9 +485,9 @@ mit doppelter Fließkommagenauigkeit im Rahmen einer vierteljährlichen Projekta
 % in the abstract anyway.
 
 % Note that keywords are not normally used for peerreview papers.
-\begin{IEEEkeywords}
-IEEEtran, journal, \LaTeX, paper, template.
-\end{IEEEkeywords}
+%\begin{IEEEkeywords}
+%IEEEtran, journal, \LaTeX, paper, template.
+%\end{IEEEkeywords}
 
 
 
@@ -525,10 +525,10 @@ IEEEtran, journal, \LaTeX, paper, template.
 \IEEEPARstart{D}{as} Lösen großer linearer Gleichungsysteme tritt häufig auf im Zusammenhang
 mit Feldtheoretischen Problemen. Grafikkarten (GPU) mit vielen parallelen Prozessoren
 sind geeignet als Rechenhardware um die rechnergestützte Lösung dieser LGS zu beschleunigen.
-CUDA ist ein API um Software für die Ausführung auf GPUs des Herstellers nvidia entwickeln zu können.
+CUDA \cite{cudapg} ist ein API um Software für die Ausführung auf GPUs des Herstellers nvidia entwickeln zu können.
 % You must have at least 2 lines in the paragraph with the drop letter
 % (should never be an issue)
-
+Matlab bietet zum Einbinden eigenen C-Codes das API 'Mex' an.
 \section{,,Theorie''}
 
 
@@ -546,12 +546,12 @@ der linearen Algebra, im einzelnen
   \hline
   dotmul & $ s = \vec{\bf{a}} \cdot \vec{\bf{b}}$ & \\
   \hline
-  norm & $  n = |\vec{\bf{a}}|= \sqrt{ \vec{\bf{a}} \cdot \vec{\bf{a}} }$ & \\
+  norm & $ |\vec{\bf{a}}|= \sqrt{ \vec{\bf{a}} \cdot \vec{\bf{a}} }$ & \\
   \hline
   matrixmul & $   \vec{\bf{c}}= \bf{A}_{full} \cdot \vec{b} $ & $\bf{A_{full}}$ vollbesetzt\\
   \hline
 
-  sparsemul & $   \vec{\bf{c}}= \bf{A}_{sparse} \cdot \vec{b} $ & $\bf{A_{sparse}}$ dünnbesetzt \\
+  sparsemul & $   \vec{\bf{c}}= \bf{A}_{s} \cdot \vec{b} $ & $\bf{A_{s}}$  Matlab Format \cite{matlabsparse} \\
   \hline
 
   solvergauss & $  \bf{M} \cdot \vec{m} = \vec{\bf{c}} $ &LGS aus Zeile 36 \cite{idrsm} \\
@@ -561,6 +561,11 @@ der linearen Algebra, im einzelnen
 \end{tabular}
 
 \subsection{Implementierung der Operationen}
+
+Blocks sind Gruppen von Threads die auf einem einzigen Multiprozessor laufen
+und gemeinsam das schnelle on-chip ,,shared Memory''
+des Multiprozessors nutzen können. \cite{cudapg}
+Die Operationen sind in doppelter Fließkommagenauigkeit implementiert.
 
 
 \input{../xby/xby//Implementierung_dotmul}
@@ -670,6 +675,10 @@ und Ansätzen zur Problemlösung.
 \input{../xby/xby/share_memory}
 \input{../xby/xby/block_uebergreiffen}
 
+\subsection{Texture Memory}
+
+Die Karteneinheit für ,,Texture Memory'' kann nicht benutzt werden
+zur Beschleunigung weil diese nur float, aber nich double unterstützt.
 
 \subsection{Fehlersuche im laufenden Algorithmus}
 
@@ -684,7 +693,7 @@ durch eine Zwischenschicht die im Debugging Mode die jeweils
 für das Debugging relevanten Daten aus der Karte extrahiert und
 in leicht verarbeitbarer Form ins Memory spiegelt:
 
-Die Einzelnen Operationen wurden je in ein Command-Muster \cite{entwurfsmuster} gewrappt
+Die Einzelnen Operationen werden je in ein Command-Muster \cite{entwurfsmuster} gewrappt
 und je einmal in CUDA und auf der Host-CPU implementiert. Die Host-Implemetierung
 wird dabei als Referenz und Sollwertgeber für das erwartete Ergebnis benutzt.
 Der Algorithmus wurde als Template-Muster ausgeführt so daß im Testbetrieb wahlweise
@@ -704,13 +713,33 @@ manuell schwer oder garnicht aufgefunden werden können.
 
 \subsection{norm und dotmul}
 
-(achim) tbd
+\begin{figure}[htbp]
+
+   \includegraphics[width=3in]{pix/dotmultime}
+
+   \caption{ \label{dotmultime} Skalarprodukt: Rechenzeit in Abhängigkeit von der Problemgröße }%
+
+\end{figure}
+
+
+Die Operationen dotmul und Norm laufen für eine Problemgröße $N > 5000$ schneller
+als die CPU-Implementierung. (Bild \ref{dotmultime})
+
+Trotz der Standardmaßnahmen \cite{reduction} zur Summierung auf ein Skalar wurde
+die Ausführungsszeit nicht schneller als die der CUBLAS-Operationen \cite{cublas}.
+
+
 
 \subsection{Löser Gauss}
 
-Bislang langsamer als CPU-Implementierung
+(tbd Achim) Bislang langsamer als CPU-Implementierung
 
-\subsection{IDRS Gesamtalgorithmus}
+\subsection{IDR(s) Gesamtalgorithmus}
+
+Testproblem für das Messen ist das LGS für die Kondensatorkante:
+$() = ()$
+Pro Iterationsschritt $i$ wird das Residuum $r_i = | \bf{A} \cdot \vec{\bf{x_i}} - \vec{b} |$ aufgezeichnet und dann
+im Diagramm gegen $i$ aufgetragen.
 
 Der CUDA-IDR(s) konvergiert bis zu einer Genauigkeit von $10^{-4}$ bei $N=700$
 
@@ -724,7 +753,7 @@ Der CUDA-IDR(s) konvergiert bis zu einer Genauigkeit von $10^{-4}$ bei $N=700$
 
 
 
-\section{Möglichkeiten für die weitere Optimierung}
+\section{Möglichkeiten für die weitere Optimierung der IDR(s)-Implementierung}
 
 \begin{itemize}
  \begin{item}
@@ -737,7 +766,7 @@ von s und N.
 
 \begin{item}
 
-Instrumentation-Code analog dem Tuning-Interface des Oracle-RDBMS \cite{oracle}. Die Idee besteht darin
+Einfügen von Instrumentation-Code analog dem Tuning-Interface des Oracle-RDBMS \cite{oracle}. Die Idee besteht darin
 automatisiert jene Operationen zu identifizieren die in Summe den größten
 Beitrag zur Gesamtlaufzeit beitragen.
 Das Codeskelett dieses Instrumentation-Codes wurde bereits erstellt,
@@ -780,11 +809,11 @@ aber noch nicht im Gesamtsystem verbaut.
 %Appendix two text goes here.
 
 
-% use section* for acknowledgement
-\section*{Acknowledgment}
-
-
-The authors would like to thank...
+% use section* for{reduction} acknowledgement
+%\section*{Acknowledgment}
+%
+%
+%The authors would like to thank...
 
 
 % Can use something like this to put references on a page
@@ -819,11 +848,38 @@ The authors would like to thank...
 % (used to reserve space for the reference number labels box)
 \begin{thebibliography}{1}
 
+\bibitem{idrs}
+ Peter Sonneveld and Martin B. van Gijzen, \emph{IDR(s): a family of simple and fast algorithms for solving large nonsymmetric linear systems.}\hskip 1em plus
+  0.5em minus 0.4em\relax SIAM J. Sci. Comput. Vol. 31, No. 2, pp. 1035-1062 (2008)
+
+
 
 \bibitem{cudapg}
    NVIDIA Corporation. (2009) \emph{ NVIDIA CUDA Programming Guide Version 2.3 }\hskip 1em plus
   0.5em minus 0.4em\relax
 [Online] Available: http://www.nvidia.de/object/cuda\_develop\_emeai.html
+
+\bibitem{idrsm}
+ Peter Sonneveld and Martin B. van Gijzen, (December 2008) \emph{ idrs.m }\hskip 1em plus
+  0.5em minus 0.4em\relax [Online] Available: http://ta.twi.tudelft.nl/NW/users/gijzen/idrs.m
+
+
+
+\bibitem{matlabsparse}
+   The Math works \emph { Matlab data } \hskip 1em plus
+  0.5em minus 0.4em\relax
+[Online] Available: http://www.mathworks.com/access/helpdesk/help/techdoc/matlab\_external/f21585.html
+
+
+
+\bibitem{cublas}
+   NVIDIA Corporation. (2009) \emph{ CUDA CUBLAS } in \emph { CUDA Toolkit v2.3 } \hskip 1em plus
+  0.5em minus 0.4em\relax
+[Online] Available: http://www.nvidia.de/object/cuda\_develop\_emeai.html
+
+
+
+
 
 \bibitem{cudbp}
    NVIDIA Corporation. (2009)
@@ -832,13 +888,6 @@ The authors would like to thank...
 [Online] Available: http://www.nvidia.de/object/cuda\_develop\_emeai.html
 
 
-\bibitem{idrs}
- Peter Sonneveld and Martin B. van Gijzen, \emph{IDR(s): a family of simple and fast algorithms for solving large nonsymmetric linear systems.}\hskip 1em plus
-  0.5em minus 0.4em\relax SIAM J. Sci. Comput. Vol. 31, No. 2, pp. 1035-1062 (2008)
-
-\bibitem{idrsm}
- Peter Sonneveld and Martin B. van Gijzen, (December 2008) \emph{ idrs.m }\hskip 1em plus
-  0.5em minus 0.4em\relax [Online] Available: http://ta.twi.tudelft.nl/NW/users/gijzen/idrs.m
 
 \bibitem{entwurfsmuster}
 
@@ -860,6 +909,14 @@ The authors would like to thank...
   \emph{ You probably dont't tune right } in
   \emph{ Oracle Insights: Tales of the Oak Table }\hskip 1em plus
   0.5em minus 0.4em\relax New York, Apress, 2004, ch.2, pp 71-94
+
+
+
+\bibitem{reduction}
+   Mark Harris \emph{ Optimizing Parallel Reduction in CUDA } in \emph{CUDA SDK} \hskip 1em plus
+  0.5em minus 0.4em\relax Nvidia Corporation
+[Online] Available: http://developer.download.nvidia.com/compute/cuda/1\_1/Website/projects/reduction/doc/reduction.pdf
+
 
 
 
