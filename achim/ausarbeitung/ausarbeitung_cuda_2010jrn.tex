@@ -128,11 +128,11 @@
 \ifCLASSINFOpdf
    \usepackage[pdftex]{graphicx}
   % declare the path(s) where your graphic files are
-  % \graphicspath{{pix}}
+   \graphicspath{{../xby}}
   % and their extensions so you won't have to specify these with
   % every instance of \includegraphics
-  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
-  %\DeclareGraphicsExtensions{.png}
+  % \DeclareGraphicsExtensions{.png}
+  \DeclareGraphicsExtensions{.png,.PNG}
 \else
   % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
   % will default to the driver specified in the system graphics.cfg if no
@@ -563,6 +563,11 @@ der linearen Algebra, im einzelnen
 \subsection{Implementierung der Operationen}
 
 
+\input{../xby/xby//Implementierung_dotmul}
+\input{../xby/xby//Implementierung_vollmatrize}
+\input{../xby/xby//Implementierung_sparematrize}
+
+
 \subsubsection{Löser Gauss}
 Basis für die CUDA Implementierung ist ein Algoritumus aus der
 Standardliteratur \cite{sedgewick} mit Pivotisierung.
@@ -656,6 +661,16 @@ Ausnutzung der Parallelität.
 
 \section{Typische Probleme bei der GPU-Programmierung}
 
+
+\IEEEPARstart{D}{ie} besondere Architektur der GPU führt zu besonderen Problemen
+und Ansätzen zur Problemlösung.
+
+\input{../xby/xby/dreieck_massig}
+\input{../xby/xby/minimierung_leerthreads}
+\input{../xby/xby/share_memory}
+\input{../xby/xby/block_uebergreiffen}
+
+
 \subsection{Fehlersuche im laufenden Algorithmus}
 
 Der auf der Karte ablaufende Prozess ist zum Debuggen und
@@ -684,7 +699,8 @@ manuell schwer oder garnicht aufgefunden werden können.
 
 \subsection{sparsemul}
 
-(buyu)
+%(buyu)
+\input{../xby/xby/sparsemul_result}
 
 \subsection{norm und dotmul}
 
@@ -804,7 +820,7 @@ The authors would like to thank...
 \begin{thebibliography}{1}
 
 
-\bibitem{cudpg}
+\bibitem{cudapg}
    NVIDIA Corporation. (2009) \emph{ NVIDIA CUDA Programming Guide Version 2.3 }\hskip 1em plus
   0.5em minus 0.4em\relax
 [Online] Available: http://www.nvidia.de/object/cuda\_develop\_emeai.html
