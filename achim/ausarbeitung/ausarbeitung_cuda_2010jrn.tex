@@ -170,7 +170,7 @@
 
 % *** MATH PACKAGES ***
 %
-%\usepackage[cmex10]{amsmath}
+\usepackage[cmex10]{amsmath}
 % A popular package from the American Mathematical Society that provides
 % many useful and powerful commands for dealing with mathematics. If using
 % it, be sure to load this package with the cmex10 option to ensure that
@@ -527,7 +527,7 @@ mit Feldtheoretischen Problemen.
 Grafikkarten (GPU) mit vielen parallelen Prozessoren
 sind geeignet als Rechenhardware um die rechnergestützte Lösung dieser LGS zu beschleunigen.
 Die Hersteller ATI und NVIDIA bieten SDK an speziell für die Entwicklung mit
-diesem Einsatzzweck. CUDA \cite{cudapg} ist ein SDK von Nvidia für die Entwicklung in C und C++.
+diesem Einsatzzweck. CUDA \cite{cudapg} ist ein API für GPU von Nvidia für die Entwicklung in C und C++.
 % You must have at least 2 lines in the paragraph with the drop letter
 % (should never be an issue)
 \par Matlab bietet zum Einbinden eigenen C-Codes das API 'Mex' an.
@@ -561,7 +561,7 @@ der linearen Algebra, im einzelnen in Tabelle \ref{idrsops} beschrieben.
   matrixmul & $   \vec{\bf{c}}= \bf{A}_{full} \cdot \vec{b} $ & $\bf{A_{full}}$ vollbesetzt\\
   \hline
 
-  sparsemul & $   \vec{\bf{c}}= \bf{A}_{s} \cdot \vec{b} $ & $\bf{A_{s}}$  Matlab Format \cite{matlabsparse} \\
+  sparsemul & $   \vec{\bf{c}}= \bf{A}_{s} \cdot \vec{b} $ & $\bf{A_{s}}$  dünnbesetzt \\
   \hline
 
   solvergauss & $  \bf{M} \cdot \vec{m} = \vec{\bf{c}} $ &LGS aus Zeile 36 \cite{idrsm} \\
@@ -570,6 +570,8 @@ der linearen Algebra, im einzelnen in Tabelle \ref{idrsops} beschrieben.
 \end{tabular}
 \end{table}
 
+$\bf{A_{s}}$ wird im Speicher dargestellt durch das ,,Sparse Matrix''-Speicherformat
+aus Matlab. \cite{matlabsparse}
 
 %\begin{tabular}[ht]{|l|c|l|}
 %  \hline
@@ -769,10 +771,27 @@ die Ausführungsszeit nicht schneller als die der CUBLAS-Operationen \cite{cubla
 
 \subsection{IDR(s) Gesamtalgorithmus}
 
-Testproblem für das Messen ist das LGS für die Kondensatorkante:
-$() = ()$
-Pro Iterationsschritt $i$ wird das Residuum $r_i = | \bf{A} \cdot \vec{\bf{x_i}} - \vec{b} |$ aufgezeichnet und dann
-im Diagramm gegen $i$ aufgetragen.
+Testproblem für das Messen ist das LGS für ein 1D-Laplaceproblem mit Randwerten.
+Die Zeilenzahl des Test-LGS wird $N$ genannt.
+
+\begin{displaymath}
+  \begin{pmatrix}
+      2 &  0  &  0  & 0   & 0 \\
+      0 &  2  & -1  & 0   & 0 \\
+      0 & -1  &  2  & -1  & 0 \\
+      0 &  0  &  -1  &  2 & -1 \\
+      0 &  0  &  0   &  0 & 2  \\
+  \end{pmatrix}
+   \cdot \vec{ \bf{x} }
+   =
+  \begin{pmatrix} 1 \\ 0  \\ 0 \\ 0  \\ -1
+  \end{pmatrix}
+%a + b
+\end{displaymath}
+
+
+Pro Iterationsschritt $i$ wird das Residuum $r_i = | \bf{A} \cdot \vec{\bf{x_i}} - \vec{b} |$ aufgezeichnet und
+im Diagramm \ref{residuum}  gegen $i$ aufgetragen.
 
 Der CUDA-IDR(s) konvergiert bis zu einer Genauigkeit von $10^{-4}$ bei $N=700$
 
@@ -780,7 +799,7 @@ Der CUDA-IDR(s) konvergiert bis zu einer Genauigkeit von $10^{-4}$ bei $N=700$
 
    \includegraphics[width=3in]{pix/bastian/image002.png}
 
-   \caption{Ein Platzhalter: Bastian hat GNUplot benutzt}%
+   \caption{ \label{residuum} Residuenverlauf des CUDA-IDR(4) bei einer Toleranz von $10^{-4}$ }%
 
 \end{figure}
 
