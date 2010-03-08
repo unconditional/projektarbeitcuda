@@ -523,25 +523,35 @@ mit doppelter Fließkommagenauigkeit im Rahmen einer vierteljährlichen Projekta
 % Here we have the typical use of a "T" for an initial drop letter
 % and "HIS" in caps to complete the first word.
 \IEEEPARstart{D}{as} Lösen großer linearer Gleichungsysteme tritt häufig auf im Zusammenhang
-mit Feldtheoretischen Problemen. Grafikkarten (GPU) mit vielen parallelen Prozessoren
+mit Feldtheoretischen Problemen.
+Grafikkarten (GPU) mit vielen parallelen Prozessoren
 sind geeignet als Rechenhardware um die rechnergestützte Lösung dieser LGS zu beschleunigen.
-CUDA \cite{cudapg} ist ein API um Software für die Ausführung auf GPUs des Herstellers nvidia entwickeln zu können.
+Die Hersteller ATI und NVIDIA bieten SDK an speziell für die Entwicklung mit
+diesem Einsatzzweck. CUDA \cite{cudapg} ist ein SDK von Nvidia für die Entwicklung in C und C++.
 % You must have at least 2 lines in the paragraph with the drop letter
 % (should never be an issue)
-Matlab bietet zum Einbinden eigenen C-Codes das API 'Mex' an.
+\par Matlab bietet zum Einbinden eigenen C-Codes das API 'Mex' an.
+
 \section{,,Theorie''}
 
 
 \subsection{Operationen}
 
 Der iterative Löser IDR(s) \cite{idrs} besteht aus Operationen \cite{idrsm}
-der linearen Algebra, im einzelnen
+der linearen Algebra, im einzelnen in Tabelle \ref{idrsops} beschrieben.
 
 
-\begin{tabular}[ht]{|l|c|l|}
-  \hline
-  Operation & Zusammenhang & Bemerkung\\
-  \hline\hline
+\begin{table}[h]
+\renewcommand{\arraystretch}{1.3}
+\caption{Im IDR(s) verwendete Operationen}
+\label{idrsops}
+\centering
+\begin{tabular}{c||c||c}
+\hline
+\bfseries Operation & \bfseries Zusammenhang & Bemerkung \\
+\hline\hline
+
+
   add & $ \vec{\bf{c}} = \vec{\bf{a}} + \vec{\bf{b}}$ & \\
   \hline
   dotmul & $ s = \vec{\bf{a}} \cdot \vec{\bf{b}}$ & \\
@@ -555,10 +565,33 @@ der linearen Algebra, im einzelnen
   \hline
 
   solvergauss & $  \bf{M} \cdot \vec{m} = \vec{\bf{c}} $ &LGS aus Zeile 36 \cite{idrsm} \\
-  \hline
 
-  \hline
+\hline
 \end{tabular}
+\end{table}
+
+
+%\begin{tabular}[ht]{|l|c|l|}
+%  \hline
+%  Operation & Zusammenhang & Bemerkung\\
+%  \hline\hline
+%  add & $ \vec{\bf{c}} = \vec{\bf{a}} + \vec{\bf{b}}$ & \\
+%  \hline
+%  dotmul & $ s = \vec{\bf{a}} \cdot \vec{\bf{b}}$ & \\
+%  \hline
+%  norm & $ |\vec{\bf{a}}|= \sqrt{ \vec{\bf{a}} \cdot \vec{\bf{a}} }$ & \\
+%  \hline
+%  matrixmul & $   \vec{\bf{c}}= \bf{A}_{full} \cdot \vec{b} $ & $\bf{A_{full}}$ vollbesetzt\\
+%  \hline
+%
+%  sparsemul & $   \vec{\bf{c}}= \bf{A}_{s} \cdot \vec{b} $ & $\bf{A_{s}}$  Matlab Format \cite{matlabsparse} \\
+%  \hline
+%
+%  solvergauss & $  \bf{M} \cdot \vec{m} = \vec{\bf{c}} $ &LGS aus Zeile 36 \cite{idrsm} \\
+%  \hline
+%
+% \hline
+%\end{tabular}
 
 \subsection{Implementierung der Operationen}
 
@@ -667,7 +700,7 @@ Ausnutzung der Parallelität.
 \section{Typische Probleme bei der GPU-Programmierung}
 
 
-\IEEEPARstart{D}{ie} besondere Architektur der GPU führt zu besonderen Problemen
+Die besondere Architektur der GPU führt zu besonderen Problemen
 und Ansätzen zur Problemlösung.
 
 \input{../xby/xby/dreieck_massig}
