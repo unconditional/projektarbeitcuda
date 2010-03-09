@@ -13,27 +13,38 @@ Da Sparsematrizen mit Vollmatrizen genau umgekehrt ist, hat man dafür auch eine
 %	\caption{compressed column structure"}
 %\end{figure}
 
+% \begin{figure}[htbp]
+	% \begin{center}
+		% \begin{minipage}[t]{0.4\linewidth}
+			% \centering
+			% \includegraphics[width=\linewidth]{../xby/pic/orignal_sparse}
+			% \caption{Original-Matrize}
+			% \label{orignal_sparse}
+		% \end{minipage}
+		% \qquad
+		% \begin{minipage}[t]{0.4\linewidth}
+			% \centering
+			% \includegraphics[width=\linewidth]{../xby/pic/numerische_sparse1}
+			% \caption{Sparsame Struktur}
+			% \label{numerische_sparse1}
+		% \end{minipage}
+		% \qquad
+		% \begin{minipage}[t]{0.4\linewidth}
+			% \centering
+			% \includegraphics[width=\linewidth]{../xby/pic/numerische_sparse2}
+			% \caption{"compressed column structure"}
+			% \label{numerische_sparse2}
+		% \end{minipage}
+	% \end{center}
+% \end{figure}
+
 \begin{figure}[htbp]
-	\begin{center}
-		\begin{minipage}[t]{0.4\linewidth}
-			\centering
-			\includegraphics[width=\linewidth]{../xby/pic/orignal_sparse}
-			\caption{Original-Matrize}
-			\label{orignal_sparse}
-		\end{minipage}
-		\qquad
-		\begin{minipage}[t]{0.4\linewidth}
-			\centering
-			\includegraphics[width=\linewidth]{../xby/pic/numerische_sparse1}
-			\caption{Sparsame Struktur}
-			\label{numerische_sparse1}
-		\end{minipage}
-		\qquad
-		\begin{minipage}[t]{0.4\linewidth}
-			\centering
-			\includegraphics[width=\linewidth]{../xby/pic/numerische_sparse2}
-			\caption{"compressed column structure"}
-			\label{numerische_sparse2}
-		\end{minipage}
-	\end{center}
+  \centering
+     \subfloat[][Original-Matrize]{\label{fig:orignal_sparse}\includegraphics[width=2.5cm]{../xby/pic/orignal_sparse}}
+	 \hspace{0.5cm}
+	\subfloat[][Sparsame Struktur]{\label{fig:numerische_sparse1}\includegraphics[width=2.5cm]{../xby/pic/numerische_sparse1}}
+	\hspace{0.5cm}
+	\subfloat[]["compressed column structure"]{\label{fig:numerische_sparse2}\includegraphics[width=2.5cm]{../xby/pic/numerische_sparse2}}	 
+  \caption{Sparse Matrix}
+  \label{fig:animals}
 \end{figure}
