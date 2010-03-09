@@ -546,25 +546,25 @@ der linearen Algebra, im einzelnen in Tabelle \ref{idrsops} beschrieben.
 \caption{Im IDR(s) verwendete Operationen}
 \label{idrsops}
 \centering
-\begin{tabular}{c||c||c}
+\begin{tabular}{|c||c||c|}
 \hline
-\bfseries Operation & \bfseries Zusammenhang & Bemerkung \\
+\bfseries Operation & \bfseries Zusammenhang & \bfseries Bemerkung \\
 \hline\hline
 
 
-  add & $ \vec{\bf{c}} = \vec{\bf{a}} + \vec{\bf{b}}$ & \\
+  add & $ \bf{c} = \bf{a} + \bf{b}$ & \\
   \hline
-  dotmul & $ s = \vec{\bf{a}} \cdot \vec{\bf{b}}$ & \\
+  dotmul & $ s = \bf{a} \cdot \bf{b}$ & \\
   \hline
-  norm & $ |\vec{\bf{a}}|= \sqrt{ \vec{\bf{a}} \cdot \vec{\bf{a}} }$ & \\
+  norm & $ |\bf{a}|= \sqrt{ \bf{a} \cdot \bf{a}}$ & \\
   \hline
-  matrixmul & $   \vec{\bf{c}}= \bf{A}_{full} \cdot \vec{b} $ & $\bf{A_{full}}$ vollbesetzt\\
-  \hline
-
-  sparsemul & $   \vec{\bf{c}}= \bf{A}_{s} \cdot \vec{b} $ & $\bf{A_{s}}$  dünnbesetzt \\
+  matrixmul & $ \bf{c}= \bf{A}_{full} \cdot {b} $ & $\bf{A_{full}}$ vollbesetzt\\
   \hline
 
-  solvergauss & $  \bf{M} \cdot \vec{m} = \vec{\bf{c}} $ &LGS aus Zeile 36 \cite{idrsm} \\
+  sparsemul & $   \bf{c} = \bf{A}_{s} \cdot \bf{b} $ & $\bf{A_{s}}$  dünnbesetzt \\
+  \hline
+
+  solvergauss & $  \bf{M} \cdot \bf{m} = \bf{c} $ &LGS aus Zeile 36 \cite{idrsm} \\
 
 \hline
 \end{tabular}
