@@ -1,3 +1,3 @@
-%Block�bergreifen
-\subsection{Blockübergreifende Synchronisation schwierig}
-Ein Weiter Problem befindet sich auf der Blocksyncronisation. Für größe Vekotrmultiplkation verwendet man wissentlich mehre Blöcke. Schließlich bekomt man ein Vektor von jede Blocksummer. Da Ohne valide Synchronisationsmaßnahme um alle Blocksummer zu synchronisieren, kann man den Vektor nicht direkt im selbes Kernel bearbeiten. Die mögliche Lösungen stellt da, 1st .die gesammte Summier wird in Cpu ausgerechnet.. 2.man leitet den Vektor von jede Blocksummer zu einem neu Kernel, das sich Summierung beschäftigt.
+%Block黚ergreifen
+\subsection{Schwierigkeit bei der Synchronisation vom Blockübergreifen}
+Für größe Vektormultiplikation müssen mehrere Blöcke verwendet werden. Das Endeergebniss bekommt man durch die Blocksummation. Da wir keine Synchronisationsmaßnahme für Blocksummation haben, kann der Vektor nicht im selben Kernel bearbeitet werden. Die möglichkeiten wären, entweder die Blocksummation in CPU bearbeitet wird, oder die Blocksummation in einem neuen Kernel bearbeitet wird.

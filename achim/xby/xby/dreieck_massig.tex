@@ -3,7 +3,7 @@
 %In der GPU-Programmierung kann mann auch viele Probleme treffen.
 
 \subsection{Dreieckförmige Summation}
-Ein typisches Problem ist Bloksummation. Aus der Beschreibungen der Operationen Multiplikationen der Matrize mal Vektor und Sparsematrize  mal Vektor beruhen obige Operationen auf Vektormultiplikationen, die schließlich ein Summierungsverfahren in jedem Block enthalten. Blocksummation in einzigen Thread ist nicht effizient. Die einführende Algorithmus: Dreieckförmige Summation lautet wie Fig.\ref{Dreieck} . In erst Schritte werden 2n und 2n+1 Elements des Produktvektors Cs in jeweilig Threads summiert. In zweiter Schritte werden 4n und 4n+2 Elements summiert. Bis BlockSize/2 Schritte erhalt man endlich Ergebnisse.
+Ein typisches Problem ist Bloksummation. Aus der Beschreibungen der Operationen Multiplikationen der Matrix mal Vektor und Sparsematrize  mal Vektor beruhen obige Operationen auf Vektormultiplikationen, die schließlich ein Summierungsverfahren in jedem Block enthalten. Blocksummation in einzigen Thread ist nicht effizient. Die einführende Algorithmus: Dreieckförmige Summation lautet wie Fig.\ref{Dreieck} . In erst Schritte werden 2n und 2n+1 Elements des Produktvektors $cs$ in jeweilig Threads summiert. In zweiter Schritte werden 4n und 4n+2 Elements summiert. Bis BlockSize/2 Schritte erhalt man endlich Ergebnisse.
 
 \begin{figure}[htbp]
 %\centering
@@ -11,6 +11,6 @@ Ein typisches Problem ist Bloksummation. Aus der Beschreibungen der Operationen 
 \caption{\label{Dreieck}Dreieckförmige Summation. Von Oben nach Unter zeigt}
 \end{figure}
 
-Beispiel Code sieht folgende aus,
+Beispiel Code kann man in \cite{reduction} finden.
 
-\input{../xby/xby//dreieck_code}
+%\input{../xby/xby//dreieck_code}
