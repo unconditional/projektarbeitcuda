@@ -13,7 +13,10 @@ LIBX = $(PRJACUDALIBEXT)
 
 RM = rm
 
-all: showenvironment.$(PRJACUDAEXEEXT) idrs.$(OX) idrscli.$(OX) idrscli.$(PRJACUDAEXEEXT) libidrs.$(LIBX)
+all: showenvironment.$(PRJACUDAEXEEXT) idrs.$(OX) idrscli.$(OX) idrscli.$(PRJACUDAEXEEXT) libidrs.$(LIBX) measuredotmul.$(PRJACUDAEXEEXT)
+
+measuredotmul.$(PRJACUDAEXEEXT): measuredotmul.cu kerneldotmul.$(OX)
+	$(CC) -Iinclude/common  measuredotmul.cu kerneldotmul.$(OX) -o measuredotmul.$(PRJACUDAEXEEXT) > nul
 
 idrscli.$(PRJACUDAEXEEXT):  libidrs.$(LIBX) idrscli.$(OX)
 	$(HOSTLD) idrscli.$(OX)  -lidrs  -lcudart -L./ -o idrscli.$(PRJACUDAEXEEXT) -L/usr/local/cuda/lib
