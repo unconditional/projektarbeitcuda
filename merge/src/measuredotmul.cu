@@ -79,6 +79,29 @@ __host__ void dodotmul (  t_mindex N_in ) {
 
     }
 
+   float gpudotwom_ms;
+
+   {
+            START_CUDA_TIMER
+
+            kernel_dotmul<<<dimGridsub,dimBlock>>>( vd1, vd2, vdout ) ;
+            e = cudaGetLastError();
+            CUDA_UTIL_ERRORCHECK("device_dotMul");
+
+            // e = cudaMemcpy( vout, vdout, SIZE_VE *  ( N_in / 512 + 1 ) , cudaMemcpyDeviceToHost);
+            // CUDA_UTIL_ERRORCHECK("cudaMemcpy( h_om1, om1, sizeof(t_ve) * N * 2, cudaMemcpyDeviceToHost)");
+
+             t_ve  sum = 0;
+
+              //for ( t_mindex blockidx = 0; blockidx < N_in/ 512 + 1; blockidx++ ) {
+              //    sum += vout[blockidx];
+              //}
+              //printf("GPU result: %f", sum );
+
+              STOP_CUDA_TIMER( &gpudotwom_ms )
+
+    }
+
    float cpudot_ms;
 
     {
@@ -93,12 +116,38 @@ __host__ void dodotmul (  t_mindex N_in ) {
 
     free( v1 );
 
-    printf("\n%u\t%f\t%f", N_in, gpudot_ms, cpudot_ms  );
+    printf("\n%u\t%f\t%f\t%f", N_in, gpudot_ms, cpudot_ms, gpudotwom_ms  );
 }
 
 int main( int argc, char *argv[] )
 {
    printf("\n measure dotmul");
+   printf( "\n Build configuration: sizeof(t_ve) = %u \n", sizeof(t_ve));
+
+
+
+    int deviceCount;
+    cudaGetDeviceCount(&deviceCount);
+
+    if (deviceCount == 0)
+        printf("There is no device supporting CUDA\n");
+
+    int dev;
+    for (dev = 0; dev < deviceCount; ++dev) {
+        cudaDeviceProp deviceProp;
+        cudaGetDeviceProperties(&deviceProp, dev);
+
+
+
+        printf("\nDevice %d: \"%s\"\n \n", dev, deviceProp.name);
+        printf("  Number of multiprocessors:                     %d\n", deviceProp.multiProcessorCount);
+        printf("  CUDA Capability Major revision number:         %d\n", deviceProp.major);
+        printf("  CUDA Capability Minor revision number:         %d\n", deviceProp.minor);
+        printf("  Maximum number of threads per block:           %d\n", deviceProp.maxThreadsPerBlock);
+    }
+
+
+
 
    t_mindex order  = 3;
 
