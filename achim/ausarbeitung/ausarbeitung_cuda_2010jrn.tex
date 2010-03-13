@@ -132,7 +132,7 @@
   % and their extensions so you won't have to specify these with
   % every instance of \includegraphics
   % \DeclareGraphicsExtensions{.png}
-  \DeclareGraphicsExtensions{.png,.PNG}
+  \DeclareGraphicsExtensions{.png,.PNG,.pdf}
 \else
   % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
   % will default to the driver specified in the system graphics.cfg if no
@@ -746,22 +746,59 @@ manuell schwer oder garnicht aufgefunden werden können.
 %(buyu)
 \input{../xby/xby/sparsemul_result}
 
-\subsection{norm und dotmul}
+\subsection{Skalarprodukt}
+
+%\begin{figure}[htbp]
+%
+%  \includegraphics[width=3in]{pix/dotmultime}
+%
+%  \caption{ \label{dotmultime} Skalarprodukt: Rechenzeit in Abhängigkeit von der Problemgröße }%
+%
+%
+%
+%\end{figure}
+
+
+
+\begin{table}[h]
+\renewcommand{\arraystretch}{1.3}
+\caption{Ausführungszeiten der Operation Skalarprodukt, gemessen auf GT 9500 in single precision}
+\label{valuesdotmul}
+\centering
+\begin{tabular}{|r||r|r|r|}
+\hline
+\bfseries $ \bf N$ & \bfseries{ $ \bf t_{CPU} / ms $ } &  $ \bf t_{GPU} / ms$ & \bfseries{Speedup} \\
+\hline\hline
+
+
+1000   &  0.033824 & 0.006368 & - \\
+10000  &  0.044928 & 0.048160 &    1.1\\
+100000 &  0.184160 & 0.495968 &    2.7\\
+1000000 & 1.406144 & 5.045984 &    3.5\\
+9000000 & 12.563456 & 45.246208  & 3.7 \\
+
+\hline
+\end{tabular}
+\end{table}
+
+
+
 
 \begin{figure}[htbp]
 
-   \includegraphics[width=3in]{pix/dotmultime}
+   \includegraphics[width=3in]{dotmul/dotmul}
 
-   \caption{ \label{dotmultime} Skalarprodukt: Rechenzeit in Abhängigkeit von der Problemgröße }%
+   \caption{ \label{dotmul} Skalarprodukt: Rechenzeit in Abhängigkeit von der Problemgröße $N$}%
 
 \end{figure}
 
 
-Die Operationen dotmul und Norm laufen für eine Problemgröße $N > 5000$ schneller
-als die CPU-Implementierung. (Abb. \ref{dotmultime})
+Tabelle \ref{valuesdotmul} zeigt die Ausführungszeiten des Skalarproduktes
+in Abhängigkeit der Vektorgröße $N$, je für eine Host-CPU Implementierung im
+Vergleich zu einer GPU-Implementierung.
 
-Trotz der Standardmaßnahmen \cite{reduction} zur Summierung auf ein Skalar wurde
-die Ausführungsszeit nicht schneller als die der CUBLAS-Operationen \cite{cublas}.
+%Trotz der Standardmaßnahmen \cite{reduction} zur Summierung auf ein Skalar wurde
+%die Ausführungsszeit nicht schneller als die der CUBLAS-Operationen \cite{cublas}.
 
 
 
