@@ -1,0 +1,28 @@
+
+ measure gauss
+ Build configuration: sizeof(t_ve) = 4 
+
+Device 0: "GeForce 9500 GT"
+ 
+  Number of multiprocessors:                     4
+  CUDA Capability Major revision number:         1
+  CUDA Capability Minor revision number:         1
+  Maximum number of threads per block:           512
+
+3	0.037280	0.003168
+4	0.030752	0.003104
+5	0.034752	0.003104
+6	0.043776	0.003040
+7	0.048352	0.006496
+8	0.056288	0.008288
+9	0.063872	0.011296
+10	0.073088	0.014432
+11	0.082176	0.017664
+12	0.093376	0.022560
+13	0.102528	0.027488
+14	0.114176	0.032704
+15	0.125056	0.039520
+16	0.145472	0.046464
+17	0.150304	0.053440
+18	0.164096	0.061984
+19	0.176288	0.071456
