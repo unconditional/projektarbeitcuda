@@ -850,17 +850,37 @@ Der Ergebnisvektor $\bf x$ wird mit Zufallswerten $x_n  \in [-0.5, 0.5]$ vorbele
 Pro Iterationsschritt $i$ wird das Residuum $r_i = | \bf{A} \cdot \vec{\bf{x_i}} - \vec{b} |$ aufgezeichnet und
 im Abb. \ref{residuum}  gegen $i$ aufgetragen.
 
-Der CUDA-IDR(s) konvergiert bis zu einer Genauigkeit von $10^{-4}$ bei $N=700$
+Zu diesem Testproblem ergibt sich bei hinreichender Toleranz $\epsilon$ als Lösung
+für x eine Gerade. (Abb. \ref{solutionx}
+
+Der CUDA-IDR(s) konvergiert bis zu einer Genauigkeit von $10^{-8}$ bei $N=20000$
+
+
+%\begin{figure}[htbp]
+%
+%   \includegraphics[width=3in]{pix/bastian/image002.png}
+%
+%   \caption{ \label{residuum} Residuenverlauf des CUDA-IDR(4) bei einer Toleranz von $10^{-4}$ }%
+%
+%\end{figure}
+
 
 \begin{figure}[htbp]
 
-   \includegraphics[width=3in]{pix/bastian/image002.png}
+   \includegraphics[width=8cm, height=5cm]{solver/0310/20000_8.pdf}
 
-   \caption{ \label{residuum} Residuenverlauf des CUDA-IDR(4) bei einer Toleranz von $10^{-4}$ }%
+   \caption{ \label{residuum} Residuenverlauf des CUDA-IDR(4) bei $N=20000$ und Toleranz $ \epsilon = 10^{-8}$  }%
 
 \end{figure}
 
 
+\begin{figure}[htbp]
+
+   \includegraphics[width=8cm, height=5cm]{solver/0310/x_20000_8.pdf}
+
+   \caption{ \label{solutionx} Lösung $\bf x$ des CUDA-IDR(4) bei $N=20000$ und Toleranz $ \epsilon = 10^{-8}$  }%
+
+\end{figure}
 
 \section{Möglichkeiten für die weitere Optimierung der IDR(s)-Implementierung}
 
