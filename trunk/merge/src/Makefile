@@ -13,7 +13,10 @@ LIBX = $(PRJACUDALIBEXT)
 
 RM = rm
 
-all: showenvironment.$(PRJACUDAEXEEXT) idrs.$(OX) idrscli.$(OX) idrscli.$(PRJACUDAEXEEXT) libidrs.$(LIBX) measuredotmul.$(PRJACUDAEXEEXT)
+all: showenvironment.$(PRJACUDAEXEEXT) idrs.$(OX) idrscli.$(OX) idrscli.$(PRJACUDAEXEEXT) libidrs.$(LIBX) measuredotmul.$(PRJACUDAEXEEXT) measuregauss.$(PRJACUDAEXEEXT)
+
+measuregauss.$(PRJACUDAEXEEXT): measuregauss.cu kernelsolver.$(OX)
+	$(CC) -Iinclude/common  measuregauss.cu kernelsolver.$(OX) -o measuregauss.$(PRJACUDAEXEEXT) > nul
 
 measuredotmul.$(PRJACUDAEXEEXT): measuredotmul.cu kerneldotmul.$(OX)
 	$(CC) -Iinclude/common  measuredotmul.cu kerneldotmul.$(OX) -o measuredotmul.$(PRJACUDAEXEEXT) > nul
