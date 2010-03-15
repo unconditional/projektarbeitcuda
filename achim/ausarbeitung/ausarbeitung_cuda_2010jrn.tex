@@ -749,7 +749,7 @@ GPU-Implemtierungen der Operationen können auf den Algorithmus aufkonfiguriert 
 
 \begin{table}[h]
 \renewcommand{\arraystretch}{1.3}
-\caption{Ausführungszeiten der Operation Skalarprodukt, gemessen auf GT 9500 in single precision}
+\caption{Ausführungszeiten der Operation Skalarprodukt, gemessen auf Tesla C1060 in double precision}
 \label{valuesdotmul}
 \centering
 \begin{tabular}{|r||r|r|r|}
@@ -758,11 +758,11 @@ GPU-Implemtierungen der Operationen können auf den Algorithmus aufkonfiguriert 
 \hline\hline
 
 
-1000   &  0.033824 & 0.006368 & - \\
-10000  &  0.044928 & 0.048160 &    1.1\\
-100000 &  0.184160 & 0.495968 &    2.7\\
-1000000 & 1.406144 & 5.045984 &    3.5\\
-9000000 & 12.563456 & 45.246208  & 3.7 \\
+1000   &  0.041344 & 0.006848 & - \\
+8000  &  0.044288 & 0.043040     &    1.0 \\
+$ 10^5 $ &  0.086080 & 0.551808    &   6.8 \\
+$ 10^6 $ & 0.332928 & 6.685600    &   20.2 \\
+$ 10^7 $ & 2.675264 & 67.924385  & 26.1 \\
 
 \hline
 \end{tabular}
@@ -773,9 +773,9 @@ GPU-Implemtierungen der Operationen können auf den Algorithmus aufkonfiguriert 
 
 \begin{figure}[htbp]
 
-   \includegraphics[width=3in]{dotmul/dotmul}
+   \includegraphics[width=9cm]{dotmul/d/dotmul.pdf}
 
-   \caption{ \label{dotmul} Skalarprodukt: Ausführungszeit in Abhängigkeit von der Problemgröße $N$}%
+   \caption{ \label{dotmul} Skalarprodukt: Ausführungszeit in Abhängigkeit von der Problemgröße $N$, double precision, Tesla C1060}%
 
 \end{figure}
 
@@ -783,6 +783,9 @@ GPU-Implemtierungen der Operationen können auf den Algorithmus aufkonfiguriert 
 Tabelle \ref{valuesdotmul} zeigt die Ausführungszeiten des Skalarproduktes
 in Abhängigkeit der Vektorgröße $N$, je für eine Host-CPU Implementierung im
 Vergleich zu einer GPU-Implementierung.
+In Abb \ref{dotmul} ist an der Stelle $N = 8000$ der Schnittpunkt der
+Ausführungszeitgraphen zu sehen - für große $N$ führt die GPU die Operation
+schneller aus.
 
 %Trotz der Standardmaßnahmen \cite{reduction} zur Summierung auf ein Skalar wurde
 %die Ausführungsszeit nicht schneller als die der CUBLAS-Operationen \cite{cublas}.
@@ -794,7 +797,7 @@ Vergleich zu einer GPU-Implementierung.
 Tabelle \ref{valuessolver} zeigt daß die GPU-Implementierung des Gauß-Lösers
 langsamer läuft als die CPU-Implementierung. Viele Schritte des Gauß-Algorithmus
 können nur sequentiell ausgeführt werden. Im rein sequentiellen
-Betrieb (bspw. im substitute-Teil des Algorithmus) ist die langsameere Taktrate
+Betrieb (bspw. im substitute-Teil des Algorithmus) ist die langsamere Taktrate
 der CUDA-Karte der größte Einfluss auf das Verhältnis der Ausführungszeiten.
 Für den IDR(s) relevant sind die $N \in[3,6]$
 
@@ -805,7 +808,7 @@ Für den IDR(s) relevant sind die $N \in[3,6]$
 \centering
 \begin{tabular}{|r||r|r|r|}
 \hline
-\bfseries $ \bf N$ & \bfseries{ $ \bf t_{CPU} / ms $ } &  $ \bf t_{GPU} / ms$ & \bfseries{Speedup} \\
+\bfseries $ \bf N$ & \bfseries{ $ \bf t_{GPU} / ms $ } &  $ \bf t_{CPU} / ms$ & \bfseries{Speedup} \\
 
 \hline
 \hline
@@ -814,9 +817,7 @@ Für den IDR(s) relevant sind die $N \in[3,6]$
 4   &  0.030752 & 0.003104 & - \\
 5   &  0.033824 & 0.003104 & - \\
 6   &  0.043776 & 0.003040 & - \\
-\hline
-10  &  0.073088 & 0.014432 & - \\
-19  &  0.176288 & 0.071456 & - \\
+
 \hline
 
 
@@ -846,28 +847,26 @@ Die Zeilenzahl des Test-LGS wird $N$ genannt.
 %a + b
 \end{displaymath}
 
+\subsubsection{Konvergenzverhalten}
+
 Der Ergebnisvektor $\bf x$ wird mit Zufallswerten $x_n  \in [-0.5, 0.5]$ vorbelegt.
-Pro Iterationsschritt $i$ wird das Residuum $r_i = | \bf{A} \cdot \vec{\bf{x_i}} - \vec{b} |$ aufgezeichnet und
+Pro Iterationsschritt $i$ wird das Residuum $r_i = | \bf{A} \cdot \bf{x_i} - \bf b |$ aufgezeichnet und
 im Abb. \ref{residuum}  gegen $i$ aufgetragen.
 
-Zu diesem Testproblem ergibt sich bei hinreichender Toleranz $\epsilon$ als Lösung
-für x eine Gerade. (Abb. \ref{solutionx}
+Zu diesem Testproblem ergibt sich bei hinreichend genauer Toleranz $\epsilon$ als Lösung
+für x eine Gerade. (Abb. \ref{solutionx})
 
-Der CUDA-IDR(s) konvergiert bis zu einer Genauigkeit von $10^{-8}$ bei $N=20000$
+Der CUDA-IDR(s) führt zu einer Gerade als Lösung bei einer Genauigkeit von $10^{-8}$
+für $N$ bis zu $N=20000$.
 
-
-%\begin{figure}[htbp]
-%
-%   \includegraphics[width=3in]{pix/bastian/image002.png}
-%
-%   \caption{ \label{residuum} Residuenverlauf des CUDA-IDR(4) bei einer Toleranz von $10^{-4}$ }%
-%
-%\end{figure}
-
+Für größere $N$ wird keine Gerade mehr errechnet.
+Für Toleranzen kleiner als $10^{-8}$ konvergiert der CUDA-IDR(s)
+nicht mehr, nach Durchschreiten des lokalen Residuen-Minumums
+klingt das Residuum auf gegen Unendlich.
 
 \begin{figure}[htbp]
 
-   \includegraphics[width=8cm, height=5cm]{solver/0310/20000_8.pdf}
+   \includegraphics[width=9cm, height=5cm]{solver/0310/20000_8.pdf}
 
    \caption{ \label{residuum} Residuenverlauf des CUDA-IDR(4) bei $N=20000$ und Toleranz $ \epsilon = 10^{-8}$  }%
 
@@ -876,11 +875,41 @@ Der CUDA-IDR(s) konvergiert bis zu einer Genauigkeit von $10^{-8}$ bei $N=20000$
 
 \begin{figure}[htbp]
 
-   \includegraphics[width=8cm, height=5cm]{solver/0310/x_20000_8.pdf}
+   \includegraphics[width=9cm, height=5cm]{solver/x20000.pdf}
 
    \caption{ \label{solutionx} Lösung $\bf x$ des CUDA-IDR(4) bei $N=20000$ und Toleranz $ \epsilon = 10^{-8}$  }%
 
 \end{figure}
+
+\subsubsection{Zeitverhalten}
+
+Zum Zeitpunkt der Niederschrift läuft der CUDA-IDR(s) langsamer als
+die Matlab-Implementierung bei gleicher Parametrisierung (Tabelle \ref{idrstimiing}).
+Das Zusammenspiel der Operationen ist mometan abgestimmt auf ,,reines Funktionieren''
+bzgl. des Konvergenzverlaufes, eine Zeitoptimierung des Gesamtalgorthmus fehlt.
+
+
+\begin{table}[h]
+\renewcommand{\arraystretch}{1.3}
+\caption{Ausführungszeiten des IDR(4), gemessen je auf Matlab v.2009b und auf Tesla C1060 in double precision}
+\label{idrstimiing}
+\centering
+\begin{tabular}{|r||r|r|}
+\hline
+\bfseries $ \bf N$ & \bfseries{ $ \bf t_{Matlab} / s $ } &  $ \bf t_{GPU} / s$  \\
+
+\hline\hline
+10000 & 64  &  137 \\
+
+\hline
+
+20000 & 415 & 922  \\
+
+
+
+\hline
+\end{tabular}
+\end{table}
 
 \section{Möglichkeiten für die weitere Optimierung der IDR(s)-Implementierung}
 
@@ -902,15 +931,15 @@ Das Codeskelett dieses Instrumentation-Codes wurde bereits erstellt,
 aber noch nicht im Gesamtsystem verbaut.
 \end{item}
 
-\begin{item}
- Operationen-Commands per Regelsatz in Abhängigkeit von Problemgröße und
-        Struktur die Größe von Block und Grid wählen
-\end{item}
+
 \end{itemize}
 
 
 \section{Zusammenfassung}
 
+Der CUDA-IDR(s) liefert dieselben Ergebnisse wie die Matlab-Vorlage.
+Die Einzeloperationen laufen schneller als ihre CPU/Matlab-Entsprechungen,
+der CUDA-IDR(s) insgesamt ich noch nicht optimiert bzgl. des Zeitverhaltens.
 
 
 % if have a single appendix:
