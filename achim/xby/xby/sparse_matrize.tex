@@ -1,7 +1,13 @@
 %sparse_matrize
 
-Sparsematrix, oder dünnbesetzte Matrix,  bezeichnet man als eine Matrix, bei der so viele Einträge aus Nullen bestehen. Im Abb.\ref{fig:Sparse_Matrix} wird ein einfaches Beispiel gezeigt.
-Da Sparsematrix mit Vollmatrix genau umgekehrt ist, hat man dafür auch eine andere Speicherweise. Unter dem Zusammenhang zwischen Abb.\ref{fig:orignal_sparse}., Abb.\ref{fig:numerische_sparse1}. und Abb.\ref{fig:numerische_sparse2}. versteht man, dass bei der Sparsematrizen wird nun nur die Nonzero-Elemente und die zugehörigen Stelleinformationen(Zeilen und Spalte) gespeichert. Vektor $pr$ enthält alle Nonzero-Elemente. Die Vektoren $ir$ und $jc$ enthalten die Zeileninformation und die Spalteinformation. Im Abb.\ref{fig:numerische_sparse2}. bezeichnet man, wie die Informationen gepackt werden. Die Werte von $jc[i]$ und $jc[i+1]-1$ zeigen den Indexe, deren die zur Spalte $i$  gehörteten Nonzero-Elemente und Zeileinformation aufweisen.
+%Sparsematrix, oder dünnbesetzte Matrix,  bezeichnet man als eine Matrix, bei der so viele Einträge aus Nullen bestehen. Im Abb.\ref{fig:Sparse_Matrix} wird ein einfaches Beispiel gezeigt.
+%Da Sparsematrix mit Vollmatrix genau umgekehrt ist, hat man dafür auch eine andere Speicherweise. Unter dem Zusammenhang zwischen Abb.\ref{fig:orignal_sparse}., Abb.\ref{fig:numerische_sparse1}. und Abb.\ref{fig:numerische_sparse2}. versteht man, dass bei der Sparsematrizen wird nun nur die Nonzero-Elemente und die zugehörigen Stelleinformationen(Zeilen und Spalte) gespeichert. Vektor $pr$ enthält alle Nonzero-Elemente. Die Vektoren $ir$ und $jc$ enthalten die Zeileninformation und die Spalteinformation. Im Abb.\ref{fig:numerische_sparse2}. bezeichnet man, wie die Informationen gepackt werden. Die Werte von $jc[i]$ und $jc[i+1]-1$ zeigen den Indexe, deren die zur Spalte $i$  gehörteten Nonzero-Elemente und Zeileinformation aufweisen.
+
+Als Sparsematrix oder dünnbesetzte Matrix bezeichnet man eine
+Matrix bei der die Mehrheit der Elemente aus Nullen besteht.
+Abb.\ref{fig:Sparse_Matrix} zeigt ein einfaches Beispiel.
+Aus Platzspargründen nutzt Matlab ein spezielles Memorylayout \cite{matlabsparse}
+mit dem nur die nonzero-Elemente im Speicher gehalten werden.
 
 %\begin{figure}[htbp]
 %	\includegraphics[width=1in]{.//pic//orignal_sparse}

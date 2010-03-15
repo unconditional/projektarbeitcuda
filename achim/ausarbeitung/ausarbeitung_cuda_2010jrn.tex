@@ -609,9 +609,9 @@ Die Operationen sind in doppelter Fließkommagenauigkeit implementiert.
 
 
 \subsubsection{Löser Gauss}
-Basis für die CUDA Implementierung ist ein Algoritumus aus der
+Basis für unsere CUDA-Implementierung ist ein Algorithmus aus der
 Standardliteratur \cite{sedgewick} mit Pivotisierung.
-Da Teile des Algorithmus (Rückwärtssubstitution, Maximum suchen bei der
+Da Teile des Algorithmus (z.B. Rückwärtssubstitution, Maximumssuche bei der
 Povitisierung) nur sequentiell ausgeführt werden können fehlt die volle
 Ausnutzung der Parallelität.
 

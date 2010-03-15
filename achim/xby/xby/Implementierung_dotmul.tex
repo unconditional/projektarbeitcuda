@@ -12,13 +12,14 @@ Der $n$te Thread berechnet das Vektorelement \mbox{ $c_n = a_n \cdot b_n$ }
 Die Elemente des Ergebnisvektors $ \bf c $ werden  zu einem Skalar
 aufsummiert.
 Überschreitet die Vektorgröße die maximale Blockgröße 512 iteriert der Thread
-über mehrere Elemente oder mehrere Blöcke müssen
+über mehrere Elemente, oder mehrere Blöcke müssen
 abgestimmt auf den großen Vektoren arbeiten.
 
 
 \begin{figure}[htbp]
 %\centering
 \includegraphics[width=3.5in]{../xby/pic/Vektor}
-\caption{Skalaprodukt: Eingabevektoren $ \bf a$ und $ \bf b$, (Zwischen)Ergebnisvektor $ \bf c$}
-\label{Vektor}
+\caption{ \label{Vektor} Skalaprodukt: Multiplikator $ \bf a$ , Multiplikand $ \bf b$,
+\mbox{ (Zwischen-)Ergebnisvektor $\bf c$ }}
+
 \end{figure}
