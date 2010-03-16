@@ -537,7 +537,7 @@ diesem Einsatzzweck. CUDA \cite{cudapg} ist ein API für GPU von Nvidia für die
 
 \subsection{Operationen}
 
-Der iterative Löser IDR(s) \cite{idrs} besteht aus Operationen \cite{idrsm}
+Der iterative Löser IDR(s) \cite{idrs} besteht aus Operationen \cite{idrs}
 der linearen Algebra, im einzelnen in Tabelle \ref{idrsops} beschrieben.
 
 
@@ -564,7 +564,7 @@ der linearen Algebra, im einzelnen in Tabelle \ref{idrsops} beschrieben.
   Matrix-Vektorprodukt & $   \bf{c} = \bf{A}_{s} \cdot \bf{b} $ & $\bf{A_{s}}$  dünnbesetzt \\
   \hline
 
-  Löser nach Gauß & $  \bf{M} \cdot \bf{m} = \bf{c} $ &LGS aus Zeile 36 \cite{idrsm} \\
+  Löser nach Gauß & $  \bf{M} \cdot \bf{m} = \bf{c} $ &Zeile 36 idrs.m \cite{idrs} \\
 
 \hline
 \end{tabular}
@@ -991,86 +991,90 @@ der CUDA-IDR(s) insgesamt ich noch nicht optimiert bzgl. des Zeitverhaltens.
 % http://www.michaelshell.org/tex/ieeetran/bibtex/
 %\bibliographystyle{IEEEtran}
 % argument is your BibTeX string definitions and bibliography database(s)
+
+\bibliographystyle{IEEEtran}
+\bibliography{literatur}
+
 %\bibliography{IEEEabrv,../bib/paper}
 %
 % <OR> manually copy in the resultant .bbl file
 % set second argument of \begin to the number of references
 % (used to reserve space for the reference number labels box)
-\begin{thebibliography}{1}
-
-\bibitem{idrs}
- Peter Sonneveld and Martin B. van Gijzen, \emph{IDR(s): a family of simple and fast algorithms for solving large nonsymmetric linear systems.}\hskip 1em plus
-  0.5em minus 0.4em\relax SIAM J. Sci. Comput. Vol. 31, No. 2, pp. 1035-1062 (2008)
-
-
-
-\bibitem{cudapg}
-   NVIDIA Corporation. (2009) \emph{ NVIDIA CUDA Programming Guide Version 2.3 }\hskip 1em plus
-  0.5em minus 0.4em\relax
-[Online] Available: \url{ http://www.nvidia.de/object/cuda_develop_emeai.html }
-
-\bibitem{idrsm}
- Peter Sonneveld and Martin B. van Gijzen, (December 2008) \emph{ idrs.m }\hskip 1em plus
-  0.5em minus 0.4em\relax [Online] \url{ Available: http://ta.twi.tudelft.nl/NW/users/gijzen/idrs.m }
-
-
-
-\bibitem{matlabsparse}
-   The Math works \emph { Matlab data } \hskip 1em plus
-  0.5em minus 0.4em\relax
-[Online] Available: \url{ http://www.mathworks.com/access/helpdesk/help/techdoc/matlab_external/f21585.html }
-
-
-
-\bibitem{cublas}
-   NVIDIA Corporation. (2009) \emph{ CUDA CUBLAS } in \emph { CUDA Toolkit v2.3 } \hskip 1em plus
-  0.5em minus 0.4em\relax
-[Online] Available: \url{ http://www.nvidia.de/object/cuda_develop_emeai.html }
-
-
-
-
-
-\bibitem{cudbp}
-   NVIDIA Corporation. (2009)
-  \emph{ NVIDIA CUDA C Programming Best Practices Guide } \hskip 1em plus
-  0.5em minus 0.4em\relax CUDA Toolkit 2.3
-[Online] Available: \url{ http://www.nvidia.de/object/cuda_develop_emeai.html }
-
-
-
-\bibitem{entwurfsmuster}
-
- Erich Gamma, Richard Helm, Ralph E. Johnson, John Vlissides
-  \emph{ Design Patterns. Elements of Reusable Object-Oriented Software.  }\hskip 1em plus
-  0.5em minus 0.4em\relax Addison Wesley, 1995
-
-
-\bibitem{sedgewick}
-
- Robert Sedgewick
-  \emph{ Algorithmen in C  }\hskip 1em plus
-  0.5em minus 0.4em\relax Addison Wesley, 1992
-
-
-\bibitem{oracle}
-
-  Mogens Norgaard
-  \emph{ You probably dont't tune right } in
-  \emph{ Oracle Insights: Tales of the Oak Table }\hskip 1em plus
-  0.5em minus 0.4em\relax New York, Apress, 2004, ch.2, pp 71-94
-
-
-
-\bibitem{reduction}
-   Mark Harris \emph{ Optimizing Parallel Reduction in CUDA } in \emph{CUDA SDK} \hskip 1em plus
-  0.5em minus 0.4em\relax Nvidia Corporation
-[Online] Available: \url{ http://developer.download.nvidia.com/compute/cuda/1_1/Website/projects/reduction/doc/reduction.pdf }
-
-
-
-
-\end{thebibliography}
+% \begin{thebibliography}{1}
+%
+% \bibitem{idrs}
+%  Peter Sonneveld and Martin B. van Gijzen, \emph{IDR(s): a family of simple and fast algorithms for solving large nonsymmetric linear systems.}\hskip 1em plus
+%   0.5em minus 0.4em\relax SIAM J. Sci. Comput. Vol. 31, No. 2, pp. 1035-1062 (2008)
+%
+%
+%
+% \bibitem{cudapg}
+%    NVIDIA Corporation. (2009) \emph{ NVIDIA CUDA Programming Guide Version 2.3 }\hskip 1em plus
+%   0.5em minus 0.4em\relax
+% [Online] Available: \url{ http://www.nvidia.de/object/cuda_develop_emeai.html }
+%
+% \bibitem{idrsm}
+%  Peter Sonneveld and Martin B. van Gijzen, (December 2008) \emph{ idrs.m }\hskip 1em plus
+%   0.5em minus 0.4em\relax [Online] \url{ Available: http://ta.twi.tudelft.nl/NW/users/gijzen/idrs.m }
+%
+%
+%
+% \bibitem{matlabsparse}
+%    The Math works \emph { Matlab data } \hskip 1em plus
+%   0.5em minus 0.4em\relax
+% [Online] Available: \url{ http://www.mathworks.com/access/helpdesk/help/techdoc/matlab_external/f21585.html }
+%
+%
+%
+% \bibitem{cublas}
+%    NVIDIA Corporation. (2009) \emph{ CUDA CUBLAS } in \emph { CUDA Toolkit v2.3 } \hskip 1em plus
+%   0.5em minus 0.4em\relax
+% [Online] Available: \url{ http://www.nvidia.de/object/cuda_develop_emeai.html }
+%
+%
+%
+%
+%
+% \bibitem{cudbp}
+%    NVIDIA Corporation. (2009)
+%   \emph{ NVIDIA CUDA C Programming Best Practices Guide } \hskip 1em plus
+%   0.5em minus 0.4em\relax CUDA Toolkit 2.3
+% [Online] Available: \url{ http://www.nvidia.de/object/cuda_develop_emeai.html }
+%
+%
+%
+% \bibitem{entwurfsmuster}
+%
+%  Erich Gamma, Richard Helm, Ralph E. Johnson, John Vlissides
+%   \emph{ Design Patterns. Elements of Reusable Object-Oriented Software.  }\hskip 1em plus
+%   0.5em minus 0.4em\relax Addison Wesley, 1995
+%
+%
+% \bibitem{sedgewick}
+%
+%  Robert Sedgewick
+%   \emph{ Algorithmen in C  }\hskip 1em plus
+%   0.5em minus 0.4em\relax Addison Wesley, 1992
+%
+%
+% \bibitem{oracle}
+%
+%   Mogens Norgaard
+%   \emph{ You probably dont't tune right } in
+%   \emph{ Oracle Insights: Tales of the Oak Table }\hskip 1em plus
+%   0.5em minus 0.4em\relax New York, Apress, 2004, ch.2, pp 71-94
+%
+%
+%
+% \bibitem{reduction}
+%    Mark Harris \emph{ Optimizing Parallel Reduction in CUDA } in \emph{CUDA SDK} \hskip 1em plus
+%   0.5em minus 0.4em\relax Nvidia Corporation
+% [Online] Available: \url{ http://developer.download.nvidia.com/compute/cuda/1_1/Website/projects/reduction/doc/reduction.pdf }
+%
+%
+%
+%
+% \end{thebibliography}
 
 % biography section
 %
