@@ -8,5 +8,30 @@ In der Grafikkate ist der Zugriff auf den globalen Speicher langsamer als auf de
 \label{sharememory}
 \end{figure}
 
+
+%\usepackage{booktabs}
+%\usepackage{tabularx}
+\begin{table}
+%\begin{tabular}{|l|c|c|c|c|c|}
+\centering
+\begin{tabular}{|p{46pt}p{28pt}p{30pt}p{28pt}p{30pt}p{30pt}|}
+%\begin{tabularx}{350pt}{1xxxxx}
+\toprule
+%\hline
+	MXN& 10000x50& 100000x50& 50000x50& 1000x1000& 5000x5000\\
+
+\midrule
+%\hline
+CPU(ms)& 1.56&    15.94& 				80&      3.44& 87.9\\
+
+old GPU/CPU& 1.711& 1.6348&   1.62548&  0.164&  0.12854\\
+
+GPU/CPU & 0.133& 0.0662&     0.06204&   0.0512& 0.03438\\
+\bottomrule
+%\hline     
+\end{tabular}
+%\end{tabularx}
+\end{table}
+
 Die optimierte GPU-Implementierung ist immer schnelle als die CPU-Implementierung  und die Alte. Für Matrix 5000x5000 kann die CUDA-Programm 30 mal schneller als CPU
 
