@@ -1,6 +1,6 @@
 %share memory
 \subsection{Shared Memory}
-In der Grafikkate ist der Zugriff auf den globalen Speicher langsamer als auf den On-Chip-Speicher.  Wie Beispiele in \cite{cudapg} gezeigt, kann man mehrer mal verwendete Daten zunächst in shared Memory schreiben, dann für die entsprechenden Operationen benutzen. In der Multiplikation der Vollmatrize mal Vektor wird jede Vektorelement mehr mal gebraut. Nach Untersuchungen wählen wir 1-Dimensionblock,die 64 beträgt und jede Vektorelement 8 mal gebraucht in einem Block, d.h. in jedem Block 8 zerlegende Vektormultiplikation bearbeitet werden. Aus den Ergebnisse von Abb.\ref{sharememory}.(Vergleich von optimierte Vollmatrixmultiplikation mit C-Implementierung und alte GPU-Implementirung für MxN Vollmatrizen).
+In der Grafikkate ist der Zugriff auf den globalen Speicher langsamer als auf den On-Chip-Speicher.  Wie Beispiele in \cite{cudapg} gezeigt, kann man mehrer mal verwendete Daten zunächst in shared Memory schreiben, dann für die entsprechenden Operationen benutzen. In der Multiplikation der Vollmatrize mal Vektor wird jede Vektorelement mehr mal gebraut. Nach Untersuchungen wählen wir 1-Dimensionblock,die 64 beträgt und jede Vektorelement 8 mal gebraucht in einem Block, d.h. in jedem Block 8 zerlegende Vektormultiplikation bearbeitet werden. Die Abb.\ref{sharememory}.(Vergleich von optimierte Vollmatrixmultiplikation mit C-Implementierung und alte GPU-Implementirung für $M$*$N$ Vollmatrix) zeigt die Laufzeitenunterschied von unterschiedlichen Implementierung. Die genauen Messungen stellen in Tabelle\ref{tab_shared_memory} dar. 
 \begin{figure}[htbp]
 %\centering
 \includegraphics[width=3.5in]{../xby/pic/sharememory}
@@ -14,7 +14,7 @@ In der Grafikkate ist der Zugriff auf den globalen Speicher langsamer als auf de
 \begin{table}
 \renewcommand{\arraystretch}{1.3}
 \caption{Ausführungszeiten der Vollmatrix-Vektormultipkation $ \bf{A_{mn} } \cdot \bf b$}
-\label{shared_memory}
+\label{tab_shared_memory}
 %\begin{tabular}{|l|c|c|c|c|c|}
 \centering
 %\begin{tabular}{|p{46pt}p{28pt}p{30pt}p{28pt}p{30pt}p{30pt}|}
