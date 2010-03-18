@@ -608,7 +608,7 @@ Die Operationen sind in doppelter Fließkommagenauigkeit implementiert.
 \input{../xby/xby//Implementierung_sparematrize}
 
 
-\subsubsection{Löser Gauss}
+\subsubsection{Löser Gauß }
 Basis für unsere CUDA-Implementierung ist ein Algorithmus aus der
 Standardliteratur \cite{sedgewick} mit Pivotisierung.
 Da Teile des Algorithmus (z.B. Rückwärtssubstitution, Maximumssuche bei der
@@ -775,7 +775,7 @@ $ 10^7 $ & 2.675264 & 67.924385  & 26.1 \\
 Tabelle \ref{valuesdotmul} zeigt die Ausführungszeiten des Skalarproduktes
 in Abhängigkeit der Vektorgröße $N$, je für eine Host-CPU Implementierung im
 Vergleich zu einer GPU-Implementierung.
-In Abb \ref{dotmul} ist an der Stelle $N = 8000$ der Schnittpunkt der
+In Abb. \ref{dotmul} ist an der Stelle $N = 8000$ der Schnittpunkt der
 Ausführungszeitgraphen zu sehen - für große $N$ führt die GPU die Operation
 schneller aus.
 
