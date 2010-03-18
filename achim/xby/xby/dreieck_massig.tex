@@ -15,14 +15,14 @@ Arbeit benutzt werden könnte.
 Abb. \ref{Dreieck} zeigt schematisch ein Verfahren mit mehreren Threads
 die Teilergebnisse aufsummieren.
 Die Grundidee: im ersten Schritt die Elemente
-$cs_{2n}$ und $CS_{2n+1}$ summiert.
-Im zweiten Schritt $cs_{4n}$ und $CS_{4n+1}$. Für die Errechnug
+$cs_{2n}$ und $cs_{2n+1}$ summiert.
+Im zweiten Schritt $cs_{4n}$ und $cs_{4n+1}$. Für die Errechnug
 des Ergebnisses benötigt man $ \log_2(blocksize)$ Iterationsschritte.
 
 \begin{figure}[htbp]
 %\centering
 \includegraphics[width=3.5in]{../xby/pic//dreieck}
-\caption{\label{Dreieck}DreieckfÃ¶rmige Summation. Von Oben nach Unter zeigt}
+\caption{\label{Dreieck}Dreieckförmige Summation, Iterationsschritte von oben nach unten.}
 \end{figure}
 
 Beispielcode und eine detaillierte Beschreibung findet man in \cite{reduction}.

@@ -1,7 +1,13 @@
 %Minimierung leer Thread
-\subsection{Minimierung leer laufende Thread}
+\subsection{Minimierung leerlaufender Threads}
 
-In CUDA bearbeitet jeder Multiprozessor gleichzeitig mit 32 Threads \cite{cudapg}, die allen zum selben Block gehören. Bei der Sparematrix-Multiplikation sind viele Threads am leerlaufen. Um die Leerlaufenden Threads zu minimieren, müssen mehrere Punktprodukte in einem Block bearbeitet werden. Dazu verwendet man 2 dimensionierte Blocksizes. Die Definition und Anwendung von 2-D Blocksize findet man in der Referenz\cite{cudapg} und \cite{cudbp}. 
+In CUDA bearbeitet jeder Multiprozessor gleichzeitig mit 32 Threads \cite{cudapg}.
+Diese gehören alle zum selben Block.
+Bei der Sparematrix-Multiplikation sind viele Threads im Leerlauf.
+Um die Anzahl der leerlaufenden Threads zu minimieren,
+müssen mehrere Punktprodukte in einem Block bearbeitet werden.
+Dazu verwendet man zweidimensionale Blocksizes.
+Die Definition und Anwendung von 2-D Blocksize findet man in der Referenz\cite{cudapg} und \cite{cudbp}.
 
 % \begin{figure}[htbp]
 	% \includegraphics[width=1.7in]{../xby/pic//einDiagonal}
