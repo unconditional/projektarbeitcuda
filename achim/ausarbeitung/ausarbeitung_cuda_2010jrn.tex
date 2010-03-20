@@ -728,6 +728,10 @@ GPU-Implementierungen der Operationen können auf den Algorithmus aufkonfigurier
 
 \section{Testergebnisse}
 
+Alle Test sind ausgeführt in double precision.
+Die vewendete GPU ist, wenn nicht anders genannt, eine Tesla C1060.
+Matlab wird in der Version v.2009b verwendet.
+
 \subsection{Sparsematrix-Vektorprodukt}
 
 %(buyu)
@@ -736,12 +740,9 @@ GPU-Implementierungen der Operationen können auf den Algorithmus aufkonfigurier
 \subsection{Skalarprodukt}
 
 
-
-
-
 \begin{table}[h]
 \renewcommand{\arraystretch}{1.3}
-\caption{Ausführungszeiten der Operation Skalarprodukt, gemessen auf Tesla C1060 in double precision}
+\caption{Ausführungszeiten der Operation Skalarprodukt}
 \label{valuesdotmul}
 \centering
 \begin{tabular}{|r||r|r|r|}
@@ -767,7 +768,7 @@ $ 10^7 $ & 2.675264 & 67.924385  & 26.1 \\
 
    \includegraphics{dotmul/d/dotmul.pdf}
 
-   \caption{ \label{dotmul} Skalarprodukt: Ausführungszeit in Abhängigkeit von der Problemgröße $N$, double precision, Tesla C1060}%
+   \caption{ \label{dotmul} Skalarprodukt: Ausführungszeit(N)}%
 
 \end{figure}
 
@@ -860,7 +861,7 @@ klingt das Residuum auf gegen Unendlich.
 
    \includegraphics[width=8cm]{solver/0310/resgp.pdf}
 
-   \caption{ \label{residuum} Residuenverlauf des CUDA-IDR(4) bei $N=20000$ und Toleranz $ \epsilon = 10^{-8}$  }%
+   \caption{ \label{residuum} Residuenverlauf, CUDA-IDR(4), $N=20000$, \mbox{$ \epsilon = 10^{-8}$}  }%
 
 \end{figure}
 
@@ -869,7 +870,7 @@ klingt das Residuum auf gegen Unendlich.
 
    \includegraphics{solver/0310/xgp.pdf}
 
-   \caption{ \label{solutionx} Lösung $\bf x$ des CUDA-IDR(4) bei $N=20000$ und Toleranz $ \epsilon = 10^{-8}$  }%
+   \caption{ \label{solutionx} Lösung $\bf x$, CUDA-IDR(4), $N=20000$, $ \epsilon = 10^{-8}$  }%
 
 \end{figure}
 
@@ -883,7 +884,7 @@ bzgl. des Konvergenzverlaufes, eine Zeitoptimierung des Gesamtalgorthmus fehlt.
 
 \begin{table}[h]
 \renewcommand{\arraystretch}{1.3}
-\caption{Ausführungszeiten des IDR(4), gemessen je auf Matlab v.2009b und auf Tesla C1060 in double precision}
+\caption{Ausführungszeiten des CUDA-IDR(4)}
 \label{idrstimiing}
 \centering
 \begin{tabular}{|r||r|r|}
