@@ -1,0 +1,10 @@
+%Block黚ergreifen
+%\subsection{Schwierigkeit bei der Synchronisation vom Blockübergreifen}
+%Für größe Vektormultiplikation müssen mehrere Blöcke verwendet werden. Das Endeergebniss bekommt man durch die Blocksummation. Da wir keine Synchronisationsmaßnahme für Blocksummation haben, kann der Vektor nicht im selben Kernel bearbeitet werden. Die möglichkeiten wären, entweder die Blocksummation in CPU bearbeitet wird, oder die Blocksummation in einem neuen Kernel bearbeitet wird.
+
+\subsection{Threadsynchronisation über Blockgrenzen hinaus}
+
+Für größe Vektormultiplikation benötigt man mehrere Blöcke.
+Da die Threads nur innerhalb eines Blockes synchronisiert
+werden können muß man die Blockergebnisse entweder
+in der CPU oder in einem zweiten Kernel weiter aufsummieren.

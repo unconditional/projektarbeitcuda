@@ -1,0 +1,20 @@
+%Dreieckmassig code zeigen
+\begin{footnotesize}
+\begin{verbatim}
+#define BLOCK_EXP 9
+#define DEF_BLOCKSIZE 1 << BLOCK_EXP
+short offset = 1;
+for (short i = 1;i < BLOCK_EXP; i++) {
+    short old = offset;
+    offset <<= 1;
+    if (threadIdx.x % offset == 0) {
+        Vs[threadIdx.x] += Vs[threadIdx.x
+        										+ old];
+    }
+    __syncthreads();
+}
+if (threadIdx.x == 0) {
+    out[0] = Vs[0] + Vs[offset];
+}
+\end{verbatim}
+\end{footnotesize}
