@@ -4,15 +4,15 @@ In der Grafikkarte ist der Zugriff auf den globalen Speicher langsamer als auf d
 In der Multiplikation Vollmatrix mal Vektor wird jedes Vektorelement mehrmals gebraucht.
 Nach Untersuchungen wählen wir einen eindimensionalen Block der Größe 64
 Jedes Vektorelement wird 8 mal bnutzt in einem Block, d.h. in jeder Block bearbeitet
-8 zerlegte Vektormultiplikationen. Die Abb. \ref{sharememory}
-zeigt die Laufzeitenunterschiede von unterschiedlicher Implementierungen.
-Egebnisse der Messungen stellen in Tabelle\ref{tab_shared_memory}.
-\begin{figure}[htbp]
+8 zerlegte Vektormultiplikationen. Die Tabelle\ref{tab_shared_memory}
+%Abb. \ref{sharememory}
+zeigt die Laufzeitenunterschiede der unterschiedlicher Implementierungen.
+%\begin{figure}[htbp]
 %\centering
-\includegraphics[width=3.5in]{../xby/pic/sharememory_2}
-\caption{Vergleich von optimierte Vollmatrixmultiplikation mit C-Implementierung und nichtoptimierte GPU-Implementirung für $M$ * $N$ Vollmatrix}
-\label{sharememory}
-\end{figure}
+%\includegraphics[width=3.5in]{../xby/pic/sharememory_2}
+%\caption{Vergleich von optimierte Vollmatrixmultiplikation mit C-Implementierung und nichtoptimierte GPU-Implementirung für $M$ * $N$ Vollmatrix}
+%\label{sharememory}
+%\end{figure}
 
 
 %\usepackage{booktabs}
