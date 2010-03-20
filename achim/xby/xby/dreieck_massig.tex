@@ -11,10 +11,10 @@ Als typisches Teilproblem tritt die Summation der Vektorelemente zu
 einem Skalar auf, bspw. beim Skalarprodukt und bei der Matrizenmultiplikation.
 Der klassische Ansatz, die Addition als Schleife mit einem Akkumulator
 auszuführen, wäre ineffizient weil nur ein einziger Thread für die
-Arbeit benutzt werden könnte.
+Arbeit benutzt werden kann.
 Abb. \ref{Dreieck} zeigt schematisch ein Verfahren mit mehreren Threads
-die Teilergebnisse aufsummieren.
-Die Grundidee: im ersten Schritt die Elemente
+welche Teilergebnisse aufsummieren.
+Die Grundidee: im ersten Schritt werden die Elemente
 $cs_{2n}$ und $cs_{2n+1}$ summiert.
 Im zweiten Schritt $cs_{4n}$ und $cs_{4n+1}$. Für die Errechnug
 des Ergebnisses benötigt man $ \log_2(blocksize)$ Iterationsschritte.

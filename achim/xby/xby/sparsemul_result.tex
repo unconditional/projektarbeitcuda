@@ -5,14 +5,16 @@
 
 Der Vergleich von Matlab, CPU- und GPU-Implementierung wird in
 Abb.\ref{sparse_ergebnis} und Tabelle \ref{tab_sparse_result} gezeigt.
-Für eine 128-Diagonalmatix kann die CUDA-Implementierung
-einen Speedup-Faktor von 9 gegenüber der  CPU erreichen.
+Für eine 128-Diagonalmatix kann die CUDA-Implementierung (16x16)
+einen Speedup-Faktor von 9 gegenüber der CPU erreichen.
 
 
 \begin{figure}[htbp]
 %\centering
-\includegraphics[width=3.5in]{../xby/pic//sparse_ergebnis}
-\caption{Vergleichung der Sparsematrix-Vektormultiplikation von matlab, CPU-und GPU-Implementierung.}
+%\includegraphics[width=3.5in]{../xby/pic//sparse_ergebnis}
+\includegraphics{../ausarbeitung/sparse/sparsegp.pdf}
+\caption{Vergleich der Sparsematrix-Vektormultiplikation von matlab, CPU-und GPU-Implementierung.
+Matrix 5000x5000, Quad CPU 2.66GHz, RAM 3.25GB, GPU GTX260, Grid size 1024, Matlab v.2009b}
 \label{sparse_ergebnis}
 \end{figure}
 
