@@ -2,7 +2,19 @@
 plot "measure_dotmul_gp.txt" using 1:2 with linespoints title "GPU" , "measure_dotmul_gp.txt" using 1:3 with linespoints title "CPU" 3 3
 
 
+
+
+
 plot  "test.log" using 1:2 title 'Tescht', "test.log" using 1:3 title 'anderes'
+
+
+
+
+ set terminal postscript eps enhanced color 17 size 3.5,1.2
+
+
+ set terminal postscript eps enhanced color 15 size 3.5,1.2
+
 
 
  4.2 set command customization  
