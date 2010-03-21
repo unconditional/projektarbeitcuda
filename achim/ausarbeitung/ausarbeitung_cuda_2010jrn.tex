@@ -390,6 +390,7 @@
 % correct bad hyphenation here
 \hyphenation{op-tical net-works semi-conduc-tor}
 
+\usepackage{german}
 
 \begin{document}
 %
@@ -526,11 +527,11 @@ mit doppelter Fließkommagenauigkeit im Rahmen einer vierteljährlichen Projekta
 mit Feldtheoretischen Problemen.
 Grafikkarten (GPU) mit vielen parallelen Prozessoren
 sind geeignet als Rechenhardware um die rechnergestützte Lösung dieser LGS zu beschleunigen.
-Die Hersteller ATI und NVIDIA bieten SDK an speziell für die Entwicklung mit
+Die Hersteller ATI und Nvidia bieten SDK an speziell für die Entwicklung mit
 diesem Einsatzzweck. CUDA \cite{cudapg} ist ein API für GPU von Nvidia für die Entwicklung in C und C++.
 % You must have at least 2 lines in the paragraph with the drop letter
 % (should never be an issue)
-\par Matlab bietet zum Einbinden eigenen C-Codes das API 'Mex' an.
+
 
 \section{Arithmetische Operationen}
 
@@ -597,11 +598,13 @@ aus Matlab. \cite{matlabsparse}
 
 \subsection{Implementierung der Operationen}
 
-Blocks sind Gruppen von Threads die auf einem einzigen Multiprozessor laufen
-und gemeinsam das schnelle on-chip ,,shared Memory''
-des Multiprozessors nutzen können. \cite{cudapg}
+Blocks sind Gruppen von Threads die auf einem einzigen Multiprozessor ablaufen.
+%und gemeinsam das schnelle on-chip ,,shared Memory''
+%des Multiprozessors nutzen können. \cite{cudapg}
+Nur Threads desselben Blocks können das schnelle on-chip Memory des Multiprozessors nutzen.
 Die Operationen sind in doppelter Fließkommagenauigkeit implementiert.
-
+Unsere in CUDA-Operationen sind zusammgefügt in einer \mbox{C-Bibliothek} die
+per Kommandozeilentool oder per MEX-Interface \cite{mex} benutzt werden kann.
 
 \input{../xby/xby//Implementierung_dotmul}
 \input{../xby/xby//Implementierung_vollmatrize}
@@ -822,8 +825,8 @@ Für den IDR(s) relevant sind die $N \in[3,6]$
 
 \subsection{IDR(s) Gesamtalgorithmus}
 
-Testproblem für das Messen ist das LGS für ein 1D-Laplaceproblem mit Randwerten.
-Die Zeilenzahl des Test-LGS wird $N$ genannt.
+Testproblem für das Messen ist das LGS für ein \mbox{1D-Laplaceproblem} mit Randwerten.
+Die Zeilenzahl des \mbox{Test-LGS} wird $N$ genannt.
 
 \begin{displaymath}
   \begin{pmatrix}
@@ -833,7 +836,7 @@ Die Zeilenzahl des Test-LGS wird $N$ genannt.
       0 &  0  &  -1  &  2 & -1 \\
       0 &  0  &  0   &  0 & 2  \\
   \end{pmatrix}
-   \cdot \vec{ \bf{x} }
+   \cdot  \bf{x}
    =
   \begin{pmatrix} 1 \\ 0  \\ 0 \\ 0  \\ -1
   \end{pmatrix}
@@ -930,7 +933,8 @@ aber noch nicht im Gesamtsystem verbaut.
 
 \section{Zusammenfassung}
 
-Der CUDA-IDR(s) liefert dieselben Ergebnisse wie die Matlab-Vorlage.
+Der CUDA-IDR(s) liefert dieselben numerischen Ergebnisse wie die Matlab-Vorlage
+bis zu einer Genauigkeit von $10^{-8}$
 Die Einzeloperationen laufen schneller als ihre CPU/Matlab-Entsprechungen,
 der CUDA-IDR(s) insgesamt ich noch nicht optimiert bzgl. des Zeitverhaltens.
 
